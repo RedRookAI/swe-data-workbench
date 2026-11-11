@@ -34,4 +34,4 @@ The declared pilot ran once across fresh synthetic/real roots. Twelve raw delive
 
 An upstream Starlette TestClient deprecation warning appeared during development qualification; checks passed. Runtime dependencies were unchanged.
 
-Hosted deployment confirmation is appended after publishing this exact checked source checkpoint. No hosted success is claimed by this prepublication record.
+Hosted deployment succeeded from source checkpoint db6564856ccd17dc5a88b368293e8aae7e880380 as Site version2. An ordinary Chromium browser received HTTP200, rendered the3-item real case and linked6-item original synthetic view, observed no owner/API/external calls or browser errors, and confirmed paused/muted controls, zero-volume retention and mobile fit. This follow-up changes verification documentation only; runtime/package/public-asset bytes remain those already qualified.

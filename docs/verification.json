@@ -122,5 +122,32 @@
   },
   "pilot_report": "pilot-report.json",
   "historical_a1_verification": "verification-v0.1.0a1.json",
-  "hosted_publication_status": "pending exact source checkpoint and deployment"
+  "hosted_publication_status": "succeeded",
+  "hosted_public_browser": {
+    "profile": "hosted-public",
+    "root_http": 200,
+    "real_unique_items": 3,
+    "original_synthetic_unique_items": 6,
+    "owner_controls_hidden": true,
+    "browser_errors": [],
+    "api_requests": [],
+    "external_requests": [],
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false,
+      "tracks": 1
+    },
+    "deliberate_zero_volume_retained": true,
+    "mobile_no_horizontal_overflow": true
+  },
+  "publication": {
+    "site_source_commit": "db6564856ccd17dc5a88b368293e8aae7e880380",
+    "site_version": 2,
+    "status": "succeeded",
+    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "historical_release_preserved": "v0.1.0a1"
+  }
 }
