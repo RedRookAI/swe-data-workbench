@@ -374,5 +374,38 @@
     "Two calibration reviews both requested changes on weak/v2. v3 incorporates their feedback; original review judgments remain unchanged."
   ],
   "coverage_limit": "Signed64 aggregate overflow is not dynamically measured; retained open medium finding.",
-  "public_status": "Local source/artifact/browser audit complete; publication pending at this evidence cut."
+  "public_status": "Public GitHub source/tag/release assets and hosted version4 verified. This main-branch documentation adds hosted results after the immutable release qualification cut; release bytes remain unchanged.",
+  "hosted_publication": {
+    "site_version": 4,
+    "source_commit": "c11ff88c4da570571c59c0c20b27861636ab32ab",
+    "deployment_id": "appgdep_6af4fac0a8d081918184a1654238bbb3",
+    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "status": "succeeded",
+    "browser": {
+      "profile": "hosted-public",
+      "http": 200,
+      "unique_items": 5,
+      "false_passes_exposed": 1,
+      "two_actual_quality_versions": true,
+      "evaluation_downloads": 6,
+      "preserved_views": {
+        "prepared": 3,
+        "unicode-hyphen": 3,
+        "synthetic": 6
+      },
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false,
+        "tracks": 1
+      },
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "browser_errors": [],
+      "api_requests": [],
+      "external_requests": []
+    }
+  }
 }
