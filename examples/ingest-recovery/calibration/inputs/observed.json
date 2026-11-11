@@ -1,0 +1,1660 @@
+[
+  {
+    "version": "weak-v1",
+    "score": {
+      "context": {
+        "calibration": [],
+        "evaluation": {
+          "alternate_patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+          "family": "ingest-recovery",
+          "kind": "audit_challenge",
+          "reference_patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+          "requirements": [
+            {
+              "id": "R1",
+              "text": "Ordinary parsing, totals, checkpoint and error preservation."
+            },
+            {
+              "id": "R2",
+              "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+            },
+            {
+              "id": "R3",
+              "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+            }
+          ],
+          "rubric": [
+            {
+              "checks": [
+                "ordinary"
+              ],
+              "critical": false,
+              "id": "ordinary",
+              "points": 25
+            },
+            {
+              "checks": [
+                "identity"
+              ],
+              "critical": false,
+              "id": "identity",
+              "points": 25
+            },
+            {
+              "checks": [
+                "recovery"
+              ],
+              "critical": true,
+              "id": "recovery",
+              "points": 50
+            }
+          ],
+          "version": "weak-v1"
+        },
+        "findings": [],
+        "id": "task-8df427e3988b645d0f294457ed68ae08f2a0af5371965c45b239398849734030",
+        "material": {
+          "check_digest": "31a492af0210c3ea575d410dc6d03ed319a1caff2bab734bff93a71ab2c40dc3",
+          "schema": "task-quality-v1",
+          "source_digest": "cd1e5ef756a73828ddceb2fc514cc30565f8a53367c8ee589b7b73f7ebb87d76",
+          "submission_rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+          "task": {
+            "checks": [
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "ordinary"
+                ],
+                "name": "ordinary",
+                "timeout": 5
+              },
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "identity"
+                ],
+                "name": "identity",
+                "timeout": 5
+              },
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "recovery"
+                ],
+                "name": "recovery",
+                "timeout": 5
+              }
+            ],
+            "evaluation": {
+              "alternate_patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+              "family": "ingest-recovery",
+              "kind": "audit_challenge",
+              "reference_patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+              "requirements": [
+                {
+                  "id": "R1",
+                  "text": "Ordinary parsing, totals, checkpoint and error preservation."
+                },
+                {
+                  "id": "R2",
+                  "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+                },
+                {
+                  "id": "R3",
+                  "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+                }
+              ],
+              "rubric": [
+                {
+                  "checks": [
+                    "ordinary"
+                  ],
+                  "critical": false,
+                  "id": "ordinary",
+                  "points": 25
+                },
+                {
+                  "checks": [
+                    "identity"
+                  ],
+                  "critical": false,
+                  "id": "identity",
+                  "points": 25
+                },
+                {
+                  "checks": [
+                    "recovery"
+                  ],
+                  "critical": true,
+                  "id": "recovery",
+                  "points": 50
+                }
+              ],
+              "version": "weak-v1"
+            },
+            "origin": "authored_task",
+            "patch_provenance": {
+              "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Alternate valid design",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "alternate"
+              },
+              "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af": {
+                "author": "Recorded Codex task attempt",
+                "input_receipt": "candidate-001.json",
+                "label": "Recorded Codex attempt",
+                "license": "MIT",
+                "origin": "recorded_codex_attempt",
+                "role": "candidate"
+              },
+              "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Existing behavior control",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "negative_control"
+              },
+              "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Authored reference",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "reference"
+              }
+            },
+            "patches": [
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -25,20 +25,19 @@\n         return row[0] if row else 0\n \n     def apply_event(self, event, after_commit=None):\n-        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n-        if previous is not None:\n-            if previous[0] != event.amount:\n-                raise ValueError(\"conflicting duplicate event\")\n-            return False\n-        total = self.total(event.tenant) + event.amount\n-        if not -(2**63) <= total < 2**63:\n-            raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n+            previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n+            if previous is not None:\n+                if previous[0] != event.amount:\n+                    raise ValueError(\"conflicting duplicate event\")\n+                return False\n+            total = self.total(event.tenant) + event.amount\n+            if not -(2**63) <= total < 2**63:\n+                raise ValueError(\"total outside signed 64-bit range\")\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n             self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -21,24 +21,21 @@\n             self.db.execute(\"UPDATE progress SET position=MAX(position,?) WHERE id=1\", (position,))\n \n     def total(self, tenant):\n-        row = self.db.execute(\"SELECT amount FROM totals WHERE tenant=?\", (tenant,)).fetchone()\n-        return row[0] if row else 0\n+        return sum(row[0] for row in self.db.execute(\"SELECT amount FROM receipts WHERE tenant=?\", (tenant,)))\n \n     def apply_event(self, event, after_commit=None):\n-        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n-        if previous is not None:\n-            if previous[0] != event.amount:\n-                raise ValueError(\"conflicting duplicate event\")\n-            return False\n-        total = self.total(event.tenant) + event.amount\n-        if not -(2**63) <= total < 2**63:\n-            raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n-            self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n+            previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n+            if previous is not None:\n+                if previous[0] != event.amount:\n+                    raise ValueError(\"conflicting duplicate event\")\n+                return False\n+            total = self.total(event.tenant) + event.amount\n+            if not -(2**63) <= total < 2**63:\n+                raise ValueError(\"total outside signed 64-bit range\")\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -1,6 +1,6 @@\n import sqlite3\n \n-class State:\n+class State:  # Existing behavior retained by this authored control.\n     def __init__(self, path):\n         self.db = sqlite3.connect(path)\n         self.db.execute(\"PRAGMA synchronous=FULL\")\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -35,10 +35,9 @@\n             raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n             self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n"
+            ],
+            "provenance": {
+              "author": "Red Rook AI with substantial Codex assistance",
+              "base_commit": "71cdf07579ad3e5d0b0e5dde6c22c201ca23e082",
+              "case_kind": "Original synthetic engineering task and labeled audit challenge; actual candidate receipt retained",
+              "license": "MIT",
+              "notice_files": [
+                "notices/license"
+              ],
+              "origin": "authored_task",
+              "repository": "RedRookAI/swe-data-workbench original eventflow example"
+            },
+            "source_files": {
+              "eventflow/__init__.py": "from .events import Event\nfrom .state import State\nfrom .pipeline import process\n",
+              "eventflow/cli.py": "import argparse\nimport json\nfrom .state import State\nfrom .pipeline import process\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"source\")\n    parser.add_argument(\"--state\", required=True)\n    args = parser.parse_args()\n    state = State(args.state)\n    try:\n        with open(args.source, encoding=\"utf-8\") as stream:\n            print(json.dumps(process((json.loads(line) for line in stream), state)))\n    finally:\n        state.close()\n\nif __name__ == \"__main__\":\n    main()\n",
+              "eventflow/events.py": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass Event:\n    tenant: str\n    event_id: str\n    amount: int\n\n    @classmethod\n    def parse(cls, record):\n        if not isinstance(record, dict):\n            raise ValueError(\"event must be an object\")\n        tenant, event_id, amount = record.get(\"tenant\"), record.get(\"event_id\"), record.get(\"amount\")\n        if not isinstance(tenant, str) or not tenant or not isinstance(event_id, str) or not event_id:\n            raise ValueError(\"nonempty tenant and event_id required\")\n        if type(amount) is not int or not -(2**31) <= amount < 2**31:\n            raise ValueError(\"amount must be a signed 32-bit integer\")\n        return cls(tenant, event_id, amount)\n",
+              "eventflow/pipeline.py": "from .events import Event\n\ndef process(records, state, after_commit=None):\n    \"\"\"Consume the complete ordered source; resume after the durable checkpoint.\"\"\"\n    for position, record in enumerate(records, 1):\n        if position <= state.checkpoint:\n            continue\n        event = Event.parse(record)\n        callback = None if after_commit is None else lambda: after_commit(position)\n        state.apply_event(event, after_commit=callback)\n        state.advance(position)\n    return {\"checkpoint\": state.checkpoint}\n",
+              "eventflow/state.py": "import sqlite3\n\nclass State:\n    def __init__(self, path):\n        self.db = sqlite3.connect(path)\n        self.db.execute(\"PRAGMA synchronous=FULL\")\n        self.db.executescript(\"\"\"\n        CREATE TABLE IF NOT EXISTS totals(tenant TEXT PRIMARY KEY, amount INTEGER NOT NULL);\n        CREATE TABLE IF NOT EXISTS receipts(tenant TEXT, event_id TEXT, amount INTEGER NOT NULL, PRIMARY KEY(tenant,event_id));\n        CREATE TABLE IF NOT EXISTS progress(id INTEGER PRIMARY KEY CHECK(id=1), position INTEGER NOT NULL);\n        INSERT OR IGNORE INTO progress VALUES(1,0);\n        \"\"\")\n        self.db.commit()\n\n    @property\n    def checkpoint(self):\n        return self.db.execute(\"SELECT position FROM progress WHERE id=1\").fetchone()[0]\n\n    def advance(self, position):\n        with self.db:\n            self.db.execute(\"UPDATE progress SET position=MAX(position,?) WHERE id=1\", (position,))\n\n    def total(self, tenant):\n        row = self.db.execute(\"SELECT amount FROM totals WHERE tenant=?\", (tenant,)).fetchone()\n        return row[0] if row else 0\n\n    def apply_event(self, event, after_commit=None):\n        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n        if previous is not None:\n            if previous[0] != event.amount:\n                raise ValueError(\"conflicting duplicate event\")\n            return False\n        total = self.total(event.tenant) + event.amount\n        if not -(2**63) <= total < 2**63:\n            raise ValueError(\"total outside signed 64-bit range\")\n        with self.db:\n            self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n        if after_commit is not None:\n            after_commit()\n        with self.db:\n            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n        return True\n\n    def close(self):\n        self.db.close()\n",
+              "license": "MIT License\n\nCopyright (c) 2026 Red Rook AI\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n"
+            },
+            "task_text": "Repair recovery in the existing eventflow ingestion service. Operators replay an ordered JSONL source after interruption and sometimes observe inflated tenant totals. Preserve the public Event.parse, State and process APIs and the CLI.\n\nR1 ordinary: each valid record has nonempty string tenant/event_id and signed32-bit integer amount (bool is invalid). Amounts may be negative. Each tenant total is an integer; overflow beyond signed64-bit must fail without partially applying that event. Malformed records raise ValueError and must not advance the checkpoint past that record. process receives the complete immutable source in order and returns its durable checkpoint.\nR2 identity: event identity is (tenant,event_id). Repeated equal payloads are successful no-ops even at different source positions. Same identity with different amount raises ValueError without altering totals or skipping that conflicting record. Different tenants may reuse an ID. Existing successfully processed state remains readable.\nR3 recovery: after an exception or abrupt process exit following a durable event effect but before source-position acknowledgment, reopening the same state and replaying the complete source must produce the same totals as uninterrupted processing, with no loss or double-application. The checkpoint may lag a committed event if replay is idempotent, but must never skip an unapplied event. The optional after_commit(position) callback is called after a new event has a durable effect and before process returns acknowledgment for that position; it may raise or exit. Preserve this injection hook, not special-case test inputs. Duplicate no-op records need not invoke it.\n\nChoose any correct internal design. Do not weaken input rules, remove the CLI/hook or rely on a specific test implementation. No network, new dependency, detached process or external service is needed. State data belongs only to the path supplied by the caller. Example: alpha/e1/+7, alpha/e2/-2, alpha/e1/+7 yields total alpha=5 and checkpoint3, including after restart. Follow-up events may be appended to the same source.\n",
+            "title": "Durable event ingestion",
+            "verifier_files": {
+              "check.py": "import json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport tempfile\nsys.path.insert(0, str(Path.cwd()))\nfrom eventflow import State, process\n\nDATA = [{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":7},{\"tenant\":\"alpha\",\"event_id\":\"e2\",\"amount\":-2},{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":7}]\n\ndef ordinary(path):\n    state = State(path)\n    try:\n        process(DATA, state)\n        assert state.total(\"alpha\") == 5 and state.checkpoint == 3\n        assert state.total(\"absent\") == 0\n        for bad in [None, {}, {\"tenant\":\"alpha\",\"event_id\":\"bad\",\"amount\":True}, {\"tenant\":\"\",\"event_id\":\"bad\",\"amount\":1}, {\"tenant\":\"alpha\",\"event_id\":\"bad\",\"amount\":2**31}]:\n            try: process(DATA + [bad], state)\n            except ValueError: pass\n            else: raise AssertionError(\"malformed record accepted\")\n            assert state.checkpoint == 3 and state.total(\"alpha\") == 5\n        process(DATA + [{\"tenant\":\"alpha\",\"event_id\":\"e3\",\"amount\":4}], state)\n        assert state.total(\"alpha\") == 9 and state.checkpoint == 4\n    finally: state.close()\n    print(\"R1 ordinary behavior preserved\")\n\ndef identity(path):\n    state = State(path)\n    records = DATA + [{\"tenant\":\"beta\",\"event_id\":\"e1\",\"amount\":3}]\n    try:\n        process(records, state)\n        assert state.total(\"alpha\") == 5 and state.total(\"beta\") == 3\n        try: process(records + [{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":99}], state)\n        except ValueError: pass\n        else: raise AssertionError(\"conflicting identity silently accepted\")\n        assert state.total(\"alpha\") == 5 and state.checkpoint == 4\n    finally: state.close()\n    reopened = State(path)\n    try:\n        process(records, reopened)\n        assert reopened.total(\"alpha\") == 5 and reopened.checkpoint == 4\n    finally: reopened.close()\n    print(\"R2 tenant identity/replay/conflict preserved\")\n\ndef recovery(path):\n    state = State(path)\n    try: process(DATA[:1], state)\n    finally: state.close()\n    reopened = State(path)\n    try:\n        process(DATA, reopened)\n        assert reopened.total(\"alpha\") == 5 and reopened.checkpoint == 3\n    finally: reopened.close()\n    print(\"R3 normal checkpoint restart passed\")\n\nwith tempfile.TemporaryDirectory(prefix=\"ingest-check-\", dir=Path.cwd()) as temporary:\n    {\"ordinary\":ordinary,\"identity\":identity,\"recovery\":recovery}[sys.argv[1]](Path(temporary)/\"state.sqlite\")\n"
+            }
+          },
+          "task_id": "ingest-recovery"
+        },
+        "material_digest": "8df427e3988b645d0f294457ed68ae08f2a0af5371965c45b239398849734030",
+        "quality": {
+          "actor": null,
+          "decision": "draft",
+          "reason": "",
+          "reviewer_mode": null
+        },
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "Ordinary parsing, totals, checkpoint and error preservation."
+          },
+          {
+            "id": "R2",
+            "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+          },
+          {
+            "id": "R3",
+            "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+          }
+        ],
+        "revision": 0,
+        "rubric": [
+          {
+            "checks": [
+              "ordinary"
+            ],
+            "critical": false,
+            "id": "ordinary",
+            "points": 25
+          },
+          {
+            "checks": [
+              "identity"
+            ],
+            "critical": false,
+            "id": "identity",
+            "points": 25
+          },
+          {
+            "checks": [
+              "recovery"
+            ],
+            "critical": true,
+            "id": "recovery",
+            "points": 50
+          }
+        ],
+        "task_id": "ingest-recovery",
+        "state_digest": "89874d51e8e0345a1d678994a0e53b364d213c0290f5f28615fb6baa5bf170b1"
+      },
+      "items": [
+        {
+          "submission_id": "sub-93ce8ea6396d67f3eb0d183996f8c3434caab48d308bb7ac45bc85e4b78639d1",
+          "patch_digest": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
+          "role": "candidate",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Existing behavior control",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "negative_control"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 3,
+              "raw_digest": "63d7524e18776af16f2b303248a1cabaa67d8788c23faf5bef142417c63a7248",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Existing behavior control",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkV4aXN0aW5nIGJlaGF2aW9yIGNvbnRyb2wiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMSw2ICsxLDYgQEBcbiBpbXBvcnQgc3FsaXRlM1xuIFxuLWNsYXNzIFN0YXRlOlxuK2NsYXNzIFN0YXRlOiAgIyBFeGlzdGluZyBiZWhhdmlvciByZXRhaW5lZCBieSB0aGlzIGF1dGhvcmVkIGNvbnRyb2wuXG4gICAgIGRlZiBfX2luaXRfXyhzZWxmLCBwYXRoKTpcbiAgICAgICAgIHNlbGYuZGIgPSBzcWxpdGUzLmNvbm5lY3QocGF0aClcbiAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIlBSQUdNQSBzeW5jaHJvbm91cz1GVUxMXCIpXG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.036258529871702194,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305637,
+                    "pid": 1305643,
+                    "start_ticks": "358772265"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.036291702184826136,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305637,
+                    "pid": 1305644,
+                    "start_ticks": "358772268"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.03566202102228999,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305637,
+                    "pid": 1305645,
+                    "start_ticks": "358772272"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 normal checkpoint restart passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "15c74f0f48428f6eccab5ecff4c7c6ce1aaf854de3b16a86480f2d7e4b5dfd48",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-af34ddfeca1d783140665358fc6c1fb5459ae29dd40cea2af7444dc99074062f",
+          "patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+          "role": "alternate",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Alternate valid design",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "alternate"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 2,
+              "raw_digest": "114fa513cae924a840c47fc1cc38b24044adf05a16262a1f6d9a6c0bdb9f5e17",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Alternate valid design",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkFsdGVybmF0ZSB2YWxpZCBkZXNpZ24iLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMjEsMjQgKzIxLDIxIEBAXG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiVVBEQVRFIHByb2dyZXNzIFNFVCBwb3NpdGlvbj1NQVgocG9zaXRpb24sPykgV0hFUkUgaWQ9MVwiLCAocG9zaXRpb24sKSlcbiBcbiAgICAgZGVmIHRvdGFsKHNlbGYsIHRlbmFudCk6XG4tICAgICAgICByb3cgPSBzZWxmLmRiLmV4ZWN1dGUoXCJTRUxFQ1QgYW1vdW50IEZST00gdG90YWxzIFdIRVJFIHRlbmFudD0/XCIsICh0ZW5hbnQsKSkuZmV0Y2hvbmUoKVxuLSAgICAgICAgcmV0dXJuIHJvd1swXSBpZiByb3cgZWxzZSAwXG4rICAgICAgICByZXR1cm4gc3VtKHJvd1swXSBmb3Igcm93IGluIHNlbGYuZGIuZXhlY3V0ZShcIlNFTEVDVCBhbW91bnQgRlJPTSByZWNlaXB0cyBXSEVSRSB0ZW5hbnQ9P1wiLCAodGVuYW50LCkpKVxuIFxuICAgICBkZWYgYXBwbHlfZXZlbnQoc2VsZiwgZXZlbnQsIGFmdGVyX2NvbW1pdD1Ob25lKTpcbi0gICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4tICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbi0gICAgICAgICAgICBpZiBwcmV2aW91c1swXSAhPSBldmVudC5hbW91bnQ6XG4tICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbi0gICAgICAgICAgICByZXR1cm4gRmFsc2Vcbi0gICAgICAgIHRvdGFsID0gc2VsZi50b3RhbChldmVudC50ZW5hbnQpICsgZXZlbnQuYW1vdW50XG4tICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2Mzpcbi0gICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4rICAgICAgICAgICAgaWYgcHJldmlvdXMgaXMgbm90IE5vbmU6XG4rICAgICAgICAgICAgICAgIGlmIHByZXZpb3VzWzBdICE9IGV2ZW50LmFtb3VudDpcbisgICAgICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbisgICAgICAgICAgICAgICAgcmV0dXJuIEZhbHNlXG4rICAgICAgICAgICAgdG90YWwgPSBzZWxmLnRvdGFsKGV2ZW50LnRlbmFudCkgKyBldmVudC5hbW91bnRcbisgICAgICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2MzpcbisgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihcInRvdGFsIG91dHNpZGUgc2lnbmVkIDY0LWJpdCByYW5nZVwiKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.03672101115807891,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305646,
+                    "pid": 1305652,
+                    "start_ticks": "358772293"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.0357204987667501,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305646,
+                    "pid": 1305725,
+                    "start_ticks": "358772297"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.03523008804768324,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305646,
+                    "pid": 1305731,
+                    "start_ticks": "358772300"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 normal checkpoint restart passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "d655348e1721d880fb094e6bc994c759146ceaa0bf3df57b8a36e65fb1f75af1",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-bf695d71d2f16c4c7908962eda80b9e77e25989478d2dbf30b214311659b248a",
+          "patch_digest": "06142e889d5746f80ef72d636aeba1fd10e05730c81e7b8c59f241a90952d884",
+          "role": "candidate",
+          "origin": "imported_unverified",
+          "provenance": {},
+          "lineage": [
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 6,
+              "raw_digest": "fc3cfdaa2cdf267891206b4b9ac22cd713e20cd1825c2dbf0c1302e2039b9761",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored transport control",
+              "declared_model": "Unadmitted variant",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlVuYWRtaXR0ZWQgdmFyaWFudCIsIm1vZGVsX3BhdGNoIjoiLS0tIGEvZXZlbnRmbG93L3N0YXRlLnB5XG4rKysgYi9ldmVudGZsb3cvc3RhdGUucHlcbkBAIC0zNSwxMCArMzUsOSBAQFxuICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJ0b3RhbCBvdXRzaWRlIHNpZ25lZCA2NC1iaXQgcmFuZ2VcIilcbiAgICAgICAgIHdpdGggc2VsZi5kYjpcbiAgICAgICAgICAgICBzZWxmLmRiLmV4ZWN1dGUoXCJJTlNFUlQgSU5UTyB0b3RhbHMgVkFMVUVTKD8sPykgT04gQ09ORkxJQ1QodGVuYW50KSBETyBVUERBVEUgU0VUIGFtb3VudD1leGNsdWRlZC5hbW91bnRcIiwgKGV2ZW50LnRlbmFudCx0b3RhbCkpXG4rICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICBpZiBhZnRlcl9jb21taXQgaXMgbm90IE5vbmU6XG4gICAgICAgICAgICAgYWZ0ZXJfY29tbWl0KClcbi0gICAgICAgIHdpdGggc2VsZi5kYjpcbi0gICAgICAgICAgICBzZWxmLmRiLmV4ZWN1dGUoXCJJTlNFUlQgSU5UTyByZWNlaXB0cyBWQUxVRVMoPyw/LD8pXCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQsZXZlbnQuYW1vdW50KSlcbiAgICAgICAgIHJldHVybiBUcnVlXG4gXG4gICAgIGRlZiBjbG9zZShzZWxmKTpcblxuIiwic291cmNlIjoiYXV0aG9yZWQgdHJhbnNwb3J0IGNvbnRyb2wifQo="
+            }
+          ],
+          "execution_status": "pending-evidence",
+          "overall": "not-run",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            }
+          ],
+          "score": null,
+          "max_score": 100,
+          "complete": false,
+          "critical_passed": null,
+          "evidence_digest": null,
+          "unavailable_reason": "Current complete named measurements are unavailable or execution/context is unresolved."
+        },
+        {
+          "submission_id": "sub-bf7129798220ac30a530d1905ee54ffd45b919156502e51b17518548981f87ac",
+          "patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+          "role": "reference",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Authored reference",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "reference"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 1,
+              "raw_digest": "0b6ffd040dba9b166c22630528f9184caa017238b740ea7b2150875bd71da69f",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Authored reference",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkF1dGhvcmVkIHJlZmVyZW5jZSIsIm1vZGVsX3BhdGNoIjoiLS0tIGEvZXZlbnRmbG93L3N0YXRlLnB5XG4rKysgYi9ldmVudGZsb3cvc3RhdGUucHlcbkBAIC0yNSwyMCArMjUsMTkgQEBcbiAgICAgICAgIHJldHVybiByb3dbMF0gaWYgcm93IGVsc2UgMFxuIFxuICAgICBkZWYgYXBwbHlfZXZlbnQoc2VsZiwgZXZlbnQsIGFmdGVyX2NvbW1pdD1Ob25lKTpcbi0gICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4tICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbi0gICAgICAgICAgICBpZiBwcmV2aW91c1swXSAhPSBldmVudC5hbW91bnQ6XG4tICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbi0gICAgICAgICAgICByZXR1cm4gRmFsc2Vcbi0gICAgICAgIHRvdGFsID0gc2VsZi50b3RhbChldmVudC50ZW5hbnQpICsgZXZlbnQuYW1vdW50XG4tICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2Mzpcbi0gICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4rICAgICAgICAgICAgcHJldmlvdXMgPSBzZWxmLmRiLmV4ZWN1dGUoXCJTRUxFQ1QgYW1vdW50IEZST00gcmVjZWlwdHMgV0hFUkUgdGVuYW50PT8gQU5EIGV2ZW50X2lkPT9cIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCkpLmZldGNob25lKClcbisgICAgICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbisgICAgICAgICAgICAgICAgaWYgcHJldmlvdXNbMF0gIT0gZXZlbnQuYW1vdW50OlxuKyAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihcImNvbmZsaWN0aW5nIGR1cGxpY2F0ZSBldmVudFwiKVxuKyAgICAgICAgICAgICAgICByZXR1cm4gRmFsc2VcbisgICAgICAgICAgICB0b3RhbCA9IHNlbGYudG90YWwoZXZlbnQudGVuYW50KSArIGV2ZW50LmFtb3VudFxuKyAgICAgICAgICAgIGlmIG5vdCAtKDIqKjYzKSA8PSB0b3RhbCA8IDIqKjYzOlxuKyAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4rICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.035607139114290476,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305732,
+                    "pid": 1305738,
+                    "start_ticks": "358772321"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.034612939693033695,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305732,
+                    "pid": 1305739,
+                    "start_ticks": "358772324"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.03291915822774172,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305732,
+                    "pid": 1305740,
+                    "start_ticks": "358772328"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 normal checkpoint restart passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "55c1a6267ad17e4bcc867096ba274eef78d62990afb1127bdd9d74a95e202185",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-fe2ce214fd117220705eeb540ed93c3ce36e9b5c7de38f7a926d60fb1005baf0",
+          "patch_digest": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
+          "role": "candidate",
+          "origin": "recorded_codex_attempt",
+          "provenance": {
+            "author": "Recorded Codex task attempt",
+            "input_receipt": "candidate-001.json",
+            "label": "Recorded Codex attempt",
+            "license": "MIT",
+            "origin": "recorded_codex_attempt",
+            "role": "candidate"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 4,
+              "raw_digest": "05659f603c3d26983b29c516ecf487b9bee849387369458f760db3056951b10c",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "recorded_codex_attempt",
+              "declared_model": "Recorded Codex attempt",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlJlY29yZGVkIENvZGV4IGF0dGVtcHQiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMzUsMTAgKzM1LDkgQEBcbiAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJyZWNvcmRlZF9jb2RleF9hdHRlbXB0In0K"
+            },
+            {
+              "batch_id": "batch-c2a316b930c433a0ae9219d0",
+              "line": 5,
+              "raw_digest": "05659f603c3d26983b29c516ecf487b9bee849387369458f760db3056951b10c",
+              "duplicate_of": 4,
+              "input_format": "swebench",
+              "declared_source": "recorded_codex_attempt",
+              "declared_model": "Recorded Codex attempt",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlJlY29yZGVkIENvZGV4IGF0dGVtcHQiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMzUsMTAgKzM1LDkgQEBcbiAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJyZWNvcmRlZF9jb2RleF9hdHRlbXB0In0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.03412300767377019,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305741,
+                    "pid": 1305748,
+                    "start_ticks": "358772349"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.0333985798060894,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305741,
+                    "pid": 1305749,
+                    "start_ticks": "358772352"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.03374677803367376,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305741,
+                    "pid": 1305750,
+                    "start_ticks": "358772355"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 normal checkpoint restart passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "e3ce69da4ac3a9628c9627cb22a223c7e5473f9ba35a69b7d1937db84a9c0287",
+          "unavailable_reason": null
+        }
+      ],
+      "summary": {
+        "task_count": 1,
+        "unique_submissions": 5,
+        "complete_scores": 4,
+        "unassessed_scores": 1,
+        "quality": "draft",
+        "role_counts": {
+          "alternate": 1,
+          "candidate": 3,
+          "reference": 1
+        },
+        "finding_categories": {},
+        "open_findings": 0,
+        "task_reviews": 0,
+        "repair_requests": 0,
+        "score_spread": {
+          "count": 4,
+          "min": 100,
+          "max": 100
+        },
+        "review_duration": null
+      },
+      "batch_id": "batch-c2a316b930c433a0ae9219d0",
+      "cut": {
+        "seq": 16,
+        "hash": "d846acd3a14daeb4ecbdb70648148e4410ae42ce9c91efadaa3ace710bb896d8"
+      }
+    }
+  },
+  {
+    "version": "fixed-v2",
+    "score": {
+      "context": {
+        "calibration": [],
+        "evaluation": {
+          "alternate_patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+          "family": "ingest-recovery",
+          "kind": "clean",
+          "reference_patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+          "requirements": [
+            {
+              "id": "R1",
+              "text": "Ordinary parsing, totals, checkpoint and error preservation."
+            },
+            {
+              "id": "R2",
+              "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+            },
+            {
+              "id": "R3",
+              "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+            }
+          ],
+          "rubric": [
+            {
+              "checks": [
+                "ordinary"
+              ],
+              "critical": false,
+              "id": "ordinary",
+              "points": 25
+            },
+            {
+              "checks": [
+                "identity"
+              ],
+              "critical": false,
+              "id": "identity",
+              "points": 25
+            },
+            {
+              "checks": [
+                "recovery"
+              ],
+              "critical": true,
+              "id": "recovery",
+              "points": 50
+            }
+          ],
+          "version": "fixed-v2"
+        },
+        "findings": [],
+        "id": "task-2075573c1b90ef62e8efd3ea50d7ed4fbb3a15032002f8167fb4f7809ea9d599",
+        "material": {
+          "check_digest": "2f8c953e8effd4da250aa5810452589333373796c3b33f8ba076265f11d65eb9",
+          "schema": "task-quality-v1",
+          "source_digest": "cd1e5ef756a73828ddceb2fc514cc30565f8a53367c8ee589b7b73f7ebb87d76",
+          "submission_rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+          "task": {
+            "checks": [
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "ordinary"
+                ],
+                "name": "ordinary",
+                "timeout": 5
+              },
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "identity"
+                ],
+                "name": "identity",
+                "timeout": 5
+              },
+              {
+                "argv": [
+                  "{python}",
+                  "{verifier}/check.py",
+                  "recovery"
+                ],
+                "name": "recovery",
+                "timeout": 5
+              }
+            ],
+            "evaluation": {
+              "alternate_patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+              "family": "ingest-recovery",
+              "kind": "clean",
+              "reference_patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+              "requirements": [
+                {
+                  "id": "R1",
+                  "text": "Ordinary parsing, totals, checkpoint and error preservation."
+                },
+                {
+                  "id": "R2",
+                  "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+                },
+                {
+                  "id": "R3",
+                  "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+                }
+              ],
+              "rubric": [
+                {
+                  "checks": [
+                    "ordinary"
+                  ],
+                  "critical": false,
+                  "id": "ordinary",
+                  "points": 25
+                },
+                {
+                  "checks": [
+                    "identity"
+                  ],
+                  "critical": false,
+                  "id": "identity",
+                  "points": 25
+                },
+                {
+                  "checks": [
+                    "recovery"
+                  ],
+                  "critical": true,
+                  "id": "recovery",
+                  "points": 50
+                }
+              ],
+              "version": "fixed-v2"
+            },
+            "origin": "authored_task",
+            "patch_provenance": {
+              "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Alternate valid design",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "alternate"
+              },
+              "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af": {
+                "author": "Recorded Codex task attempt",
+                "input_receipt": "candidate-001.json",
+                "label": "Recorded Codex attempt",
+                "license": "MIT",
+                "origin": "recorded_codex_attempt",
+                "role": "candidate"
+              },
+              "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Existing behavior control",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "negative_control"
+              },
+              "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de": {
+                "author": "Red Rook AI with Codex assistance",
+                "input_receipt": "authored control",
+                "label": "Authored reference",
+                "license": "MIT",
+                "origin": "authored_control",
+                "role": "reference"
+              }
+            },
+            "patches": [
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -25,20 +25,19 @@\n         return row[0] if row else 0\n \n     def apply_event(self, event, after_commit=None):\n-        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n-        if previous is not None:\n-            if previous[0] != event.amount:\n-                raise ValueError(\"conflicting duplicate event\")\n-            return False\n-        total = self.total(event.tenant) + event.amount\n-        if not -(2**63) <= total < 2**63:\n-            raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n+            previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n+            if previous is not None:\n+                if previous[0] != event.amount:\n+                    raise ValueError(\"conflicting duplicate event\")\n+                return False\n+            total = self.total(event.tenant) + event.amount\n+            if not -(2**63) <= total < 2**63:\n+                raise ValueError(\"total outside signed 64-bit range\")\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n             self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -21,24 +21,21 @@\n             self.db.execute(\"UPDATE progress SET position=MAX(position,?) WHERE id=1\", (position,))\n \n     def total(self, tenant):\n-        row = self.db.execute(\"SELECT amount FROM totals WHERE tenant=?\", (tenant,)).fetchone()\n-        return row[0] if row else 0\n+        return sum(row[0] for row in self.db.execute(\"SELECT amount FROM receipts WHERE tenant=?\", (tenant,)))\n \n     def apply_event(self, event, after_commit=None):\n-        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n-        if previous is not None:\n-            if previous[0] != event.amount:\n-                raise ValueError(\"conflicting duplicate event\")\n-            return False\n-        total = self.total(event.tenant) + event.amount\n-        if not -(2**63) <= total < 2**63:\n-            raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n-            self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n+            previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n+            if previous is not None:\n+                if previous[0] != event.amount:\n+                    raise ValueError(\"conflicting duplicate event\")\n+                return False\n+            total = self.total(event.tenant) + event.amount\n+            if not -(2**63) <= total < 2**63:\n+                raise ValueError(\"total outside signed 64-bit range\")\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -1,6 +1,6 @@\n import sqlite3\n \n-class State:\n+class State:  # Existing behavior retained by this authored control.\n     def __init__(self, path):\n         self.db = sqlite3.connect(path)\n         self.db.execute(\"PRAGMA synchronous=FULL\")\n",
+              "--- a/eventflow/state.py\n+++ b/eventflow/state.py\n@@ -35,10 +35,9 @@\n             raise ValueError(\"total outside signed 64-bit range\")\n         with self.db:\n             self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n+            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         if after_commit is not None:\n             after_commit()\n-        with self.db:\n-            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n         return True\n \n     def close(self):\n"
+            ],
+            "provenance": {
+              "author": "Red Rook AI with substantial Codex assistance",
+              "base_commit": "71cdf07579ad3e5d0b0e5dde6c22c201ca23e082",
+              "case_kind": "Original synthetic engineering task and labeled audit challenge; actual candidate receipt retained",
+              "license": "MIT",
+              "notice_files": [
+                "notices/license"
+              ],
+              "origin": "authored_task",
+              "repository": "RedRookAI/swe-data-workbench original eventflow example"
+            },
+            "source_files": {
+              "eventflow/__init__.py": "from .events import Event\nfrom .state import State\nfrom .pipeline import process\n",
+              "eventflow/cli.py": "import argparse\nimport json\nfrom .state import State\nfrom .pipeline import process\n\ndef main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"source\")\n    parser.add_argument(\"--state\", required=True)\n    args = parser.parse_args()\n    state = State(args.state)\n    try:\n        with open(args.source, encoding=\"utf-8\") as stream:\n            print(json.dumps(process((json.loads(line) for line in stream), state)))\n    finally:\n        state.close()\n\nif __name__ == \"__main__\":\n    main()\n",
+              "eventflow/events.py": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass Event:\n    tenant: str\n    event_id: str\n    amount: int\n\n    @classmethod\n    def parse(cls, record):\n        if not isinstance(record, dict):\n            raise ValueError(\"event must be an object\")\n        tenant, event_id, amount = record.get(\"tenant\"), record.get(\"event_id\"), record.get(\"amount\")\n        if not isinstance(tenant, str) or not tenant or not isinstance(event_id, str) or not event_id:\n            raise ValueError(\"nonempty tenant and event_id required\")\n        if type(amount) is not int or not -(2**31) <= amount < 2**31:\n            raise ValueError(\"amount must be a signed 32-bit integer\")\n        return cls(tenant, event_id, amount)\n",
+              "eventflow/pipeline.py": "from .events import Event\n\ndef process(records, state, after_commit=None):\n    \"\"\"Consume the complete ordered source; resume after the durable checkpoint.\"\"\"\n    for position, record in enumerate(records, 1):\n        if position <= state.checkpoint:\n            continue\n        event = Event.parse(record)\n        callback = None if after_commit is None else lambda: after_commit(position)\n        state.apply_event(event, after_commit=callback)\n        state.advance(position)\n    return {\"checkpoint\": state.checkpoint}\n",
+              "eventflow/state.py": "import sqlite3\n\nclass State:\n    def __init__(self, path):\n        self.db = sqlite3.connect(path)\n        self.db.execute(\"PRAGMA synchronous=FULL\")\n        self.db.executescript(\"\"\"\n        CREATE TABLE IF NOT EXISTS totals(tenant TEXT PRIMARY KEY, amount INTEGER NOT NULL);\n        CREATE TABLE IF NOT EXISTS receipts(tenant TEXT, event_id TEXT, amount INTEGER NOT NULL, PRIMARY KEY(tenant,event_id));\n        CREATE TABLE IF NOT EXISTS progress(id INTEGER PRIMARY KEY CHECK(id=1), position INTEGER NOT NULL);\n        INSERT OR IGNORE INTO progress VALUES(1,0);\n        \"\"\")\n        self.db.commit()\n\n    @property\n    def checkpoint(self):\n        return self.db.execute(\"SELECT position FROM progress WHERE id=1\").fetchone()[0]\n\n    def advance(self, position):\n        with self.db:\n            self.db.execute(\"UPDATE progress SET position=MAX(position,?) WHERE id=1\", (position,))\n\n    def total(self, tenant):\n        row = self.db.execute(\"SELECT amount FROM totals WHERE tenant=?\", (tenant,)).fetchone()\n        return row[0] if row else 0\n\n    def apply_event(self, event, after_commit=None):\n        previous = self.db.execute(\"SELECT amount FROM receipts WHERE tenant=? AND event_id=?\", (event.tenant,event.event_id)).fetchone()\n        if previous is not None:\n            if previous[0] != event.amount:\n                raise ValueError(\"conflicting duplicate event\")\n            return False\n        total = self.total(event.tenant) + event.amount\n        if not -(2**63) <= total < 2**63:\n            raise ValueError(\"total outside signed 64-bit range\")\n        with self.db:\n            self.db.execute(\"INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount\", (event.tenant,total))\n        if after_commit is not None:\n            after_commit()\n        with self.db:\n            self.db.execute(\"INSERT INTO receipts VALUES(?,?,?)\", (event.tenant,event.event_id,event.amount))\n        return True\n\n    def close(self):\n        self.db.close()\n",
+              "license": "MIT License\n\nCopyright (c) 2026 Red Rook AI\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n"
+            },
+            "task_text": "Repair recovery in the existing eventflow ingestion service. Operators replay an ordered JSONL source after interruption and sometimes observe inflated tenant totals. Preserve the public Event.parse, State and process APIs and the CLI.\n\nR1 ordinary: each valid record has nonempty string tenant/event_id and signed32-bit integer amount (bool is invalid). Amounts may be negative. Each tenant total is an integer; overflow beyond signed64-bit must fail without partially applying that event. Malformed records raise ValueError and must not advance the checkpoint past that record. process receives the complete immutable source in order and returns its durable checkpoint.\nR2 identity: event identity is (tenant,event_id). Repeated equal payloads are successful no-ops even at different source positions. Same identity with different amount raises ValueError without altering totals or skipping that conflicting record. Different tenants may reuse an ID. Existing successfully processed state remains readable.\nR3 recovery: after an exception or abrupt process exit following a durable event effect but before source-position acknowledgment, reopening the same state and replaying the complete source must produce the same totals as uninterrupted processing, with no loss or double-application. The checkpoint may lag a committed event if replay is idempotent, but must never skip an unapplied event. The optional after_commit(position) callback is called after a new event has a durable effect and before process returns acknowledgment for that position; it may raise or exit. Preserve this injection hook, not special-case test inputs. Duplicate no-op records need not invoke it.\n\nChoose any correct internal design. Do not weaken input rules, remove the CLI/hook or rely on a specific test implementation. No network, new dependency, detached process or external service is needed. State data belongs only to the path supplied by the caller. Example: alpha/e1/+7, alpha/e2/-2, alpha/e1/+7 yields total alpha=5 and checkpoint3, including after restart. Follow-up events may be appended to the same source.\n",
+            "title": "Durable event ingestion",
+            "verifier_files": {
+              "check.py": "import json\nimport os\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport tempfile\nsys.path.insert(0, str(Path.cwd()))\nfrom eventflow import State, process\n\nDATA = [{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":7},{\"tenant\":\"alpha\",\"event_id\":\"e2\",\"amount\":-2},{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":7}]\n\ndef ordinary(path):\n    state = State(path)\n    try:\n        process(DATA, state)\n        assert state.total(\"alpha\") == 5 and state.checkpoint == 3\n        assert state.total(\"absent\") == 0\n        for bad in [None, {}, {\"tenant\":\"alpha\",\"event_id\":\"bad\",\"amount\":True}, {\"tenant\":\"\",\"event_id\":\"bad\",\"amount\":1}, {\"tenant\":\"alpha\",\"event_id\":\"bad\",\"amount\":2**31}]:\n            try: process(DATA + [bad], state)\n            except ValueError: pass\n            else: raise AssertionError(\"malformed record accepted\")\n            assert state.checkpoint == 3 and state.total(\"alpha\") == 5\n        process(DATA + [{\"tenant\":\"alpha\",\"event_id\":\"e3\",\"amount\":4}], state)\n        assert state.total(\"alpha\") == 9 and state.checkpoint == 4\n    finally: state.close()\n    print(\"R1 ordinary behavior preserved\")\n\ndef identity(path):\n    state = State(path)\n    records = DATA + [{\"tenant\":\"beta\",\"event_id\":\"e1\",\"amount\":3}]\n    try:\n        process(records, state)\n        assert state.total(\"alpha\") == 5 and state.total(\"beta\") == 3\n        try: process(records + [{\"tenant\":\"alpha\",\"event_id\":\"e1\",\"amount\":99}], state)\n        except ValueError: pass\n        else: raise AssertionError(\"conflicting identity silently accepted\")\n        assert state.total(\"alpha\") == 5 and state.checkpoint == 4\n    finally: state.close()\n    reopened = State(path)\n    try:\n        process(records, reopened)\n        assert reopened.total(\"alpha\") == 5 and reopened.checkpoint == 4\n    finally: reopened.close()\n    print(\"R2 tenant identity/replay/conflict preserved\")\n\ndef recovery(path):\n    code = \"import os;from eventflow import State,process;state=State(__import__('sys').argv[1]);process(\" + repr(DATA) + \",state,after_commit=lambda position: os._exit(73) if position==1 else None)\"\n    child = subprocess.run([sys.executable, \"-c\", code, str(path)], cwd=Path.cwd(), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3)\n    assert child.returncode == 73, \"fault injection did not reach the specified committed-event boundary\"\n    reopened = State(path)\n    try:\n        process(DATA, reopened)\n        observed = reopened.total(\"alpha\")\n        assert observed == 5, \"R3 replay double-applied a committed event: expected total5, observed \" + str(observed)\n        assert reopened.checkpoint == 3\n    finally: reopened.close()\n    print(\"R3 post-commit/pre-ack abrupt exit replay passed\")\n\nwith tempfile.TemporaryDirectory(prefix=\"ingest-check-\", dir=Path.cwd()) as temporary:\n    {\"ordinary\":ordinary,\"identity\":identity,\"recovery\":recovery}[sys.argv[1]](Path(temporary)/\"state.sqlite\")\n"
+            }
+          },
+          "task_id": "ingest-recovery"
+        },
+        "material_digest": "2075573c1b90ef62e8efd3ea50d7ed4fbb3a15032002f8167fb4f7809ea9d599",
+        "quality": {
+          "actor": null,
+          "decision": "draft",
+          "reason": "",
+          "reviewer_mode": null
+        },
+        "requirements": [
+          {
+            "id": "R1",
+            "text": "Ordinary parsing, totals, checkpoint and error preservation."
+          },
+          {
+            "id": "R2",
+            "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+          },
+          {
+            "id": "R3",
+            "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+          }
+        ],
+        "revision": 0,
+        "rubric": [
+          {
+            "checks": [
+              "ordinary"
+            ],
+            "critical": false,
+            "id": "ordinary",
+            "points": 25
+          },
+          {
+            "checks": [
+              "identity"
+            ],
+            "critical": false,
+            "id": "identity",
+            "points": 25
+          },
+          {
+            "checks": [
+              "recovery"
+            ],
+            "critical": true,
+            "id": "recovery",
+            "points": 50
+          }
+        ],
+        "task_id": "ingest-recovery",
+        "state_digest": "242e5533117e2b3363a0d426eedacf021e1c12ebecd2ac5ba7f1c954a7aa7e44"
+      },
+      "items": [
+        {
+          "submission_id": "sub-5f5cd582fd695c61c5329fcc22b4ca74fb6f2c71e912cfb1496eaa3aa75b90a5",
+          "patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+          "role": "alternate",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Alternate valid design",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "alternate"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 2,
+              "raw_digest": "114fa513cae924a840c47fc1cc38b24044adf05a16262a1f6d9a6c0bdb9f5e17",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Alternate valid design",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkFsdGVybmF0ZSB2YWxpZCBkZXNpZ24iLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMjEsMjQgKzIxLDIxIEBAXG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiVVBEQVRFIHByb2dyZXNzIFNFVCBwb3NpdGlvbj1NQVgocG9zaXRpb24sPykgV0hFUkUgaWQ9MVwiLCAocG9zaXRpb24sKSlcbiBcbiAgICAgZGVmIHRvdGFsKHNlbGYsIHRlbmFudCk6XG4tICAgICAgICByb3cgPSBzZWxmLmRiLmV4ZWN1dGUoXCJTRUxFQ1QgYW1vdW50IEZST00gdG90YWxzIFdIRVJFIHRlbmFudD0/XCIsICh0ZW5hbnQsKSkuZmV0Y2hvbmUoKVxuLSAgICAgICAgcmV0dXJuIHJvd1swXSBpZiByb3cgZWxzZSAwXG4rICAgICAgICByZXR1cm4gc3VtKHJvd1swXSBmb3Igcm93IGluIHNlbGYuZGIuZXhlY3V0ZShcIlNFTEVDVCBhbW91bnQgRlJPTSByZWNlaXB0cyBXSEVSRSB0ZW5hbnQ9P1wiLCAodGVuYW50LCkpKVxuIFxuICAgICBkZWYgYXBwbHlfZXZlbnQoc2VsZiwgZXZlbnQsIGFmdGVyX2NvbW1pdD1Ob25lKTpcbi0gICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4tICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbi0gICAgICAgICAgICBpZiBwcmV2aW91c1swXSAhPSBldmVudC5hbW91bnQ6XG4tICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbi0gICAgICAgICAgICByZXR1cm4gRmFsc2Vcbi0gICAgICAgIHRvdGFsID0gc2VsZi50b3RhbChldmVudC50ZW5hbnQpICsgZXZlbnQuYW1vdW50XG4tICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2Mzpcbi0gICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4rICAgICAgICAgICAgaWYgcHJldmlvdXMgaXMgbm90IE5vbmU6XG4rICAgICAgICAgICAgICAgIGlmIHByZXZpb3VzWzBdICE9IGV2ZW50LmFtb3VudDpcbisgICAgICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbisgICAgICAgICAgICAgICAgcmV0dXJuIEZhbHNlXG4rICAgICAgICAgICAgdG90YWwgPSBzZWxmLnRvdGFsKGV2ZW50LnRlbmFudCkgKyBldmVudC5hbW91bnRcbisgICAgICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2MzpcbisgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihcInRvdGFsIG91dHNpZGUgc2lnbmVkIDY0LWJpdCByYW5nZVwiKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.03505527228116989,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305752,
+                    "pid": 1305759,
+                    "start_ticks": "358772383"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.03424970433115959,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305752,
+                    "pid": 1305760,
+                    "start_ticks": "358772387"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.05474755493924022,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305752,
+                    "pid": 1305761,
+                    "start_ticks": "358772390"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 post-commit/pre-ack abrupt exit replay passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "f6bf77b53b3385510f119a9b9c92ba660e5d43137a880992848135a0d7d212ba",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-62522a06737ef2e24bd40c73208a81f2c2b8d3627afb3b7739af40022084666b",
+          "patch_digest": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
+          "role": "candidate",
+          "origin": "recorded_codex_attempt",
+          "provenance": {
+            "author": "Recorded Codex task attempt",
+            "input_receipt": "candidate-001.json",
+            "label": "Recorded Codex attempt",
+            "license": "MIT",
+            "origin": "recorded_codex_attempt",
+            "role": "candidate"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 4,
+              "raw_digest": "05659f603c3d26983b29c516ecf487b9bee849387369458f760db3056951b10c",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "recorded_codex_attempt",
+              "declared_model": "Recorded Codex attempt",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlJlY29yZGVkIENvZGV4IGF0dGVtcHQiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMzUsMTAgKzM1LDkgQEBcbiAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJyZWNvcmRlZF9jb2RleF9hdHRlbXB0In0K"
+            },
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 5,
+              "raw_digest": "05659f603c3d26983b29c516ecf487b9bee849387369458f760db3056951b10c",
+              "duplicate_of": 4,
+              "input_format": "swebench",
+              "declared_source": "recorded_codex_attempt",
+              "declared_model": "Recorded Codex attempt",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlJlY29yZGVkIENvZGV4IGF0dGVtcHQiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMzUsMTAgKzM1LDkgQEBcbiAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuKyAgICAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIklOU0VSVCBJTlRPIHJlY2VpcHRzIFZBTFVFUyg/LD8sPylcIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCxldmVudC5hbW91bnQpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJyZWNvcmRlZF9jb2RleF9hdHRlbXB0In0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.034386077895760536,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305763,
+                    "pid": 1305770,
+                    "start_ticks": "358772416"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.03328362572938204,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305763,
+                    "pid": 1305771,
+                    "start_ticks": "358772420"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.052384388633072376,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305763,
+                    "pid": 1305772,
+                    "start_ticks": "358772423"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 post-commit/pre-ack abrupt exit replay passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "91399a546dfc251fe531e376faf9c25d331f00ed576792e5895f4ebdae889ab3",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-82ad6ccf26bb72e74fd2b92f02491d819a41d1c20275e782322c94584000d545",
+          "patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+          "role": "reference",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Authored reference",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "reference"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 1,
+              "raw_digest": "0b6ffd040dba9b166c22630528f9184caa017238b740ea7b2150875bd71da69f",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Authored reference",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkF1dGhvcmVkIHJlZmVyZW5jZSIsIm1vZGVsX3BhdGNoIjoiLS0tIGEvZXZlbnRmbG93L3N0YXRlLnB5XG4rKysgYi9ldmVudGZsb3cvc3RhdGUucHlcbkBAIC0yNSwyMCArMjUsMTkgQEBcbiAgICAgICAgIHJldHVybiByb3dbMF0gaWYgcm93IGVsc2UgMFxuIFxuICAgICBkZWYgYXBwbHlfZXZlbnQoc2VsZiwgZXZlbnQsIGFmdGVyX2NvbW1pdD1Ob25lKTpcbi0gICAgICAgIHByZXZpb3VzID0gc2VsZi5kYi5leGVjdXRlKFwiU0VMRUNUIGFtb3VudCBGUk9NIHJlY2VpcHRzIFdIRVJFIHRlbmFudD0/IEFORCBldmVudF9pZD0/XCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQpKS5mZXRjaG9uZSgpXG4tICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbi0gICAgICAgICAgICBpZiBwcmV2aW91c1swXSAhPSBldmVudC5hbW91bnQ6XG4tICAgICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJjb25mbGljdGluZyBkdXBsaWNhdGUgZXZlbnRcIilcbi0gICAgICAgICAgICByZXR1cm4gRmFsc2Vcbi0gICAgICAgIHRvdGFsID0gc2VsZi50b3RhbChldmVudC50ZW5hbnQpICsgZXZlbnQuYW1vdW50XG4tICAgICAgICBpZiBub3QgLSgyKio2MykgPD0gdG90YWwgPCAyKio2Mzpcbi0gICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4gICAgICAgICB3aXRoIHNlbGYuZGI6XG4rICAgICAgICAgICAgcHJldmlvdXMgPSBzZWxmLmRiLmV4ZWN1dGUoXCJTRUxFQ1QgYW1vdW50IEZST00gcmVjZWlwdHMgV0hFUkUgdGVuYW50PT8gQU5EIGV2ZW50X2lkPT9cIiwgKGV2ZW50LnRlbmFudCxldmVudC5ldmVudF9pZCkpLmZldGNob25lKClcbisgICAgICAgICAgICBpZiBwcmV2aW91cyBpcyBub3QgTm9uZTpcbisgICAgICAgICAgICAgICAgaWYgcHJldmlvdXNbMF0gIT0gZXZlbnQuYW1vdW50OlxuKyAgICAgICAgICAgICAgICAgICAgcmFpc2UgVmFsdWVFcnJvcihcImNvbmZsaWN0aW5nIGR1cGxpY2F0ZSBldmVudFwiKVxuKyAgICAgICAgICAgICAgICByZXR1cm4gRmFsc2VcbisgICAgICAgICAgICB0b3RhbCA9IHNlbGYudG90YWwoZXZlbnQudGVuYW50KSArIGV2ZW50LmFtb3VudFxuKyAgICAgICAgICAgIGlmIG5vdCAtKDIqKjYzKSA8PSB0b3RhbCA8IDIqKjYzOlxuKyAgICAgICAgICAgICAgICByYWlzZSBWYWx1ZUVycm9yKFwidG90YWwgb3V0c2lkZSBzaWduZWQgNjQtYml0IHJhbmdlXCIpXG4rICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gdG90YWxzIFZBTFVFUyg/LD8pIE9OIENPTkZMSUNUKHRlbmFudCkgRE8gVVBEQVRFIFNFVCBhbW91bnQ9ZXhjbHVkZWQuYW1vdW50XCIsIChldmVudC50ZW5hbnQsdG90YWwpKVxuICAgICAgICAgaWYgYWZ0ZXJfY29tbWl0IGlzIG5vdCBOb25lOlxuICAgICAgICAgICAgIGFmdGVyX2NvbW1pdCgpXG4tICAgICAgICB3aXRoIHNlbGYuZGI6XG4tICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICByZXR1cm4gVHJ1ZVxuIFxuICAgICBkZWYgY2xvc2Uoc2VsZik6XG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "passed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.034194331150501966,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305775,
+                    "pid": 1305782,
+                    "start_ticks": "358772450"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.034994348883628845,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305775,
+                    "pid": 1305783,
+                    "start_ticks": "358772453"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.05281226523220539,
+                  "exit_code": 0,
+                  "name": "recovery",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305775,
+                    "pid": 1305784,
+                    "start_ticks": "358772456"
+                  },
+                  "stderr": "",
+                  "stdout": "R3 post-commit/pre-ack abrupt exit replay passed\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 50
+            }
+          ],
+          "score": 100,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": true,
+          "evidence_digest": "31cf1acd6cfa41a7f47fe8eb24fc47c9aaa2d2d7c5756706633a00fc92face23",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-ae54460a3b01e5947e04673c3d6c961a6b5b7d0300431e2b60c755a93f9f55f9",
+          "patch_digest": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
+          "role": "candidate",
+          "origin": "authored_control",
+          "provenance": {
+            "author": "Red Rook AI with Codex assistance",
+            "input_receipt": "authored control",
+            "label": "Existing behavior control",
+            "license": "MIT",
+            "origin": "authored_control",
+            "role": "negative_control"
+          },
+          "lineage": [
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 3,
+              "raw_digest": "63d7524e18776af16f2b303248a1cabaa67d8788c23faf5bef142417c63a7248",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored_control",
+              "declared_model": "Existing behavior control",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IkV4aXN0aW5nIGJlaGF2aW9yIGNvbnRyb2wiLCJtb2RlbF9wYXRjaCI6Ii0tLSBhL2V2ZW50Zmxvdy9zdGF0ZS5weVxuKysrIGIvZXZlbnRmbG93L3N0YXRlLnB5XG5AQCAtMSw2ICsxLDYgQEBcbiBpbXBvcnQgc3FsaXRlM1xuIFxuLWNsYXNzIFN0YXRlOlxuK2NsYXNzIFN0YXRlOiAgIyBFeGlzdGluZyBiZWhhdmlvciByZXRhaW5lZCBieSB0aGlzIGF1dGhvcmVkIGNvbnRyb2wuXG4gICAgIGRlZiBfX2luaXRfXyhzZWxmLCBwYXRoKTpcbiAgICAgICAgIHNlbGYuZGIgPSBzcWxpdGUzLmNvbm5lY3QocGF0aClcbiAgICAgICAgIHNlbGYuZGIuZXhlY3V0ZShcIlBSQUdNQSBzeW5jaHJvbm91cz1GVUxMXCIpXG4iLCJzb3VyY2UiOiJhdXRob3JlZF9jb250cm9sIn0K"
+            }
+          ],
+          "execution_status": "completed",
+          "overall": "failed",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "ordinary"
+                  ],
+                  "duration_seconds": 0.03486206289380789,
+                  "exit_code": 0,
+                  "name": "ordinary",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305786,
+                    "pid": 1305811,
+                    "start_ticks": "358772487"
+                  },
+                  "stderr": "",
+                  "stdout": "R1 ordinary behavior preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "identity"
+                  ],
+                  "duration_seconds": 0.035341484006494284,
+                  "exit_code": 0,
+                  "name": "identity",
+                  "outcome": "passed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305786,
+                    "pid": 1305812,
+                    "start_ticks": "358772491"
+                  },
+                  "stderr": "",
+                  "stdout": "R2 tenant identity/replay/conflict preserved\n"
+                }
+              ],
+              "outcome": "passed",
+              "earned": 25
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [
+                {
+                  "argv": [
+                    "{python}",
+                    "{verifier}/check.py",
+                    "recovery"
+                  ],
+                  "duration_seconds": 0.0901578082703054,
+                  "exit_code": 1,
+                  "name": "recovery",
+                  "outcome": "failed",
+                  "output_truncated": false,
+                  "process": {
+                    "pgid": 1305786,
+                    "pid": 1305813,
+                    "start_ticks": "358772494"
+                  },
+                  "stderr": "Traceback (most recent call last):\n  File \"<attempt>/verifier/check.py\", line 60, in <module>\n    {\"ordinary\":ordinary,\"identity\":identity,\"recovery\":recovery}[sys.argv[1]](Path(temporary)/\"state.sqlite\")\n  File \"<attempt>/verifier/check.py\", line 54, in recovery\n    assert observed == 5, \"R3 replay double-applied a committed event: expected total5, observed \" + str(observed)\n           ^^^^^^^^^^^^^\nAssertionError: R3 replay double-applied a committed event: expected total5, observed 12\n",
+                  "stdout": ""
+                }
+              ],
+              "outcome": "failed",
+              "earned": 0
+            }
+          ],
+          "score": 50,
+          "max_score": 100,
+          "complete": true,
+          "critical_passed": false,
+          "evidence_digest": "1203b6e3e7ced75bb4a602817032259d85174cfc86ab3dceca4916f418bfc82c",
+          "unavailable_reason": null
+        },
+        {
+          "submission_id": "sub-d1839b0b733a16aed7f13abd65eb5aab03359b66d1b2519007e546e89e06c94b",
+          "patch_digest": "06142e889d5746f80ef72d636aeba1fd10e05730c81e7b8c59f241a90952d884",
+          "role": "candidate",
+          "origin": "imported_unverified",
+          "provenance": {},
+          "lineage": [
+            {
+              "batch_id": "batch-86415cbe407d04267aaf7fac",
+              "line": 6,
+              "raw_digest": "fc3cfdaa2cdf267891206b4b9ac22cd713e20cd1825c2dbf0c1302e2039b9761",
+              "duplicate_of": null,
+              "input_format": "swebench",
+              "declared_source": "authored transport control",
+              "declared_model": "Unadmitted variant",
+              "raw_record_base64": "eyJpbnN0YW5jZV9pZCI6ImluZ2VzdC1yZWNvdmVyeSIsIm1vZGVsX25hbWVfb3JfcGF0aCI6IlVuYWRtaXR0ZWQgdmFyaWFudCIsIm1vZGVsX3BhdGNoIjoiLS0tIGEvZXZlbnRmbG93L3N0YXRlLnB5XG4rKysgYi9ldmVudGZsb3cvc3RhdGUucHlcbkBAIC0zNSwxMCArMzUsOSBAQFxuICAgICAgICAgICAgIHJhaXNlIFZhbHVlRXJyb3IoXCJ0b3RhbCBvdXRzaWRlIHNpZ25lZCA2NC1iaXQgcmFuZ2VcIilcbiAgICAgICAgIHdpdGggc2VsZi5kYjpcbiAgICAgICAgICAgICBzZWxmLmRiLmV4ZWN1dGUoXCJJTlNFUlQgSU5UTyB0b3RhbHMgVkFMVUVTKD8sPykgT04gQ09ORkxJQ1QodGVuYW50KSBETyBVUERBVEUgU0VUIGFtb3VudD1leGNsdWRlZC5hbW91bnRcIiwgKGV2ZW50LnRlbmFudCx0b3RhbCkpXG4rICAgICAgICAgICAgc2VsZi5kYi5leGVjdXRlKFwiSU5TRVJUIElOVE8gcmVjZWlwdHMgVkFMVUVTKD8sPyw/KVwiLCAoZXZlbnQudGVuYW50LGV2ZW50LmV2ZW50X2lkLGV2ZW50LmFtb3VudCkpXG4gICAgICAgICBpZiBhZnRlcl9jb21taXQgaXMgbm90IE5vbmU6XG4gICAgICAgICAgICAgYWZ0ZXJfY29tbWl0KClcbi0gICAgICAgIHdpdGggc2VsZi5kYjpcbi0gICAgICAgICAgICBzZWxmLmRiLmV4ZWN1dGUoXCJJTlNFUlQgSU5UTyByZWNlaXB0cyBWQUxVRVMoPyw/LD8pXCIsIChldmVudC50ZW5hbnQsZXZlbnQuZXZlbnRfaWQsZXZlbnQuYW1vdW50KSlcbiAgICAgICAgIHJldHVybiBUcnVlXG4gXG4gICAgIGRlZiBjbG9zZShzZWxmKTpcblxuIiwic291cmNlIjoiYXV0aG9yZWQgdHJhbnNwb3J0IGNvbnRyb2wifQo="
+            }
+          ],
+          "execution_status": "pending-evidence",
+          "overall": "not-run",
+          "criteria": [
+            {
+              "id": "ordinary",
+              "points": 25,
+              "critical": false,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            },
+            {
+              "id": "identity",
+              "points": 25,
+              "critical": false,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            },
+            {
+              "id": "recovery",
+              "points": 50,
+              "critical": true,
+              "checks": [],
+              "outcome": "unassessed",
+              "earned": null
+            }
+          ],
+          "score": null,
+          "max_score": 100,
+          "complete": false,
+          "critical_passed": null,
+          "evidence_digest": null,
+          "unavailable_reason": "Current complete named measurements are unavailable or execution/context is unresolved."
+        }
+      ],
+      "summary": {
+        "task_count": 1,
+        "unique_submissions": 5,
+        "complete_scores": 4,
+        "unassessed_scores": 1,
+        "quality": "draft",
+        "role_counts": {
+          "alternate": 1,
+          "candidate": 3,
+          "reference": 1
+        },
+        "finding_categories": {},
+        "open_findings": 0,
+        "task_reviews": 0,
+        "repair_requests": 0,
+        "score_spread": {
+          "count": 4,
+          "min": 50,
+          "max": 100
+        },
+        "review_duration": null
+      },
+      "batch_id": "batch-86415cbe407d04267aaf7fac",
+      "cut": {
+        "seq": 32,
+        "hash": "aa80247d8ebf3f02570944a8a4030277503d756420c365a67b3d2507fd94412b"
+      }
+    }
+  }
+]

@@ -181,4 +181,59 @@ class BundleTests(unittest.TestCase):
         self.assertFalse(self.arguments['output'].exists())
 
 
+    def test_optional_protected_verifier_and_evaluation_metadata_bind_preparation(self):
+        verifiers = self.root / 'verifier-files.json'
+        mapping = {'check.py': 'raise SystemExit(0)\n'}
+        verifiers.write_bytes(canonical(mapping))
+        evaluation = self.root / 'evaluation.json'
+        role = digest(self.patch_bytes)
+        metadata = {'family': 'preparation-test', 'version': 'clean-v1', 'kind': 'clean',
+                    'requirements': [{'id': 'behavior', 'text': 'Required behavior.'}],
+                    'rubric': [{'id': 'behavior', 'points': 100, 'checks': ['marker'], 'critical': True}],
+                    'reference_patch_digest': role, 'alternate_patch_digest': role}
+        evaluation.write_bytes(canonical(metadata))
+        receipt = self.prepare(verifier_files=verifiers, evaluation=evaluation)
+        catalog = json.loads((self.arguments['output'] / 'catalog.json').read_bytes())
+        task = catalog['tasks']['example-task']
+        self.assertEqual(task['verifier_files'], mapping)
+        self.assertEqual(task['evaluation'], metadata)
+        self.assertNotIn('check.py', task['source_files'])
+        self.assertEqual(receipt['check_digest'], digest(canonical({'checks': self.check_data, 'verifier_files': mapping})))
+        self.assertEqual(receipt['verifier_digest'], digest(canonical(mapping)))
+        w = Workbench(self.root / 'state', fixture_dir=self.arguments['output'])
+        item = w._record({'task_id': 'example-task', 'patch': self.patch_bytes.decode()})
+        self.assertEqual(item['check_digest'], receipt['check_digest'])
+        self.assertFalse(self.marker.exists())
+
+    def test_optional_role_validation_leaves_no_partial_bundle(self):
+        verifiers = self.root / 'verifier-files.json'
+        for mapping in ({'../check.py': 'text'}, {'check.py': 1}, {'a': 'text', 'a/check.py': 'text'}, {}):
+            with self.subTest(mapping=mapping):
+                verifiers.write_bytes(canonical(mapping))
+                with self.assertRaises(WorkbenchError):
+                    self.prepare(verifier_files=verifiers)
+                self.assertFalse(self.arguments['output'].exists())
+        verifiers.write_bytes(canonical({'check.py': 'raise SystemExit(0)\n'}))
+        evaluation = self.root / 'bad-evaluation.json'
+        evaluation.write_bytes(canonical({'kind': 'unknown'}))
+        with self.assertRaises(WorkbenchError) as caught:
+            self.prepare(verifier_files=verifiers, evaluation=evaluation)
+        self.assertEqual(caught.exception.code, 'bundle-evaluation')
+        self.assertFalse(self.arguments['output'].exists())
+        self.assertEqual(list(self.root.glob('.bundle-pending-*')), [])
+
+    def test_cli_optional_verifier_files_does_not_initialize_database(self):
+        verifiers = self.root / 'verifier-files.json'
+        verifiers.write_bytes(canonical({'check.py': 'raise SystemExit(0)\n'}))
+        argv = ['--root', str(self.root/'unused'), 'prepare-bundle', '--repo', str(self.repo),
+                '--commit', self.commit, '--task-id', 'example-task', '--task-text', str(self.task),
+                '--source', 'solution.py', '--checks', str(self.checks), '--candidates', str(self.candidates),
+                '--provenance', str(self.provenance), '--notice', 'license', '--output', str(self.arguments['output']),
+                '--verifier-files', str(verifiers)]
+        with patch('swe_workbench.cli.Workbench', side_effect=AssertionError('Preparation cannot initialize state')), redirect_stdout(io.StringIO()):
+            self.assertEqual(main(argv), 0)
+        self.assertFalse((self.root/'unused').exists())
+        self.assertIn('verifier_files', json.loads((self.arguments['output']/'catalog.json').read_bytes())['tasks']['example-task'])
+
+
 if __name__=='__main__':unittest.main()

@@ -6,6 +6,7 @@ import errno
 import json
 import math
 import os
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
@@ -97,6 +98,53 @@ def _checks(value):
     return value
 
 
+def _verifiers(value):
+    if not isinstance(value, dict) or not value:
+        _fail('bundle-verifier', 'Verifier files must be a nonempty mapping of relative paths to UTF-8 text.')
+    for relative, text in value.items():
+        _source_path(relative)
+        if not isinstance(text, str):
+            _fail('bundle-verifier', 'Verifier file contents must be text.')
+        _text(text.encode('utf-8'), 'Protected verifier')
+        if any(parent.as_posix() in value for parent in PurePosixPath(relative).parents if parent.as_posix() != '.'):
+            _fail('bundle-verifier', 'Verifier file paths cannot overlap as files and directories.')
+    return value
+
+
+def _evaluation(value, check_names, patch_digests):
+    if not isinstance(value, dict):
+        _fail('bundle-evaluation', 'Evaluation metadata must be an object.')
+    if (not isinstance(value.get('family'), str) or not value['family'].strip()
+            or type(value.get('version')) not in (str, int) or not value['version']
+            or value.get('kind') not in ('audit_challenge', 'clean')):
+        _fail('bundle-evaluation', 'Evaluation family, version and audit_challenge/clean kind are required.')
+    requirements, rubric = value.get('requirements'), value.get('rubric')
+    if not isinstance(requirements, list) or not requirements or not isinstance(rubric, list) or not rubric:
+        _fail('bundle-evaluation', 'Evaluation requires nonempty requirements and rubric lists.')
+    ids = set()
+    for requirement in requirements:
+        if (not isinstance(requirement, dict) or not isinstance(requirement.get('id'), str)
+                or not requirement['id'].strip() or requirement['id'] in ids
+                or not isinstance(requirement.get('text'), str) or not requirement['text'].strip()):
+            _fail('bundle-evaluation', 'Requirements need unique IDs and nonempty text.')
+        ids.add(requirement['id'])
+    ids = set()
+    for criterion in rubric:
+        if (not isinstance(criterion, dict) or not isinstance(criterion.get('id'), str)
+                or not criterion['id'].strip() or criterion['id'] in ids
+                or type(criterion.get('points')) is not int or criterion['points'] < 0
+                or type(criterion.get('critical')) is not bool
+                or not isinstance(criterion.get('checks'), list) or not criterion['checks']
+                or any(not isinstance(name, str) or name not in check_names for name in criterion['checks'])):
+            _fail('bundle-evaluation', 'Rubric criteria need unique IDs, nonnegative points, known checks and boolean critical.')
+        ids.add(criterion['id'])
+    for name in ('reference_patch_digest', 'alternate_patch_digest'):
+        key = value.get(name)
+        if not isinstance(key, str) or not re.fullmatch('[0-9a-f]{64}', key) or key not in patch_digests:
+            _fail('bundle-evaluation', 'Reference and alternate roles must name exact admitted patch digests.')
+    return value
+
+
 def _publish(temporary, output):
     """Linux atomic directory publication that cannot replace an existing path."""
     library = ctypes.CDLL(None, use_errno=True)
@@ -121,7 +169,8 @@ def _fsync_directory(path):
 
 
 def prepare_bundle(*, repo, commit, task_id, task_text, sources, checks, candidates,
-                   provenance, notices, output, predictions=None, input_format='native', name=None, title=None):
+                   provenance, notices, output, predictions=None, input_format='native', name=None, title=None,
+                   verifier_files=None, evaluation=None):
     """Select committed text and explicitly admitted patches into a fresh bundle.
 
     Config JSON and exact patch/prediction bytes are read locally. The selected
@@ -147,6 +196,7 @@ def prepare_bundle(*, repo, commit, task_id, task_text, sources, checks, candida
     input_paths = [Path(value).resolve() for value in (task_text, checks, candidates, provenance)]
     if predictions is not None:
         input_paths.append(Path(predictions).resolve())
+    input_paths.extend(Path(value).resolve() for value in (verifier_files, evaluation) if value is not None)
     # Refuse partial clones before object access: missing objects must never
     # trigger implicit network fetching during a read-only preparation.
     partial = _git(repo, 'config', '--local', '--get-regexp', r'^(extensions\.partialclone|remote\..*\.promisor)$', missing_ok=True)
@@ -180,6 +230,7 @@ def prepare_bundle(*, repo, commit, task_id, task_text, sources, checks, candida
     if not text.strip():
         _fail('bundle-task', 'Task text must not be empty.')
     check_list = _checks(_json(checks))
+    protected_files = _verifiers(_json(verifier_files)) if verifier_files is not None else None
     source_provenance = dict(_metadata(_json(provenance), 'Source provenance', repository=True))
     if source_provenance.get('base_commit', exact_commit) != exact_commit:
         _fail('bundle-provenance', 'Source provenance base_commit must match the resolved selected commit.')
@@ -220,6 +271,10 @@ def prepare_bundle(*, repo, commit, task_id, task_text, sources, checks, candida
     task = {'title': title or task_id, 'task_text': text, 'source_files': source_files, 'checks': check_list,
             'patches': [raw.decode('utf-8') for raw in patch_data.values()], 'patch_provenance': patch_provenance,
             'origin': source_provenance['origin'], 'provenance': source_provenance}
+    if protected_files is not None:
+        task['verifier_files'] = protected_files
+    if evaluation is not None:
+        task['evaluation'] = _evaluation(_json(evaluation), {check['name'] for check in check_list}, set(patch_data))
     catalog = {'version': 1, 'name': name or task_id, 'title': title or task_id,
                'origin': source_provenance['origin'], 'prediction_file': 'predictions.jsonl',
                'prediction_format': input_format, 'provenance': source_provenance,
@@ -229,11 +284,16 @@ def prepare_bundle(*, repo, commit, task_id, task_text, sources, checks, candida
         _fail('bundle-size', 'Generated predictions exceed the existing intake file limit.')
     summary = {'schema': 'swe-workbench-bundle-preparation-v1', 'base_commit': exact_commit, 'task_id': task_id,
                'source_files': source_summary, 'source_digest': digest(canonical(source_files)),
-               'check_digest': digest(canonical(check_list)), 'rubric_digest': digest(canonical(rubric)),
+               'check_digest': digest(canonical({'checks': check_list, 'verifier_files': protected_files}
+                                                if protected_files is not None else check_list)), 'rubric_digest': digest(canonical(rubric)),
                'catalog_digest': digest(canonical(catalog)), 'checks': check_list, 'candidates': candidate_summary,
                'notices': source_provenance['notice_files'], 'prediction_format': input_format,
                'prediction_digest': digest(prediction_bytes), 'checks_executed': False,
                'execution_trust': 'The operator admits these exact patch/check tuples for trusted execution; preparation reads inputs only.'}
+    if protected_files is not None:
+        summary['verifier_digest'] = digest(canonical(protected_files))
+    if evaluation is not None:
+        summary['evaluation'] = task['evaluation']
     temporary = Path(tempfile.mkdtemp(prefix='.' + output.name + '-pending-', dir=output.parent))
     try:
         files = {'catalog.json': canonical(catalog) + b'\n', 'predictions.jsonl': prediction_bytes}

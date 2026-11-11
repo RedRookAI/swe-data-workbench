@@ -52,3 +52,11 @@ https://git-scm.com/docs/git-show/2.43.0
 https://git-scm.com/docs/git-ls-tree
 
 https://github.com/sindresorhus/escape-goat/pull/13#discussion_r288880742
+
+## Task-quality milestone
+
+Rechecked 2026-11-12 local: the October29 task-clarity/test-coverage paper and SQLite's transaction documentation remain applicable. Their role is design evidence. The demo's actual weak-check failure, two assisted review outputs and repaired execution supply the project-specific observations. We use one original recovery task and a separate all-outcome evaluation export rather than a task generator, training pipeline or new database authority. Full prior-art and implementation planning stay private; these links expose only public sources.
+
+https://arxiv.org/abs/2610.39417
+
+https://www.sqlite.org/transactional.html

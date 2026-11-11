@@ -1,0 +1,47 @@
+{
+  "family": "ingest-recovery",
+  "version": "fixed-v2",
+  "kind": "clean",
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Ordinary parsing, totals, checkpoint and error preservation."
+    },
+    {
+      "id": "R2",
+      "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+    },
+    {
+      "id": "R3",
+      "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+    }
+  ],
+  "rubric": [
+    {
+      "id": "ordinary",
+      "points": 25,
+      "checks": [
+        "ordinary"
+      ],
+      "critical": false
+    },
+    {
+      "id": "identity",
+      "points": 25,
+      "checks": [
+        "identity"
+      ],
+      "critical": false
+    },
+    {
+      "id": "recovery",
+      "points": 50,
+      "checks": [
+        "recovery"
+      ],
+      "critical": true
+    }
+  ],
+  "reference_patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+  "alternate_patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8"
+}

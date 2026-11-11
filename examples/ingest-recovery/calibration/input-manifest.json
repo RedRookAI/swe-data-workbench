@@ -1,0 +1,17 @@
+{
+  "BRIEF.txt": "adf2efd4fafc9ccaefa80db583f48da4dafd859eec2b8415351cef4b47c830b9",
+  "alternate.patch": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+  "candidate-001.patch": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
+  "fixed-v2-verifier.json": "c4d8c6906599386aa8c385e335268c82f11a29cba8f16d36b60f1d96bd11c5ce",
+  "observed.json": "8d6993eee65c8a6bb02ad887a07f2232e68690e0a9e1e702c59653cd5ce2807f",
+  "reference.patch": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+  "requirements.json": "ccc123b6814ac76b374f8f41d6d72205a86d0b8eeb561b1f87d97facbc455ea5",
+  "task.txt": "4c8c630383079cec17ebd656063ca4998694ff6da682fe9a5556d208012f3014",
+  "unchanged-control.patch": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
+  "visible/eventflow/__init__.py": "6a8df84fbcd5b19b06fe03aafeec68f2a91ce938d5d93afbe27c1fe39c8e80e6",
+  "visible/eventflow/cli.py": "218e519cae5b3ff2b1480e14e1ab771c3f2af9de458a6eee4d6c9d4d5444d4af",
+  "visible/eventflow/events.py": "be3870a72b7e9c9d4e8223a86526c9244bcbbdb1a982ef7aef950bca1069e4e7",
+  "visible/eventflow/pipeline.py": "24030538d1f7156685e5730840467f6ce24596c4f1b777be41cc4677af482313",
+  "visible/eventflow/state.py": "8077cc4c1ad5e914f955ed1aea4815c0d0fca76067e5c515e3a269c563a3bd7c",
+  "weak-v1-verifier.json": "9ae41e525c215bfb0fcc6ea4ab7b711991a59b78ecd44210ff69ae9c1993846e"
+}

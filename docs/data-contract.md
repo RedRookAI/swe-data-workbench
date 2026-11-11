@@ -33,3 +33,9 @@ https://docs.python.org/3.12/library/os.html#os.rename
 ## Raw occurrence extension
 
 New snapshots record runtime.intake_version as raw-occurrence-v2 while retaining the export-v1 envelope for backward verification. Each lineage entry adds input_format, declared_source, declared_model and raw_record_base64. Offline verification checks the exact decoded bytes/digest, task/patch correspondence and declared values; selected-batch membership reconciliation prevents dropping a repeated attribution. Native and SWE-bench transport can refer to the same computed tuple while preserving separate source records. Old frozen v1 exports without this extension retain their original bytes and verification semantics.
+
+## Task evaluation export (0.1.0a4)
+
+The separate swe-workbench-evaluation-v1 format has exactly evaluation.json, evidence.json and manifest.json. It preserves the frozen task context/material, rubric, quality decision, original raw candidate lineage, named machine observations, computed credit, critical gates, historical task states and audit references. Clean approved tasks enter clean_tasks; challenge or unapproved tasks enter audit_tasks. Failed and unassessed candidates remain in either record. An evaluation export never grants accepted-code membership.
+
+verify_evaluation(path) is read-only. It resolves original material/state/result artifacts, verifies their digests and audit bindings, recomputes criterion credit, rechecks reference/alternate qualification, and requires the exact frozen file set. Repeated exports at an unchanged substantive cut produce the same manifest identity. The static builder matches its displayed quality versions against the verified exported scores and copies only the selected three-file snapshots.

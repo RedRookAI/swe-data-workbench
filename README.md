@@ -1,87 +1,83 @@
 # SWE Data Workbench
 
-**Turn coding patches into a reviewed dataset with executable evidence.**
+**Find weak coding tasks before their results enter your dataset.**
 
-A patch can pass its visible checks and still violate the task. SWE Data Workbench keeps the original input, actual execution results and version-bound judgments together, so an operator can inspect what should enter an accepted dataset.
+SWE Data Workbench prepares repository tasks, executes admitted patches, records quality findings and freezes an inspectable evaluation dataset. It keeps task approval separate from candidate correctness, with exact source, check and review identities behind each result.
 
-Open the evidence explorer and silent recorded walkthrough:
+Explore the recorded audit and silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The current preview prepares a local repository and processes two genuine historical escape-goat patch revisions. Both fix template-tag conversion; the early revision also changes an existing API contract and is rejected. The revised fix is accepted against actual evidence. An unapproved variant stays pending. The public recording replays the examined decisions with explicit scripted attribution; original assessments are recorded separately.
+The current example catches a recovery checker that gives buggy ingestion code full credit. After repair, the same code earns 50/100 and fails the critical recovery gate. An alternate valid design, an authored reference and one recorded Codex attempt pass. An unapproved variant stays unexecuted. Two actual AI-assisted calibration reviews prompted an additional durable-state assertion; their judgments and the subsequent repair are retained.
 
-![Actual upstream-case workbench](docs/images/workbench.png)
+![Actual task-quality workbench](docs/images/workbench.png)
 
-Installable wheel and selected evidence:
+Installable wheel, original example inputs, recording and verified evaluation exports:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a3
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a4
 
-## What is implemented
+## Run it today
 
-- A local preparation command that reads committed source, explicit checks and selected patches into an inspectable bundle without checking out or executing the repository.
-- Bounded native and SWE-bench-compatible JSONL import, exact raw-byte lineage and per-occurrence source/model declarations. Repeated deliveries share execution while retaining their attribution.
-- Owner-selected local bundles. Only admitted source/check/patch tuples execute; a model name or imported claim grants no execution permission.
-- Separate baseline/candidate workspaces, ordinary Git patch application and executable checks. Output is collected incrementally with a 64 KiB retained prefix per stream; timeouts remain active under continuous output. The original source remains intact.
-- Durable SQLite state, recorded launch intent, owned worker groups and generation fences. Committed results survive a fresh-process resume.
-- A private owner interface for evidence/rubric-bound review, including stale-revision conflicts and explicit reviewer attribution.
-- Deterministic accepted JSONL, a content-addressed manifest and an offline-verifiable evidence snapshot.
-- A measured two-stratum pilot with explicit wall/CPU/memory scope and honest missing measurements.
-
-The earlier escape-string-regexp Unicode-hyphen case and original synthetic counterexample remain inspectable with their original evidence:
-
-https://swe-data-workbench.flyswatterghost.chatgpt.site/unicode-hyphen/
-
-https://swe-data-workbench.flyswatterghost.chatgpt.site/synthetic/
-
-## Run the account-free example
-
-Requires Linux, Python3.12, Git and Node at /usr/bin/node. The demonstrated Node version is22.23.4. Keep is not required.
+Requires Linux, Python 3.12 and Git. The new ingestion example uses the Python standard library for its checks and makes no network or model calls.
 
 ```sh
 git clone https://github.com/RedRookAI/swe-data-workbench.git
 cd swe-data-workbench
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock
-mkdir -p .state
-git init .state/escape-goat-source
-git -C .state/escape-goat-source fetch --depth=1 https://github.com/sindresorhus/escape-goat.git 235683eb791e13336cf4bd9705ea9df97e0d8e51
-.venv/bin/python tools/run_prepared_demo.py --repo .state/escape-goat-source
+.venv/bin/python tools/run_quality_demo.py --root .state/quality-example
 ```
 
-This calls the real bundle-preparation command, runs checks, stops after one committed result and resumes in a fresh process. It leaves decisions pending for inspection. The receipt identifies state, bundle, measurements and retained evidence. Preparation never runs the supplied check commands or creates a runtime database. Fetching the source is an explicit separate step.
+The driver reconstructs the original committed source, calls the real preparation command and runs weak-v1 and fixed-v3 against identical candidate bytes. It explicitly replays the recorded assessments after checking actual outcomes, freezes both datasets and verifies them offline. The receipt names the bundles, state and exports. Choose a fresh output root for another run; existing evidence is preserved.
 
-To use your own supported repository, follow examples/escape-goat/README.md: choose committed source/notice files, exact candidate patches and check argv. The command generates the internal catalog; you inspect its preparation summary and select it with --bundle. No catalog hand-editing is needed.
-
-The original synthetic example remains runnable:
+For private live inspection, set a high-entropy `SWE_WORKBENCH_OWNER_TOKEN` in your local environment and start:
 
 ```sh
-.venv/bin/python tools/run_demo.py --root .state/synthetic-example
+.venv/bin/python -m swe_workbench.server --root .state/quality-example/workbench --bundle .state/quality-example/bundle-fixed-v3 --port 8097
 ```
 
-The earlier upstream example also remains runnable:
+Use the server through your own trusted private connection with `?mode=live`. The token requires at least 32 ASCII characters and stays in browser memory. The public site serves frozen evidence only.
 
-```sh
-.venv/bin/python tools/run_real_demo.py --root .state/real-example
-```
+## What is implemented
 
-That older driver explicitly replays its labeled reference decisions. The new prepared example leaves review to the operator. Both native and SWE-bench-compatible imports preserve occurrence attribution; prediction claims never expand execution permission. Neither historical case is advertised as an official SWE-bench instance.
+- Read committed source and selected patches into an inspectable task bundle without checkout or execution during preparation.
+- Import native or SWE-bench-style JSONL with exact raw bytes, per-occurrence attribution and duplicate accounting. Imported claims do not grant execution permission.
+- Run baseline and candidate checks in separate workspaces with ordinary Git patch application, bounded retained output and active deadlines. Preserve the original source.
+- Keep protected verifier files outside candidate patches and check their integrity before and after each phase. This is local role separation within a trusted execution profile.
+- Record task-quality findings, repair requests, reviewer involvement and feedback against exact material versions. Reject stale review revisions.
+- Compute task-specific integer credit from actual named checks and show the critical gate separately. Missing evidence stays unassessed.
+- Approve a clean task only with passing reference and alternate implementations and no unresolved high or critical findings.
+- Export every candidate outcome for an evaluation task, including failures and pending evidence. The existing accepted-code JSONL remains a separate output requiring explicit code acceptance.
+- Recover committed results through SQLite state, recorded launch intent, owned worker groups and generation fences.
 
-## Private live review
+## What the demonstration establishes
 
-Set a high-entropy `SWE_WORKBENCH_OWNER_TOKEN` in your local environment, then launch:
+The ingestion service can commit a total before its replay receipt. The original checker restarts after normal completion and misses that defect. The repaired checker interrupts after a durable event, inspects state before replay and checks for loss or double-counting. It also exercises callback exceptions, a later event, parsing boundaries, the CLI and compatibility with a successfully saved original state.
 
-```sh
-.venv/bin/python -m swe_workbench.server --root .state/prepared-example --bundle .state/prepared-example-bundle --port 8097
-```
+Credit is 25 ordinary, 25 identity and 50 recovery. Passing those checks measures that recipe. Signed64 aggregate overflow remains a visible, unmeasured coverage limitation; the task retains the requirement. This small authored corpus supports a task-audit example, not a model success-rate estimate. The account-free recording replays actual recorded judgments through working controls with explicit scripted attribution.
 
-The token must contain at least32 ASCII characters. The server binds to loopback; access its root with `?mode=live` through your own trusted private connection. The owner form keeps the token in browser memory. Public hosting serves only selected frozen data and browser assets.
+Original source and controls are MIT-licensed. One separate Codex task produced the recorded candidate from the supplied goal and starter files. Its receipt records actual visibility; the shared account was not an OS sandbox. Both calibration reviewers were AI-assisted, and one authored that candidate. Their agreement is recorded without claiming independent human validation.
 
-## Engineering choices and limits
+## Earlier working examples
 
-SQLite supplies one transactional authority for this local workload. Content identities bind the exact source, patch, checks, rubric and review. Filesystem publication and database completion reconcile after interruption. These choices keep the demonstration small and make its state inspectable.
+The prepared escape-goat case examines two genuine historical human patch revisions, rejecting the first for changing an existing API contract. It remains available with its original evidence:
 
-Execution currently trusts carefully inspected exact bundles. Retained command-output buffers are bounded while both streams are drained. The commands’ own memory and arbitrary descendants remain outside that guarantee. The demonstrated recipes need no network, installs or generated descendants during checks. Preparation currently supports committed non-executable UTF-8 regular source files from complete local Git objects. Arbitrary public code requires a stronger execution boundary. The pilot covers twelve deliveries across nine unique memberships and makes no production-scale or model-accuracy claim. Review time remains unmeasured.
+https://swe-data-workbench.flyswatterghost.chatgpt.site/prepared/
 
-Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. The upstream revisions are human-authored; synthetic controls, examined AI-assisted assessments and scripted replays are labeled. This project runs independently from Keep, whose recovery and audit design informed it.
+The Unicode-hyphen and original synthetic cases are also preserved:
 
-Engineering details: docs/engineering.md. Exact export contract: docs/data-contract.md. Current verification: docs/verification.md. Pilot observations: docs/pilot.md and docs/pilot-report.json. The v0.1.0a1/a2 evidence and releases remain available with their original identities.
+https://swe-data-workbench.flyswatterghost.chatgpt.site/unicode-hyphen/
+
+https://swe-data-workbench.flyswatterghost.chatgpt.site/synthetic/
+
+Their runnable drivers and source-fetch instructions remain in examples/escape-goat/README.md and bundles/unicode-hyphen/README.md. These historical Node checks require /usr/bin/node. Old releases and receipts keep their original identities.
+
+## Design choices and current limits
+
+SQLite provides one local transactional authority. Content-addressed artifacts retain the material behind each task, result and decision. Task-quality states reuse the existing audit and artifact store without a database schema migration. Separate evaluation and accepted-code exports serve different dataset uses.
+
+Execution admits inspected exact source/check/patch tuples. Verifier integrity checks do not isolate arbitrary hostile same-user code. Check commands' total memory and arbitrary descendants are outside the bounded-output guarantee. Stronger isolation and the planned migration/concurrency task families remain follow-up work. The earlier throughput pilot is historical workload evidence; it was not rerun or presented as a scale claim.
+
+Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. Keep supplied prior art for recovery and auditable decisions; this application runs independently.
+
+Details: examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.

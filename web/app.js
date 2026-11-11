@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const live = new URLSearchParams(location.search).get('mode') === 'live';
 const criteria = ['task_clarity', 'evidence_adequacy', 'requested_behavior', 'preserved_behavior', 'unsupported_claims'];
 const labels = {task_clarity: 'Task clarity', evidence_adequacy: 'Evidence adequacy', requested_behavior: 'Requested behavior', preserved_behavior: 'Preserved behavior', unsupported_claims: 'Unsupported claims'};
-const state = {token: '', batch: null, items: [], selected: null, audit: [], snapshot: null, bundle: null, busy: false};
+const state = {token: '', batch: null, items: [], selected: null, audit: [], snapshot: null, bundle: null, busy: false, evaluation: null, qualityDemo: null};
 const retries = new Map();
 const reviewerModes = {developer_adjudication: 'Developer adjudication', ai_assisted_adjudication: 'AI-assisted adjudication', owner_adjudication: 'Owner adjudication', scripted_adjudication: 'Scripted adjudication'};
 function reviewLabel(mode) { return reviewerModes[mode] || 'Unspecified adjudication'; }
@@ -28,7 +28,7 @@ async function request(path, body) {
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   const response = await fetch(path, {method: body === undefined ? 'GET' : 'POST', headers, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', credentials: 'omit', redirect: 'error'});
   const data = await response.json();
-  if (!response.ok) throw new Error((data.error?.code || response.status) + ': ' + (data.error?.message || 'Request failed.'));
+  if (!response.ok) { const error = new Error((data.error?.code || response.status) + ': ' + (data.error?.message || 'Request failed.')); error.code = data.error?.code; error.status = response.status; throw error; }
   return data;
 }
 function op(key, payload = {}) {
@@ -50,6 +50,7 @@ async function mutation(path, payload, key, after) {
 }
 function syncActions() {
   for (const id of ['import', 'process', 'export', 'refresh']) $(id).disabled = state.busy || !state.token || (id !== 'import' && !state.batch);
+  for (const button of document.querySelectorAll('#quality-content button[type=submit], #evaluation-export')) button.disabled = state.busy || !state.token;
   const submit = $('submit-review');
   if (submit) submit.disabled = state.busy || !state.token;
   $('process').textContent = state.busy ? 'Operation in progress…' : 'Run checks · 1 worker';
@@ -63,7 +64,7 @@ function showBatchOptions(batches) {
 async function loadLive(batchId) {
   const batches = await request('/api/batches');
   const id = batchId || state.batch?.id || batches[0]?.id;
-  if (!id) { state.batch = null; state.items = []; state.audit = []; showBatchOptions([]); render(); return; }
+  if (!id) { state.batch = null; state.items = []; state.audit = []; state.evaluation = null; showBatchOptions([]); render(); return; }
   const encoded = encodeURIComponent(id);
   const [batch, items, audit] = await Promise.all([request('/api/batches/' + encoded), request('/api/batches/' + encoded + '/submissions'), request('/api/batches/' + encoded + '/audit')]);
   state.batch = batch;
@@ -73,6 +74,13 @@ async function loadLive(batchId) {
   if (state.selected) {
     const detail = await request('/api/submissions/' + encodeURIComponent(state.selected));
     state.items = items.map((item) => item.id === detail.id ? detail : item);
+  }
+  state.evaluation = null;
+  try {
+    const evaluation = await request('/api/batches/' + encoded + '/evaluation');
+    if (evaluation.context && Array.isArray(evaluation.items)) state.evaluation = evaluation;
+  } catch (error) {
+    if (!['evaluation-unavailable', 'evaluation-task-mismatch', 'task-not-found'].includes(error.code)) throw error;
   }
   showBatchOptions(batches); render();
 }
@@ -231,11 +239,172 @@ function renderAudit() {
   if (!state.audit.length) $('audit-list').append(node('p', 'No audit events available.', 'muted'));
   for (const event of [...state.audit].reverse()) { const details = node('details', null, 'audit-row'); const summary = node('summary', '#' + event.seq + ' · ' + event.kind + ' · ' + event.actor); details.append(summary, node('p', event.created_at || 'Time unavailable', 'small muted'), node('pre', JSON.stringify(event, null, 2))); $('audit-list').append(details); }
 }
-function render() { renderCase(); renderMetrics(); renderIntake(); renderQueue(); renderInspector(); renderAudit(); syncActions(); }
+function criticalLabel(value) { return value === true ? 'passed' : value === false ? 'failed' : 'unassessed'; }
+function scoreText(score, max) { return score === null || score === undefined ? 'Unassessed' : score + ' / ' + (max ?? '—'); }
+function qualityTable(parent, scores) {
+  const wrapper = node('div', null, 'table-scroll');
+  const table = node('table'); const caption = node('caption', 'Criterion scores for every submission'); table.append(caption);
+  const head = node('thead'); const header = node('tr');
+  const rubric = scores.context.rubric || [];
+  for (const label of ['Submission / role', ...rubric.map((criterion) => criterion.id + (criterion.critical ? ' · critical' : '')), 'Total credit', 'Critical gate']) { const cell = node('th', label); cell.scope = 'col'; header.append(cell); }
+  head.append(header); table.append(head); const body = node('tbody');
+  for (const item of scores.items) {
+    const row = node('tr', null, item.critical_passed === false ? 'critical-failure' : '');
+    const identity = node('th'); identity.scope = 'row'; identity.append(node('span', short(item.patch_digest), 'digest'), node('span', item.role || 'candidate'), node('span', item.origin || 'origin unavailable', 'small muted'));
+    row.append(identity);
+    for (const criterion of rubric) {
+      const observation = item.criteria?.find((value) => value.id === criterion.id);
+      const cell = node('td'); cell.append(node('strong', scoreText(observation?.earned, observation?.points ?? criterion.points)), badge(observation?.outcome || 'unassessed')); row.append(cell);
+    }
+    row.append(node('td', scoreText(item.score, item.max_score)));
+    const gate = node('td'); gate.append(badge(criticalLabel(item.critical_passed))); row.append(gate); body.append(row);
+  }
+  table.append(body); wrapper.append(table); parent.append(wrapper);
+  const details = node('details'); details.append(node('summary', 'Named check observations and candidate attribution'));
+  for (const item of scores.items) appendField(details, short(item.patch_digest) + ' · ' + (item.role || 'candidate'), item);
+  parent.append(details);
+}
+function renderFindings(parent, findings) {
+  parent.append(node('h4', 'Task findings'));
+  if (!findings?.length) { parent.append(node('p', 'No task findings recorded.', 'muted')); return; }
+  for (const finding of findings) {
+    const block = node('article', null, 'quality-finding');
+    block.append(node('h4', finding.id + ' · ' + finding.kind), badge(finding.severity), badge(finding.status), node('p', finding.reason), node('p', 'Assigned to: ' + finding.assignee, 'small'), node('p', 'Requested correction: ' + finding.requested_correction, 'small'));
+    if (finding.resolution) block.append(node('p', 'Resolution: ' + finding.resolution, 'small'));
+    parent.append(block);
+  }
+}
+function renderCalibration(parent, records) {
+  parent.append(node('h4', 'Review calibration and author feedback'));
+  if (!records?.length) { parent.append(node('p', 'No calibration recorded.', 'muted')); return; }
+  for (const record of records) {
+    const details = node('details'); details.open = true;
+    details.append(node('summary', 'Recorded calibration · ' + (record.actor || 'actor unavailable')), node('p', record.reason), node('h4', 'Author feedback'), node('p', record.author_feedback), node('h4', 'Guideline update'), node('p', record.guideline_update));
+    for (const review of record.reviews || []) appendField(details, (review.actor || 'Reviewer') + ' · ' + reviewLabel(review.reviewer_mode), review);
+    if (record.agreement) appendField(details, 'Declared paired judgments', record.agreement);
+    parent.append(details);
+  }
+}
+function renderScoreVersion(parent, scores, title) {
+  const context = scores.context;
+  const section = node('section', null, 'quality-version');
+  section.append(node('h3', title), badge(context.evaluation?.kind || 'kind unavailable'), badge(context.quality?.decision || 'draft'), node('p', 'Task ' + context.task_id + ' · checker version ' + display(context.evaluation?.version) + ' · task revision ' + context.revision, 'small muted'), node('p', context.quality?.reason || 'No task-quality decision reason recorded.'));
+  section.append(node('p', reviewLabel(context.quality?.reviewer_mode) + ' · ' + (context.quality?.actor || 'no reviewer recorded'), 'small muted'));
+  const requirements = node('details'); requirements.append(node('summary', 'Requirements and exact task identity'));
+  const list = node('ul');
+  for (const requirement of context.requirements || []) list.append(node('li', requirement.id + ': ' + requirement.text));
+  requirements.append(list, node('p', 'Context: ' + context.id, 'digest'), node('p', 'Material: ' + (context.material_digest || 'unavailable'), 'digest')); section.append(requirements);
+  qualityTable(section, scores); renderFindings(section, context.findings); renderCalibration(section, context.calibration);
+  const summary = node('details'); summary.append(node('summary', 'Task and submission denominators'), node('pre', display(scores.summary))); section.append(summary);
+  parent.append(section);
+}
+function formField(form, id, label, multiline = true) {
+  const text = node('label', label); text.htmlFor = id;
+  const field = node(multiline ? 'textarea' : 'input'); field.id = id; field.required = true;
+  if (multiline) { field.rows = 3; field.maxLength = 8000; }
+  form.append(text, field); return field;
+}
+function jsonArray(field, label) {
+  let value;
+  try { value = JSON.parse(field.value); } catch { throw new Error(label + ' must be valid JSON.'); }
+  if (!Array.isArray(value)) throw new Error(label + ' must be a JSON array.');
+  return value;
+}
+function renderQualityForms(parent, scores) {
+  const context = scores.context;
+  const taskPath = '/api/tasks/' + encodeURIComponent(context.task_id);
+  const details = node('details'); details.append(node('summary', 'Review task quality'));
+  const form = node('form'); form.id = 'task-quality-form';
+  const decisionLabel = node('label', 'Task quality decision'); decisionLabel.htmlFor = 'task-quality-decision';
+  const decision = node('select'); decision.id = 'task-quality-decision'; decision.required = true;
+  for (const [value, title] of [['', 'Choose a task decision'], ['needs-repair', 'Needs repair'], ['quarantined', 'Quarantine audit version'], ['approved', 'Approve clean task']]) { const option = node('option', title); option.value = value; decision.append(option); }
+  form.append(decisionLabel, decision);
+  const reason = formField(form, 'task-quality-reason', 'Task quality reason');
+  const modeLabel = node('label', 'Task reviewer mode'); modeLabel.htmlFor = 'task-reviewer-mode'; const mode = node('select'); mode.id = 'task-reviewer-mode';
+  for (const [value, title] of Object.entries(reviewerModes)) { const option = node('option', title); option.value = value; mode.append(option); } mode.value = 'ai_assisted_adjudication'; form.append(modeLabel, mode);
+  const findings = formField(form, 'task-findings', 'Findings (JSON array)'); findings.maxLength = 56000; findings.rows = 9; findings.spellcheck = false; findings.value = JSON.stringify(context.findings || [], null, 2);
+  form.append(node('p', 'Each finding needs id, kind, severity (low/medium/high/critical), status (open/resolved), reason, assignee and requested_correction. Resolved findings also need resolution. Keep earlier findings and record their resolution.', 'small muted'), node('p', 'Bound to task revision ' + context.revision + ' · ' + context.id, 'small digest'));
+  const submit = node('button', 'Save task quality', 'primary'); submit.type = 'submit'; form.append(submit);
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    let records; try { records = jsonArray(findings, 'Findings'); } catch (error) { notify(error.message, true); return; }
+    await mutation(taskPath + '/quality', {decision: decision.value, reason: reason.value, findings: records, expected_revision: context.revision, reviewer_mode: mode.value}, 'task-quality:' + context.id, async () => { await loadLive(); notify('Task quality saved against the current task revision.'); });
+  });
+  details.append(form); parent.append(details);
+  const calibrationDetails = node('details'); calibrationDetails.append(node('summary', 'Record calibration and author feedback'));
+  const calibration = node('form'); calibration.id = 'task-calibration-form';
+  const reviews = formField(calibration, 'calibration-reviews', 'Recorded AI-assisted reviews (JSON array)'); reviews.rows = 8; reviews.maxLength = 56000; reviews.spellcheck = false;
+  calibration.append(node('p', 'Supply at least two actual separately recorded reviews with review_id, actor, decision, reason, reviewer_mode=ai_assisted_adjudication, input_digest and output_digest. Digests identify the recorded input and output.', 'small muted'));
+  const calibrationReason = formField(calibration, 'calibration-reason', 'Calibration reason');
+  const feedback = formField(calibration, 'calibration-feedback', 'Author feedback');
+  const guideline = formField(calibration, 'calibration-guideline', 'Guideline update');
+  const save = node('button', 'Save calibration', 'primary'); save.type = 'submit'; calibration.append(save);
+  calibration.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    let records; try { records = jsonArray(reviews, 'Recorded reviews'); } catch (error) { notify(error.message, true); return; }
+    await mutation(taskPath + '/calibration', {reviews: records, reason: calibrationReason.value, author_feedback: feedback.value, guideline_update: guideline.value}, 'calibration:' + context.id, async () => { await loadLive(); notify('Calibration, author feedback and guideline update recorded.'); });
+  });
+  calibrationDetails.append(calibration); parent.append(calibrationDetails);
+  const exportButton = node('button', 'Freeze evaluation dataset', 'primary'); exportButton.id = 'evaluation-export'; exportButton.type = 'button';
+  const receipt = node('pre'); receipt.id = 'evaluation-export-receipt'; receipt.hidden = true;
+  exportButton.addEventListener('click', () => mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/evaluation-export', {}, 'evaluation-export:' + context.id, async (result) => { receipt.textContent = JSON.stringify(result, null, 2); receipt.hidden = false; notify('Evaluation dataset frozen with every candidate outcome.'); }));
+  parent.append(exportButton, receipt);
+}
+function renderQuality() {
+  const versions = live ? (state.evaluation ? [state.evaluation] : []) : (state.qualityDemo?.versions || []);
+  const root = $('quality-content'); root.replaceChildren(); $('quality-section').hidden = !versions.length;
+  if (!versions.length) return;
+  $('quality-heading').textContent = 'Evaluation quality';
+  $('quality-intro').textContent = 'Task approval and candidate credit use separate evidence. Inspect each criterion and the critical behavior gate alongside the total.';
+  if (!live && Array.isArray(state.qualityDemo.comparison)) {
+    const comparison = node('section'); comparison.append(node('h3', 'Same patches, two checker versions'));
+    const wrapper = node('div', null, 'table-scroll'); const table = node('table'); const head = node('tr');
+    for (const title of ['Patch / attribution', 'Before credit', 'After credit', 'Before critical gate', 'After critical gate', 'Audit observation']) head.append(node('th', title));
+    const thead = node('thead'); thead.append(head); table.append(thead); const body = node('tbody');
+    for (const item of state.qualityDemo.comparison) {
+      const row = node('tr', null, item.false_pass === true ? 'false-pass' : '');
+      const label = node('th'); label.scope = 'row'; label.append(node('strong', item.label || short(item.patch_digest)), node('span', item.origin || 'origin unavailable', 'small muted'), node('span', short(item.patch_digest), 'digest')); row.append(label);
+      row.append(node('td', item.before_score ?? 'Unassessed'), node('td', item.after_score ?? 'Unassessed'), node('td', criticalLabel(item.before_critical)), node('td', criticalLabel(item.after_critical)), node('td', item.false_pass === true ? 'False pass exposed' : 'See criterion evidence'));
+      body.append(row);
+    }
+    table.append(body); wrapper.append(table); comparison.append(wrapper); root.append(comparison);
+  }
+  for (const [index, scores] of versions.entries()) renderScoreVersion(root, scores, live ? 'Current task context' : index === 0 ? 'Before · original checker' : 'After · revised checker');
+  if (live) renderQualityForms(root, state.evaluation);
+  else {
+    if (state.qualityDemo.author_feedback) appendField(root, 'Recorded author feedback', state.qualityDemo.author_feedback);
+    if (state.qualityDemo.guideline_update) appendField(root, 'Recorded guideline update', state.qualityDemo.guideline_update);
+    const exports = node('nav', null, 'actions'); exports.setAttribute('aria-label', 'Evaluation evidence downloads');
+    for (const [version, label] of [['before', 'Before repair'], ['after', 'After repair']]) {
+      for (const [file, kind] of [['evaluation.json', 'all outcomes'], ['evidence.json', 'bound evidence'], ['manifest.json', 'manifest']]) {
+        const link = node('a', label + ' · ' + kind, 'button'); link.href = './evaluation/' + version + '/' + file; link.download = ''; exports.append(link);
+      }
+    }
+    root.append(exports);
+    // Only show root-provided earlier views from the main published page.
+    if (location.pathname === '/') {
+      const nav = node('nav', null, 'actions'); nav.setAttribute('aria-label', 'Earlier demonstrations');
+      for (const [path, label] of [['./prepared/', 'Prepared bundle example'], ['./unicode-hyphen/', 'Unicode hyphen example'], ['./synthetic/', 'Original synthetic example']]) { const link = node('a', label, 'button'); link.href = path; nav.append(link); }
+      root.append(nav);
+    }
+  }
+}
+async function loadRecordedQuality() {
+  try {
+    const response = await fetch('./quality.json', {credentials: 'omit', cache: 'no-store'});
+    if (response.status === 404) return;
+    if (!response.ok) throw new Error('The optional evaluation-quality record is unavailable.');
+    const data = await response.json();
+    if (data.schema !== 'swe-workbench-quality-demo/v1' || !Array.isArray(data.versions) || !data.versions.every((version) => version.context && Array.isArray(version.items))) throw new Error('The evaluation-quality record does not match its schema.');
+    state.qualityDemo = data; renderQuality();
+  } catch (error) { notify(error.message, true); }
+}
+
+function render() { renderCase(); renderQuality(); renderMetrics(); renderIntake(); renderQueue(); renderInspector(); renderAudit(); syncActions(); }
 $('filter').addEventListener('change', renderQueue);
 $('batch-select').addEventListener('change', () => { loadLive($('batch-select').value).catch((e) => notify(e.message, true)); });
 $('connect-form').addEventListener('submit', async (event) => { event.preventDefault(); state.token = $('token').value; $('token').value = ''; try { state.bundle = await request('/api/bundle'); await loadLive(); $('owner-actions').hidden = false; $('export').hidden = false; notify('Connected to the private owner API.'); } catch (e) { state.token = ''; notify(e.message, true); } syncActions(); });
-$('disconnect').addEventListener('click', () => { state.token = ''; state.batch = null; state.items = []; state.audit = []; state.selected = null; state.bundle = null; retries.clear(); $('owner-actions').hidden = true; $('export').hidden = true; $('export-receipt').hidden = true; showBatchOptions([]); render(); notify('Disconnected. Owner token cleared from page memory.'); });
+$('disconnect').addEventListener('click', () => { state.token = ''; state.batch = null; state.items = []; state.audit = []; state.selected = null; state.bundle = null; state.evaluation = null; retries.clear(); $('owner-actions').hidden = true; $('export').hidden = true; $('export-receipt').hidden = true; showBatchOptions([]); render(); notify('Disconnected. Owner token cleared from page memory.'); });
 $('import').addEventListener('click', () => mutation(approvedInput() ? '/api/import-approved' : '/api/import-sample', {}, 'import', async (batch) => { await loadLive(batch.id); notify('Configured input imported with duplicate accounting and occurrence-level source claims.'); }));
 $('process').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/process', {workers: 1}, null, async () => { await loadLive(); notify('Processing returned. Inspect each submission for its measured outcome.'); }); });
 $('refresh').addEventListener('click', () => loadLive().then(() => notify('Current evidence and revisions loaded.')).catch((e) => notify(e.message, true)));
@@ -251,6 +420,7 @@ async function start() {
     showBatchOptions([snapshot.batch]); $('downloads').hidden = false; render();
     const manifestResponse = await fetch('./data/manifest.json', {credentials: 'omit'});
     if (manifestResponse.ok) { const manifest = await manifestResponse.json(); renderExportMetrics(manifest.metrics || {}); }
+    await loadRecordedQuality();
     // Only this fixed local recording path is eligible; imported URLs are inert.
     const recording = await fetch('./recording.webm', {method: 'HEAD', credentials: 'omit'});
     if (recording.ok && (recording.headers.get('content-type') || '').startsWith('video/')) {

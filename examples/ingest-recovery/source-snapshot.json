@@ -1,0 +1,17 @@
+{
+  "commit": "71cdf07579ad3e5d0b0e5dde6c22c201ca23e082",
+  "author_name": "Workbench authored example",
+  "author_email": "example@invalid.local",
+  "author_date": "2026-11-12T00:10:26+01:00",
+  "committer_name": "Workbench authored example",
+  "committer_email": "example@invalid.local",
+  "committer_date": "2026-11-12T00:10:26+01:00",
+  "message": "Original eventflow starter",
+  "files": {
+    "eventflow/__init__.py": "6a8df84fbcd5b19b06fe03aafeec68f2a91ce938d5d93afbe27c1fe39c8e80e6",
+    "eventflow/cli.py": "218e519cae5b3ff2b1480e14e1ab771c3f2af9de458a6eee4d6c9d4d5444d4af",
+    "eventflow/events.py": "be3870a72b7e9c9d4e8223a86526c9244bcbbdb1a982ef7aef950bca1069e4e7",
+    "eventflow/pipeline.py": "24030538d1f7156685e5730840467f6ce24596c4f1b777be41cc4677af482313",
+    "eventflow/state.py": "8077cc4c1ad5e914f955ed1aea4815c0d0fca76067e5c515e3a269c563a3bd7c"
+  }
+}

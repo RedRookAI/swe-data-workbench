@@ -1,0 +1,11 @@
+{
+  "origin": "Generated locally using the unpatched original visible Eventflow implementation and normal successful process(DATA, state).",
+  "source_commit": "71cdf07579ad3e5d0b0e5dde6c22c201ca23e082",
+  "state_sha256": "158e965d432056dd38817b54b6a0d62c3964973483f44c853c7f786b1d08ed5b",
+  "state_bytes": 24576,
+  "expected": {
+    "alpha": 5,
+    "checkpoint": 3
+  },
+  "format": "Base64 SQLite bytes in protected original-state.b64; candidate is tested through its public APIs."
+}

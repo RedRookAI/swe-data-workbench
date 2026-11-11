@@ -1,23 +1,132 @@
 {
-  "version": "0.1.0a3",
-  "checked": "2026-11-11",
-  "baseline_commit": "ef63c60fe9f48b4daea612eb36d949c94f01fc71",
-  "worker": "trusted-task-worker-v3",
-  "wheel_sha256": "c5fb54bda1b920b837921936e32827fe61e22c373429de7cc4b0acbd3d605f4f",
-  "focused_checks": {
-    "worker_capture": 6,
-    "actual_runner_and_controller_kill": 2,
-    "bundle_preparation": 8
+  "version": "0.1.0a4",
+  "checked_date": "2026-11-12",
+  "baseline": "f7ccaf9f0d68ed2e164539c539a891f66211c0de",
+  "source_sha256": {
+    "swe_workbench/__init__.py": "10073a676863cbacd17ca774197cf23a6074fdc1765353ce6fa2240d36d12fb4",
+    "swe_workbench/api.py": "ecd3da3c95129ffc76a91ddb6436b099a2310fd18ce5c270ff02a1d1b3be4cc2",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/bundle.py": "767716053079a01f3137b746730758dc39558ed21441b26a204f8d7062beb333",
+    "swe_workbench/cli.py": "4175d50cdd4bb3198845a93301a1cc17daa100d56df25c389b8319087f13d530",
+    "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
+    "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
+    "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
+    "web/app.js": "e051245879c5a8a91b1ec39b3529760e826734e5a181c19880575c6467b0f1a7",
+    "web/index.html": "64d550027b57d62dddd35cef79b55c2c9744a411ba2b2cf1178f8e1ae6fb692d",
+    "web/style.css": "868b5829a6afd9a300820075dab91dbe334a77660e377c7af616f8e86a7607b9"
   },
-  "scope": "Separate focused lane runs, not one final full-suite execution.",
-  "installed_wheel": {
-    "profile": "installed-wheel-a3",
-    "version": "0.1.0a3",
+  "wheel": {
+    "name": "swe_data_workbench-0.1.0a4-py3-none-any.whl",
+    "sha256": "0b0e7bc0a0a9a2d6ae70b608a10374c8d5c085532f483d0da66bb4cdd335b2d0"
+  },
+  "focused_checks": {
+    "worker": [
+      {
+        "command": ".venv/bin/python -m unittest discover -s tests -p test_worker_verifier.py -v",
+        "result": "7 passed in0.177s",
+        "covers": [
+          "reference and alternate pass the same external behavioral verifier",
+          "candidate-local fake checker cannot replace entrypoint",
+          "Git traversal patch cannot alter sibling verifier",
+          "candidate symlink effects refused before checks",
+          "runtime verifier mutation invalidates otherwise-passing evidence",
+          "verifier-content change changes check/item identity; legacy digest unchanged",
+          "invalid protected paths refuse execution"
+        ]
+      },
+      {
+        "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_bundle.BundleTests.test_optional_protected_verifier_and_evaluation_metadata_bind_preparation test_bundle.BundleTests.test_optional_role_validation_leaves_no_partial_bundle test_bundle.BundleTests.test_cli_optional_verifier_files_does_not_initialize_database test_bundle.BundleTests.test_committed_bytes_not_dirty_or_untracked_inputs_and_stable_identity -v",
+        "result": "4 passed in0.213s",
+        "covers": [
+          "optional roles/protected-check digest agree with actual Workbench record",
+          "invalid path/type/evaluation leaves no partial bundle",
+          "CLI prep remains before DB initialization",
+          "original committed bytes and source identities unchanged"
+        ]
+      },
+      {
+        "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_runner.RunnerTests.test_real_baseline_candidate_concurrency_and_exact_allowlist -v",
+        "result": "1 passed in0.194s",
+        "covers": [
+          "actual old baseline/candidate checks, exact allowlist, source preservation, worker ceiling"
+        ]
+      },
+      {
+        "command": "verify_export on original three-file synthetic, real-upstream and prepared-examined export sets",
+        "result": "all3passed unchanged",
+        "manifest_digests": [
+          "16cd48ea6b95dda0ee6a3c6c9d9a3ede4d46e9be61d82afb1c23835e4ab62d6e",
+          "e198d661745b60da3a07a1c8b973f5f72a0756f8d45ab1c4d3bcf77f92fe6aab",
+          "5f2564946f8a312c0fe911108ffdb74973bde0970940732e1e8b38fec8f36a7d"
+        ]
+      }
+    ],
+    "core": [
+      {
+        "command": "python3 -m unittest discover -s tests -p test_evaluation.py -v",
+        "result": "6 passed in5.446s",
+        "coverage": [
+          "actual protected weighted measurements100/50/0/null with independent critical gate",
+          "draft/ref-alt approval prerequisites and openhigh blockers",
+          "findings retention and exact resolution",
+          "stale/idempotent task reviews",
+          "SQL state+audit rollback/reload",
+          "honest calibration pair count/conflicts",
+          "alloutcome samecut export",
+          "challenge exclusion and historical material/artifacts",
+          "legacy accepted-code compatibility",
+          "tampered approval/rubric/score/raw/machine refusal",
+          "malformed criterion definitions"
+        ]
+      },
+      {
+        "command": "Affected calibration + missing-original-material export tests after small validation changes",
+        "result": "2 passed in1.363s"
+      },
+      {
+        "command": "Affected historical/export test with added stale-cross-context revision assertion",
+        "result": "1 passed in1.506s after task-global revision correction"
+      }
+    ],
+    "ui": [
+      {
+        "command": ".venv/bin/python -m pytest -q tests/test_api.py -k 'task_quality or calibration_records or evaluation_export_uses'",
+        "result": "8passed,21deselected;0.30s",
+        "scope": "Explicit narrow adapter doubles: auth+Origin+server actor, task revision forwarded/typed conflict, finding and mode schema, raw calibration reviews preserved, fixed owned export path omitted from response"
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/root/workspaces/swe-data-workbench/.browsers .venv/bin/python -m pytest -q tests/test_web.py -k 'recorded_quality_versions or live_quality_revision or recorded_is_inert'",
+        "result": "3passed,4deselected;1.43s",
+        "scope": "Actual Chromium/test-only synthetic view data: paired versions, false pass, numeric total alongside critical failure, failed/pending criteria, null not zero, feedback/AI reviewer attribution inert without external requests,390px containment; live JSON validation/current revision, actual payload mode/calibration/separate export; old static404quality/security/player behavior"
+      },
+      {
+        "command": "PLAYWRIGHT_BROWSERS_PATH=/root/workspaces/swe-data-workbench/.browsers .venv/bin/python -m pytest -q tests/test_web.py::test_live_token_only_in_headers_review_binds_current_identity",
+        "result": "1passed;0.86s",
+        "scope": "Affected legacy live fallback for typed evaluation-unavailable422; ordinary submission review/token workflow remains usable"
+      },
+      {
+        "command": "node --check web/app.js",
+        "result": "passed"
+      }
+    ]
+  },
+  "installed_artifact": {
+    "profile": "installed-wheel-a4",
+    "version": "0.1.0a4",
     "imports_from_site_packages": true,
     "matched_source_files": [
+      "swe_workbench/evaluation.py",
       "swe_workbench/worker.py",
       "swe_workbench/errors.py",
       "swe_workbench/__init__.py",
+      "swe_workbench/evaluation_export.py",
       "swe_workbench/core.py",
       "swe_workbench/assets.py",
       "swe_workbench/api.py",
@@ -43,229 +152,227 @@
       "bundles/unicode-hyphen/catalog.json",
       "bundles/unicode-hyphen/upstream.patch"
     ],
-    "preparation_no_state_or_execution": true,
-    "source_checkout_unchanged": true,
-    "verification": {
-      "ok": true,
-      "errors": [],
-      "manifest_digest": "472372b3c9c95d1d89a5e3a749906821517307d0067a8e81c2ee26e88512c6bd",
-      "export_id": "export-8f941ad8213b775dcf92962e9feba9d210db73cfba68279c44fccbb4d8672c7c",
-      "accepted_count": 1
-    },
+    "driver_receipt": "/tmp/swe-wheel-a4-90fq_cl3/demo/receipt.json",
+    "state": "/tmp/swe-wheel-a4-90fq_cl3/demo/workbench",
+    "same_cut_repeat": true,
+    "owner_api": "unauthorized rejected; authenticated real approved context; installed assets passed",
+    "new_model_calls": 0,
+    "versions": [
+      {
+        "version": "weak-v1",
+        "quality": "needs-repair",
+        "verification": {
+          "ok": true,
+          "errors": [],
+          "manifest_digest": "5432c6bd138c7d5979d9c11ed36b103bc7d0dcba31a042e519b9d0206bbb6624",
+          "export_id": "evaluation-da273f6fa99ed86fe7f1115c4ff383c0801e4a2e98232573c34182284c49515f",
+          "candidate_count": 5,
+          "clean_task_count": 0,
+          "audit_task_count": 1
+        },
+        "scores": [
+          [
+            "authored_control",
+            "candidate",
+            100,
+            true
+          ],
+          [
+            "authored_control",
+            "alternate",
+            100,
+            true
+          ],
+          [
+            "imported_unverified",
+            "candidate",
+            null,
+            null
+          ],
+          [
+            "authored_control",
+            "reference",
+            100,
+            true
+          ],
+          [
+            "recorded_codex_attempt",
+            "candidate",
+            100,
+            true
+          ]
+        ]
+      },
+      {
+        "version": "fixed-v3",
+        "quality": "approved",
+        "verification": {
+          "ok": true,
+          "errors": [],
+          "manifest_digest": "3dd0abe40f937419b6e52125aa3bd7468aa39ab2027ce8a9036a39b58fb5d191",
+          "export_id": "evaluation-0f59dfbc40b154ee60695bbdf65a0fe0bcaf29993db49337ee016e1b790316a7",
+          "candidate_count": 5,
+          "clean_task_count": 1,
+          "audit_task_count": 0
+        },
+        "scores": [
+          [
+            "recorded_codex_attempt",
+            "candidate",
+            100,
+            true
+          ],
+          [
+            "imported_unverified",
+            "candidate",
+            null,
+            null
+          ],
+          [
+            "authored_control",
+            "candidate",
+            50,
+            false
+          ],
+          [
+            "authored_control",
+            "reference",
+            100,
+            true
+          ],
+          [
+            "authored_control",
+            "alternate",
+            100,
+            true
+          ]
+        ]
+      }
+    ],
     "integrity": {
       "ok": true,
       "schema_version": 1,
-      "audit_root": "6d6b1deac7ff9adbe5d3f6a85dd265cf644b94728f6c1af699c817cae7ff796a",
-      "audit_events": 13,
-      "verified_results": 2,
+      "audit_root": "0dd4aff8ce07721bbce4464deab1f503c4eabd00ed031db9b3ff0c8fe9198c26",
+      "audit_events": 42,
+      "verified_results": 8,
       "journal_mode": "delete",
       "synchronous": 2,
       "foreign_keys": 1
-    },
-    "same_cut_repeat": true,
-    "owner_api": "authenticated bundle, unauthorized rejection, installed web assets passed"
+    }
   },
-  "documented_example": {
-    "passed": true,
-    "preparation_checks_executed": false,
-    "counts": {
-      "queued": 0,
-      "running": 0,
-      "interrupted": 0,
-      "completed": 2,
-      "execution-error": 0,
-      "uncertain": 0,
-      "pending-evidence": 1,
-      "accepted": 0,
-      "rejected": 0,
-      "needs-work": 0,
-      "pending_review": 3
+  "static_browser": {
+    "profile": "local-static-public",
+    "http": 200,
+    "unique_items": 5,
+    "false_passes_exposed": 1,
+    "two_actual_quality_versions": true,
+    "evaluation_downloads": 6,
+    "preserved_views": {
+      "prepared": 3,
+      "unicode-hyphen": 3,
+      "synthetic": 6
     },
-    "retained_completed_result": true,
-    "review_state": "No decisions made by this driver; inspect actual evidence before review."
-  },
-  "preparation": {
-    "schema": "swe-workbench-bundle-preparation-v1",
-    "base_commit": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
-    "task_id": "sindresorhus__escape-goat-pr13",
-    "source_files": [
-      {
-        "path": "index.d.ts",
-        "git_blob": "4f46024d4491c64ef61c9741f1818935ec87d10a",
-        "mode": "100644",
-        "sha256": "3bcc26119b56f23b4cc5fe82897a359d40aa414d3901a613833adedbc4ada12e",
-        "bytes": 1738
-      },
-      {
-        "path": "index.js",
-        "git_blob": "c669f6dff621ff17743cb619500bba0dfea529ad",
-        "mode": "100644",
-        "sha256": "5a0cd8d362b99c7038fd8fb6524e2435f31541f73647ae1293de956c5621e213",
-        "bytes": 779
-      },
-      {
-        "path": "license",
-        "git_blob": "e7af2f77107d73046421ef56c4684cbfdd3c1e89",
-        "mode": "100644",
-        "sha256": "48da2f39e100d4085767e94966b43f4fa95ff6a0698fba57ed460914e35f94a0",
-        "bytes": 1109
-      },
-      {
-        "path": "test.js",
-        "git_blob": "ee9cdd95e896e31ee487d6e52736364f6161f9ed",
-        "mode": "100644",
-        "sha256": "7493beaefe9503470a3a954d4c762253520420de6aae777b22c04e2ac7624dcb",
-        "bytes": 1362
-      }
-    ],
-    "source_digest": "733138d2ff8fc9bc9a008b69b857dff398b22b41cc1faab2befc660bcfd1b767",
-    "check_digest": "d2b3c192ebae6d1d085ab3c291f40ad3e7d16ae3e8cce861948f38928d13d0e3",
-    "rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
-    "catalog_digest": "96247edd291cedf2292918a0393a3067fe6456c937f0db2821703f6707dbb3d2",
-    "checks": [
-      {
-        "name": "tag-non-string-coercion",
-        "argv": [
-          "/usr/bin/node",
-          "-e",
-          "const assert = require('node:assert/strict');\nconst {htmlEscapeTag, htmlUnescapeTag} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.equal(htmlEscapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n assert.equal(htmlUnescapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n}\nassert.equal(htmlEscapeTag`<b>${{toString: () => '<&>'}}</b>`, '<b>&lt;&amp;&gt;</b>');\nassert.equal(htmlUnescapeTag`<b>${{toString: () => '&lt;&amp;&gt;'}}</b>`, '<b><&></b>');\nconsole.log('tag substitutions converted; literal template segments preserved');\n"
-        ],
-        "timeout": 5
-      },
-      {
-        "name": "ordinary-string-preservation",
-        "argv": [
-          "/usr/bin/node",
-          "-e",
-          "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const input of ['', 'plain text', '<&>\\\"\\'', '\ud83e\udd84 & \ud83d\udc10']) {\n assert.equal(htmlUnescape(htmlEscape(input)), input);\n}\nassert.equal(htmlUnescape('&amp;lt;'), '&lt;');\nconsole.log('ordinary string round trips and single-pass unescape preserved');\n"
-        ],
-        "timeout": 5
-      },
-      {
-        "name": "regular-function-type-contract",
-        "argv": [
-          "/usr/bin/node",
-          "-e",
-          "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.throws(() => htmlEscape(value), TypeError);\n assert.throws(() => htmlUnescape(value), TypeError);\n}\nconsole.log('regular functions retain existing non-string rejection');\n"
-        ],
-        "timeout": 5
-      }
-    ],
-    "candidates": [
-      {
-        "patch_digest": "bce7ba18673118e2f4db4e1e7f9b51ae2940ade475b26b3bede3615960c5ec87",
-        "bytes": 1619,
-        "model_name_or_path": "upstream-early-revision",
-        "provenance": {
-          "origin": "public_upstream",
-          "source_commit": "a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
-          "source_url": "https://github.com/sindresorhus/escape-goat/commit/a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
-          "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
-          "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
-          "license": "MIT"
-        }
-      },
-      {
-        "patch_digest": "e0b840a3885a527a4aaf9593928762073037194034d6d019aad4f20aaa388b3e",
-        "bytes": 1905,
-        "model_name_or_path": "upstream-revised-fix",
-        "provenance": {
-          "origin": "public_upstream",
-          "source_commit": "ee3349151564b5ed225136e9d2e48e55107d775f",
-          "source_url": "https://github.com/sindresorhus/escape-goat/commit/ee3349151564b5ed225136e9d2e48e55107d775f",
-          "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
-          "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
-          "license": "MIT"
-        }
-      }
-    ],
-    "notices": [
-      "notices/license"
-    ],
-    "prediction_format": "swebench",
-    "prediction_digest": "39d497c88b8948b3a7aa292fb18e6c21167635bec31b8904ba9299f69214db95",
-    "checks_executed": false,
-    "execution_trust": "The operator admits these exact patch/check tuples for trusted execution; preparation reads inputs only.",
-    "prediction_records": 4,
-    "unapproved_prediction_records": 1
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false,
+      "tracks": 1
+    },
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "browser_errors": [],
+    "api_requests": [],
+    "external_requests": []
   },
   "recording": {
-    "duration_seconds": 19.695,
-    "source_commit": "ef63c60fe9f48b4daea612eb36d949c94f01fc71",
-    "source_commit_role": "Repository HEAD at recording; source_file_sha256 identifies the actual bytes, including uncommitted work.",
-    "source_file_sha256": {
-      "swe_workbench/__init__.py": "53ca2d514e038528d9f611fb5b1afc09ba55ee3ada776ab511fbb38d6a76e601",
-      "swe_workbench/api.py": "e7396c84f749247319f87e249aa18ebd88be1e43adb87050dfa1ed86025c48a0",
-      "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
-      "swe_workbench/bundle.py": "0c162ae80e8e349adba05804f29ba991b2ff0eae80d56e0e36bf39abf74e57d3",
-      "swe_workbench/cli.py": "c3da61927c752bbbaa64103d97e128c7e2eb48ce659804149456259fb15e1ab7",
-      "swe_workbench/core.py": "dd496351de50d3b988aab384e4634c4afa27f92540b77106d273a5fbc61b0925",
-      "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
-      "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
-      "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
-      "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
-      "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
-      "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
-      "swe_workbench/worker.py": "bdca2b4d7454127d17f0e1232070ddaeb4ab11a65efa1ad760e07094bbbcbf18",
-      "web/app.js": "77b81f6e3cbb272238926062a4c26f23bb73f348202daab461ab83eb1d4cf555",
-      "web/index.html": "507bace4ab854fed54e2e66994cfedfb8d34d402303e1ebc79d94c9adc5e821b",
-      "web/style.css": "e3e9be596c07edffaf64f0942ebdceaf3dbd7fdde44983bc5508bb7aba3d18f6"
-    },
-    "raw_video_sha256": "3a083abff3a572d29a8e5392c3fd720ad7f05078eda1594ecfdcf0103255dc70",
+    "duration_seconds": 22.615,
+    "sha256": "b69dc02db134c03ba31a081a6089b652487c4ca106f440c0c6706c7307eeb0a0",
     "browser_errors": [],
-    "decision_origin": "scripted browser replay of Codex-assisted code assessment",
-    "assessment_reference_sha256": "daaed48231cf9184567849c107b047e9fca64c730e30b980793a4d8d081f0c99"
+    "model_calls": 0,
+    "decision_origin": "scripted browser replay of actual prior AI-assisted task assessments"
   },
-  "frozen_manifest_sha256": "54304e40a5fd9a799ef7b61188b6cfdee154034ac5f50d1a21c69c90726080ac",
-  "original_assessment": "examples/prepared-run/assessment.json",
-  "local_public_browser": {
-    "profile": "local-static-public",
-    "root_http": 200,
-    "real_unique_items": 3,
-    "original_synthetic_unique_items": 6,
-    "first_upstream_unique_items": 3,
-    "owner_controls_hidden": true,
-    "browser_errors": [],
-    "api_requests": [],
-    "external_requests": [],
-    "initial_player": {
-      "paused": true,
-      "muted": true,
-      "controls": true,
-      "volume": 0.1,
-      "autoplay": false,
-      "tracks": 1
+  "exports": [
+    {
+      "ok": true,
+      "errors": [],
+      "manifest_digest": "03ac40deed075b22dbebb1190da9688ba8cdf9c362fc3aaac387a068973cab11",
+      "export_id": "evaluation-4db50237f7905c82817d783383f547fa9854182500e182901e6ae65efdfb8bae",
+      "candidate_count": 5,
+      "clean_task_count": 0,
+      "audit_task_count": 1
     },
-    "deliberate_zero_volume_retained": true,
-    "mobile_no_horizontal_overflow": true
-  },
-  "historical_a2_verification": "verification-v0.1.0a2.json",
-  "hosted_publication_status": "succeeded",
-  "hosted_public_browser": {
-    "profile": "hosted-public",
-    "root_http": 200,
-    "real_unique_items": 3,
-    "original_synthetic_unique_items": 6,
-    "first_upstream_unique_items": 3,
-    "owner_controls_hidden": true,
-    "browser_errors": [],
-    "api_requests": [],
-    "external_requests": [],
-    "initial_player": {
-      "paused": true,
-      "muted": true,
-      "controls": true,
-      "volume": 0.1,
-      "autoplay": false,
-      "tracks": 1
+    {
+      "ok": true,
+      "errors": [],
+      "manifest_digest": "e4a121e77c6c1771c597b9914165fb61c9df0840a7bfe4b22383851bd2f82a22",
+      "export_id": "evaluation-eb5b03356acf2064c4a5b517cea5e4b3f86bdc68c65b6ded0bd8b13e7eb74812",
+      "candidate_count": 5,
+      "clean_task_count": 1,
+      "audit_task_count": 0
+    }
+  ],
+  "comparison": [
+    {
+      "patch_digest": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
+      "label": "Existing behavior control",
+      "origin": "authored_control",
+      "before_score": 100,
+      "after_score": 50,
+      "before_critical": true,
+      "after_critical": false,
+      "false_pass": true
     },
-    "deliberate_zero_volume_retained": true,
-    "mobile_no_horizontal_overflow": true
-  },
-  "publication": {
-    "site_version": 3,
-    "site_source_commit": "a69616c174c007c5c923473c0a325953722c8450",
-    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
-    "status": "succeeded"
-  }
+    {
+      "patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+      "label": "Alternate valid design",
+      "origin": "authored_control",
+      "before_score": 100,
+      "after_score": 100,
+      "before_critical": true,
+      "after_critical": true,
+      "false_pass": false
+    },
+    {
+      "patch_digest": "06142e889d5746f80ef72d636aeba1fd10e05730c81e7b8c59f241a90952d884",
+      "label": "Unapproved variant",
+      "origin": "imported_unverified",
+      "before_score": null,
+      "after_score": null,
+      "before_critical": null,
+      "after_critical": null,
+      "false_pass": false
+    },
+    {
+      "patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+      "label": "Authored reference",
+      "origin": "authored_control",
+      "before_score": 100,
+      "after_score": 100,
+      "before_critical": true,
+      "after_critical": true,
+      "false_pass": false
+    },
+    {
+      "patch_digest": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
+      "label": "Recorded Codex attempt",
+      "origin": "recorded_codex_attempt",
+      "before_score": 100,
+      "after_score": 100,
+      "before_critical": true,
+      "after_critical": true,
+      "false_pass": false
+    }
+  ],
+  "old_evidence": "Nine earlier public frozen files are byte-identical. Original three historical exports also verified by focused worker checks.",
+  "builder_mismatch_rejected": true,
+  "qualification_notes": [
+    "Initial no-build-isolation wheel command could not find setuptools in the project venv; normal isolated pinned build succeeded. No runtime dependency changed.",
+    "The new CLI preservation assertion first expected scalar3; actual unchanged public API returns {checkpoint:3}. Corrected verifier expectation; failed state retained; final installed path passed.",
+    "A recording locator raced a same-batch async rerender. Avoided a redundant batch-select change and waited for changed batch response; final recording passed with no check rerun.",
+    "Two calibration reviews both requested changes on weak/v2. v3 incorporates their feedback; original review judgments remain unchanged."
+  ],
+  "coverage_limit": "Signed64 aggregate overflow is not dynamically measured; retained open medium finding.",
+  "public_status": "Local source/artifact/browser audit complete; publication pending at this evidence cut."
 }

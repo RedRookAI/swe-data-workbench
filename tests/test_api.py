@@ -18,6 +18,7 @@ POST = AUTH | {'Origin': 'http://testserver', 'Content-Type': 'application/json'
 class AdapterDouble:
     def __init__(self, root, fixture_dir=None):
         self.calls = []
+        self.root = Path(root)
         self.fixture_dir = fixture_dir
 
     def initialize(self):
@@ -296,3 +297,84 @@ def test_real_approved_bundle_api_claims_checks_and_scripted_export(tmp_path):
         retained = next(item for item in evidence['items'] if item['id'] == genuine['id'])
         assert retained['lineage'] == genuine['lineage']
         assert retained['review']['reviewer_mode'] == 'scripted_adjudication'
+
+
+@pytest.fixture
+def quality_adapter(client, monkeypatch):
+    calls = []
+    context = {'task_id': 'ingest-recovery', 'id': 'task-context', 'revision': 3, 'quality': {'decision': 'needs-repair'}}
+    def scores(workbench, batch_id):
+        calls.append(('scores', batch_id))
+        return {'context': context, 'items': [], 'batch_id': batch_id}
+    def quality(workbench, task_id, **payload):
+        calls.append(('quality', task_id, payload))
+        if payload['expected_revision'] != 3:
+            raise WorkbenchError('stale-task-review', 'Task revision changed.', 409)
+        return context | {'quality': payload}
+    def calibration(workbench, task_id, **payload):
+        calls.append(('calibration', task_id, payload))
+        return context | {'calibration': [payload]}
+    def export(workbench, batch_id, output, operation_key):
+        calls.append(('evaluation-export', batch_id, output, operation_key))
+        return {'path': '/private/export', 'location': '/private/export', 'manifest_digest': 'bound-manifest'}
+    monkeypatch.setattr('swe_workbench.evaluation.score_batch', scores)
+    monkeypatch.setattr('swe_workbench.evaluation.review_task', quality)
+    monkeypatch.setattr('swe_workbench.evaluation.record_calibration', calibration)
+    monkeypatch.setattr('swe_workbench.evaluation_export.export_evaluation', export)
+    return client, calls
+
+
+def quality_payload():
+    return {'decision': 'needs-repair', 'reason': 'Recovery check misses a committed write before acknowledgment.', 'findings': [{'id': 'recovery-gap', 'kind': 'coverage', 'severity': 'critical', 'status': 'open', 'reason': 'The interrupted acknowledgment window is untested.', 'assignee': 'task-author', 'requested_correction': 'Check replay after a committed write.'}], 'expected_revision': 3, 'operation_key': 'task-review'}
+
+
+def test_task_quality_routes_preserve_owner_origin_and_exact_revision(quality_adapter):
+    client, calls = quality_adapter
+    assert client.get('/api/batches/one/evaluation').status_code == 401
+    assert client.get('/api/batches/one/evaluation', headers=AUTH).json()['context']['revision'] == 3
+    path = '/api/tasks/ingest-recovery/quality'
+    assert client.post(path, json=quality_payload()).status_code == 401
+    assert client.post(path, headers=AUTH | {'Origin': 'https://elsewhere.invalid'}, json=quality_payload()).status_code == 403
+    assert client.post(path, headers=POST, json=quality_payload() | {'actor': 'forged-authority'}).status_code == 422
+    assert client.post(path, headers=POST, json=quality_payload() | {'expected_revision': 2}).status_code == 409
+    result = client.post(path, headers=POST, json=quality_payload())
+    assert result.status_code == 200
+    payload = result.json()['quality']
+    assert payload['actor'] == 'operator'
+    assert payload['reviewer_mode'] == 'ai_assisted_adjudication'
+    assert payload['expected_revision'] == 3
+    assert payload['findings'] == quality_payload()['findings']
+    assert calls[-1] == ('quality', 'ingest-recovery', payload)
+
+
+@pytest.mark.parametrize('update', [{'expected_revision': True}, {'decision': 'accepted'}, {'reviewer_mode': 'verified-independent-human'}, {'findings': [{'id': 'missing-fields'}]}, {'path': '/private/host'}])
+def test_task_quality_schema_refuses_invented_authority_and_malformed_findings(quality_adapter, update):
+    client, calls = quality_adapter
+    assert client.post('/api/tasks/ingest-recovery/quality', headers=POST, json=quality_payload() | update).status_code == 422
+    assert not calls
+
+
+def test_calibration_records_are_forwarded_with_operator_authority(quality_adapter):
+    client, calls = quality_adapter
+    reviews = [{'review_id': 'record-' + str(n), 'actor': 'recorded-ai-reviewer-' + str(n), 'reviewer_mode': 'ai_assisted_adjudication', 'decision': 'needs-repair', 'reason': 'Coverage diagnosis from a separately recorded review.', 'input_digest': 'a' * 64, 'output_digest': str(n) * 64, 'access_note': 'Actual recorded material set'} for n in [1, 2]]
+    payload = {'reviews': reviews, 'reason': 'Compare the two recorded diagnoses.', 'author_feedback': 'Add acknowledgment-window replay coverage.', 'guideline_update': 'Require a commit-before-ack recovery check.', 'operation_key': 'calibration-op'}
+    path = '/api/tasks/ingest-recovery/calibration'
+    assert client.post(path, json=payload).status_code == 401
+    assert client.post(path, headers=AUTH, json=payload).status_code == 403
+    assert client.post(path, headers=POST, json=payload | {'actor': 'forged'}).status_code == 422
+    assert client.post(path, headers=POST, json=payload | {'reviews': reviews[:1]}).status_code == 422
+    result = client.post(path, headers=POST, json=payload)
+    assert result.status_code == 200
+    assert result.json()['calibration'][0]['reviews'] == reviews
+    assert calls[-1] == ('calibration', 'ingest-recovery', payload | {'actor': 'operator'})
+
+
+def test_evaluation_export_uses_owned_output_and_hides_paths(quality_adapter):
+    client, calls = quality_adapter
+    path = '/api/batches/one/evaluation-export'
+    assert client.post(path, json={'operation_key': 'freeze'}).status_code == 401
+    assert client.post(path, headers=POST, json={'operation_key': 'freeze', 'output': '/private/host'}).status_code == 422
+    result = client.post(path, headers=POST, json={'operation_key': 'freeze'})
+    assert result.status_code == 200
+    assert result.json() == {'manifest_digest': 'bound-manifest'}
+    assert calls[-1] == ('evaluation-export', 'one', client.app.state.workbench.root / 'evaluation-exports', 'freeze')

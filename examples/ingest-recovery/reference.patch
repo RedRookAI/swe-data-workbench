@@ -1,0 +1,32 @@
+--- a/eventflow/state.py
++++ b/eventflow/state.py
+@@ -25,20 +25,19 @@
+         return row[0] if row else 0
+ 
+     def apply_event(self, event, after_commit=None):
+-        previous = self.db.execute("SELECT amount FROM receipts WHERE tenant=? AND event_id=?", (event.tenant,event.event_id)).fetchone()
+-        if previous is not None:
+-            if previous[0] != event.amount:
+-                raise ValueError("conflicting duplicate event")
+-            return False
+-        total = self.total(event.tenant) + event.amount
+-        if not -(2**63) <= total < 2**63:
+-            raise ValueError("total outside signed 64-bit range")
+         with self.db:
++            previous = self.db.execute("SELECT amount FROM receipts WHERE tenant=? AND event_id=?", (event.tenant,event.event_id)).fetchone()
++            if previous is not None:
++                if previous[0] != event.amount:
++                    raise ValueError("conflicting duplicate event")
++                return False
++            total = self.total(event.tenant) + event.amount
++            if not -(2**63) <= total < 2**63:
++                raise ValueError("total outside signed 64-bit range")
++            self.db.execute("INSERT INTO receipts VALUES(?,?,?)", (event.tenant,event.event_id,event.amount))
+             self.db.execute("INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount", (event.tenant,total))
+         if after_commit is not None:
+             after_commit()
+-        with self.db:
+-            self.db.execute("INSERT INTO receipts VALUES(?,?,?)", (event.tenant,event.event_id,event.amount))
+         return True
+ 
+     def close(self):

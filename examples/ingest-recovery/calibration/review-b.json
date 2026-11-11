@@ -1,0 +1,112 @@
+{
+  "decision": {
+    "overall": "request_changes_before_full_contract_approval",
+    "task_statement": "fit_for_a_bounded_synthetic_recovery_repair",
+    "weak-v1": "reject",
+    "fixed-v2": "accept_as_a_targeted_recovery_regression_check; request_changes_for_full_contract_judging"
+  },
+  "reason": "The task states an observable recovery contract and permits alternate internal designs. Actual weak-v1 results give the unchanged defective control 100/100 because its recovery check only restarts after successful acknowledgment. Fixed-v2 exercises abrupt exit in the callback and correctly rejects that control with replay total 12 instead of 5, while the reference, receipts-derived alternate, and candidate001 each score 100/100. This supports the specific verifier repair. It does not establish full coverage of mandatory parsing, overflow, compatibility, hook durability, and exception behavior, so approval should state its scope or await focused additions.",
+  "findings": [
+    {
+      "id": "F1",
+      "versions": ["weak-v1"],
+      "severity": "blocking",
+      "requirement": "R3",
+      "finding": "The recovery check never interrupts the post-commit/pre-ack window and cannot distinguish the reported defect from a repair.",
+      "evidence": [
+        "weak-v1-verifier.json check.py lines 46-55 processes DATA[:1] to completion, closes state, then reopens and processes DATA.",
+        "unchanged-control.patch changes only a comment and retains separate total and receipt commits.",
+        "observed.json weak-v1 reports 100/100, overall passed, and critical_passed=true for the unchanged behavior control as well as the three repair submissions."
+      ],
+      "action": "Retire weak-v1 as a recovery acceptance gate. Preserve its recorded false positive and use the fixed interruption check as the minimum R3 check."
+    },
+    {
+      "id": "F2",
+      "versions": ["fixed-v2"],
+      "severity": "positive_evidence",
+      "requirement": "R3",
+      "finding": "The revised check distinguishes the known crash-window defect using observable replay results and accepts multiple implementation designs.",
+      "evidence": [
+        "fixed-v2-verifier.json check.py lines 46-57 runs a child that exits with code 73 in the position-1 after_commit callback, reopens the supplied state, replays DATA, and asserts total 5 and checkpoint 3.",
+        "observed.json fixed-v2 records the unchanged control passing ordinary and identity but failing recovery with observed total 12, score 50/100, overall failed, and critical_passed=false.",
+        "The reference, alternate, and candidate001 each have completed fixed-v2 results of 100/100 and critical_passed=true.",
+        "reference.patch commits receipt and cached total together; alternate.patch derives totals from durable receipts; candidate-001.patch moves the receipt into the existing total transaction."
+      ],
+      "action": "Accept these results as evidence that fixed-v2 detects this particular recovery defect. Keep the alternate control and grade public behavior rather than SQL layout, write order, or resemblance to the reference."
+    },
+    {
+      "id": "F3",
+      "versions": ["fixed-v2"],
+      "severity": "material_coverage_gap",
+      "requirement": "R3 and callback contract",
+      "finding": "The crash check verifies eventual replay totals but does not verify that the event was already durable when the callback ran. It also does not exercise callback exceptions or interruption after a later event.",
+      "evidence": [
+        "The child exit code establishes that the callback was reached, but the verifier never inspects public state between child termination and replay.",
+        "By static reasoning, an implementation that invokes the hook before committing any event could exit with code 73, leave an empty database, and then pass the normal replay assertions. This is a hypothetical verifier gap, not an observed submitted implementation.",
+        "The only injected position is 1 and the only interruption is os._exit(73)."
+      ],
+      "action": "Before replay, inspect the reopened public total to establish that the committed event survived. Add a callback-raises case and a later-event interruption with a processed prefix. Permit any intermediate checkpoint consistent with the task; do not require a particular checkpoint lag or receipt representation."
+    },
+    {
+      "id": "F4",
+      "versions": ["weak-v1", "fixed-v2"],
+      "severity": "material_coverage_gap",
+      "requirement": "R1",
+      "finding": "The ordinary check samples validation and negative amounts but does not judge the signed64 overflow rule or several explicit signed32 and identifier boundaries. The CLI is never invoked.",
+      "evidence": [
+        "Both ordinary checks use the same small DATA and five malformed examples: None, an empty object, boolean amount, empty tenant, and positive signed32 overflow.",
+        "Neither verifier tests signed32 endpoints, lower overflow, nonstring or empty event_id, a float amount, signed64 overflow rejection with unchanged event state, or the CLI."
+      ],
+      "action": "Add compact parsing boundary cases and a CLI JSONL smoke check. Establish a bounded overflow strategy that checks no partial effect and respects valid storage alternatives; document any fixture-specific assumptions instead of treating cached totals as the only authoritative representation. Until then, qualify R1 credit as coverage of the measured ordinary cases."
+    },
+    {
+      "id": "F5",
+      "versions": ["weak-v1", "fixed-v2"],
+      "severity": "material_coverage_gap",
+      "requirement": "R2 saved-state compatibility",
+      "finding": "Reopening a database created by the submitted implementation establishes same-version persistence, not readability of a successfully processed database produced by the supplied original implementation.",
+      "evidence": [
+        "The identity check creates state, processes records, closes it, and reopens it using the same imported State implementation.",
+        "No supplied verifier loads a database generated by the original implementation before applying a patch."
+      ],
+      "action": "Add a successful original-format state fixture, then reopen, verify public totals and checkpoint, and append new and duplicate records with the candidate. A receipt-derived total should receive credit when it preserves these behaviors."
+    },
+    {
+      "id": "F6",
+      "versions": ["weak-v1", "fixed-v2"],
+      "severity": "interpretation",
+      "requirement": "credit, critical gate, and evidence provenance",
+      "finding": "Partial points and task acceptance must remain distinct, and the imported unmeasured record must remain unassessed.",
+      "evidence": [
+        "The rubric assigns 25 ordinary points, 25 identity points, and 50 recovery points, with recovery marked critical.",
+        "Fixed-v2 gives the unchanged control the retained 50 regression points but overall failed and critical_passed=false. This is consistent partial credit for preserved behavior, not successful completion of the repair.",
+        "Each version contains five unique submission entries, four complete measured results, and one imported_unverified entry with pending-evidence, not-run, null score, and null critical_passed.",
+        "The recorded Codex candidate has duplicate lineage records attached to one patch result; authored reference, alternate, and negative controls are not additional independent model attempts.",
+        "Both summaries still report quality=draft and task_reviews=0."
+      ],
+      "action": "Preserve numeric credit while enforcing the recovery gate. Do not describe an unassessed entry as a failure or success, count duplicate transport records as independent attempts, or convert this calibration into a model pass-rate claim. If overall passed is intended to certify every mandatory requirement, document acceptance rules for R1 and R2 as well as the recovery gate."
+    }
+  ],
+  "author_feedback": [
+    "Keep the task's complete-source replay, immutable-prefix, appended-event, tenant-scoped identity, and implementation-choice language. It gives enough context to repair the concrete defect without prescribing the reference design.",
+    "Keep fixed-v2's real abrupt-exit injection and unchanged negative control. Their actual results expose weak-v1's false positive and demonstrate the narrow repair's value.",
+    "Prioritize verifying durable state before replay, callback exception recovery, and original-state compatibility. Add the small parsing and CLI checks, and explicitly resolve or document overflow coverage.",
+    "Use behavioral expectations that permit both cached-total and receipt-derived designs. Avoid requiring private tables, a transaction statement order, or an exact checkpoint at the injected exit.",
+    "Candidate001's recorded success is supported by the supplied result and its atomic total/receipt change. My authorship of that patch limits the independence of this judgment; another reviewer should own any independent candidate-specific approval."
+  ],
+  "guideline_update": [
+    "A recovery verifier should cross the stated interruption boundary, establish that the durable precondition occurred, and verify complete-source replay. A clean close and reopen only supports ordinary restart behavior.",
+    "Calibrate with the unchanged known-bad behavior and at least one valid alternate design. Record exact observed outcomes and restrict approval claims to requirements actually exercised.",
+    "Keep requirement-level partial credit separate from critical-gate acceptance and from full-contract certification. A measured gate failure remains a failure even when regression points are retained.",
+    "Track missing measurements as unassessed, deduplicate identical candidate lineage, and distinguish authored controls from recorded agent attempts.",
+    "Disclose reviewer authorship and AI assistance. Separate observed results, static code reasoning, and proposed additional checks; do not manufacture reviewer disagreement or general model-performance conclusions."
+  ],
+  "limitations": [
+    "This is an AI-assisted calibration review, not a human review or a model-performance benchmark.",
+    "I authored candidate001 earlier in this same session. I am not independent of that submission and retain prior knowledge of its implementation and focused checks. This review bases its calibration findings on the supplied task, verifier code, patches, visible sources, and observed.json rather than substituting my earlier checks for verifier coverage.",
+    "I did not read any other reviewer outputs or compare judgments. No agreement or disagreement with another reviewer is claimed.",
+    "No implementation, new test execution, helper creation, external research, or additional model calls were performed for this review. Existing JSON was parsed and relevant supplied evidence inspected.",
+    "The evidence comprises one original synthetic task, authored controls, one recorded candidate patch, and one unassessed imported entry. It supports a bounded verifier-calibration conclusion rather than general reliability estimates.",
+    "The missing-coverage findings identify static verifier gaps. No new faulty variants were executed, so their acceptance remains an inference rather than a measured result."
+  ]
+}

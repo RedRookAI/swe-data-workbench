@@ -1,0 +1,14 @@
+[
+  {
+    "id": "R1",
+    "text": "Ordinary parsing, totals, checkpoint and error preservation."
+  },
+  {
+    "id": "R2",
+    "text": "Tenant-scoped duplicate identity, conflict rejection and compatible saved state."
+  },
+  {
+    "id": "R3",
+    "text": "Durable event recovery across post-commit/pre-ack interruption without loss or double-application."
+  }
+]

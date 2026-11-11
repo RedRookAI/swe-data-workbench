@@ -1,0 +1,50 @@
+[
+  {
+    "patch_file": "reference.patch",
+    "model_name_or_path": "Authored reference",
+    "provenance": {
+      "origin": "authored_control",
+      "license": "MIT",
+      "role": "reference",
+      "label": "Authored reference",
+      "author": "Red Rook AI with Codex assistance",
+      "input_receipt": "authored control"
+    }
+  },
+  {
+    "patch_file": "alternate.patch",
+    "model_name_or_path": "Alternate valid design",
+    "provenance": {
+      "origin": "authored_control",
+      "license": "MIT",
+      "role": "alternate",
+      "label": "Alternate valid design",
+      "author": "Red Rook AI with Codex assistance",
+      "input_receipt": "authored control"
+    }
+  },
+  {
+    "patch_file": "unchanged-control.patch",
+    "model_name_or_path": "Existing behavior control",
+    "provenance": {
+      "origin": "authored_control",
+      "license": "MIT",
+      "role": "negative_control",
+      "label": "Existing behavior control",
+      "author": "Red Rook AI with Codex assistance",
+      "input_receipt": "authored control"
+    }
+  },
+  {
+    "patch_file": "candidate-001.patch",
+    "model_name_or_path": "Recorded Codex attempt",
+    "provenance": {
+      "origin": "recorded_codex_attempt",
+      "license": "MIT",
+      "role": "candidate",
+      "label": "Recorded Codex attempt",
+      "author": "Recorded Codex task attempt",
+      "input_receipt": "candidate-001.json"
+    }
+  }
+]

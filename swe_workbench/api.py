@@ -48,6 +48,35 @@ class Review(Operation):
     reviewer_mode: Literal["developer_adjudication", "ai_assisted_adjudication", "owner_adjudication", "scripted_adjudication"] = "developer_adjudication"
 
 
+
+class Finding(Payload):
+    id: str = Field(min_length=1, max_length=160)
+    kind: str = Field(min_length=1, max_length=160)
+    severity: Literal["low", "medium", "high", "critical"]
+    status: Literal["open", "resolved"]
+    reason: str = Field(min_length=1, max_length=8000)
+    assignee: str = Field(min_length=1, max_length=200)
+    requested_correction: str = Field(min_length=1, max_length=8000)
+    resolution: str | None = Field(default=None, max_length=8000)
+
+
+class TaskQuality(Operation):
+    decision: Literal["approved", "needs-repair", "quarantined"]
+    reason: str = Field(min_length=1, max_length=8000)
+    findings: list[Finding] = Field(max_length=100)
+    expected_revision: StrictInt = Field(ge=0)
+    reviewer_mode: Literal["developer_adjudication", "ai_assisted_adjudication", "owner_adjudication", "scripted_adjudication"] = "ai_assisted_adjudication"
+
+
+class Calibration(Operation):
+    # Record contents and their digest/attribution semantics are validated by
+    # evaluation.record_calibration; preserve the actual review records.
+    reviews: list[dict] = Field(min_length=2, max_length=20)
+    reason: str = Field(min_length=1, max_length=8000)
+    author_feedback: str = Field(min_length=1, max_length=8000)
+    guideline_update: str = Field(min_length=1, max_length=8000)
+
+
 def error(code: str, message: str, status: int) -> JSONResponse:
     return JSONResponse({"error": {"code": code, "message": message}}, status_code=status)
 
@@ -174,6 +203,27 @@ def create_app(root: Path | str, *, owner_token: str | None = None, bundle_dir: 
     def export(batch_id: str, body: Operation):
         from swe_workbench.exporter import export_batch
         result = export_batch(workbench, batch_id, root / "exports", body.operation_key)
+        return {key: value for key, value in result.items() if key not in {"path", "location"}}
+
+    @app.get("/api/batches/{batch_id}/evaluation")
+    def evaluation(batch_id: str):
+        from swe_workbench.evaluation import score_batch
+        return score_batch(workbench, batch_id)
+
+    @app.post("/api/tasks/{task_id}/quality")
+    def task_quality(task_id: str, body: TaskQuality):
+        from swe_workbench.evaluation import review_task
+        return review_task(workbench, task_id, **body.model_dump(exclude_none=True), actor="operator")
+
+    @app.post("/api/tasks/{task_id}/calibration")
+    def calibration(task_id: str, body: Calibration):
+        from swe_workbench.evaluation import record_calibration
+        return record_calibration(workbench, task_id, **body.model_dump(), actor="operator")
+
+    @app.post("/api/batches/{batch_id}/evaluation-export")
+    def evaluation_export(batch_id: str, body: Operation):
+        from swe_workbench.evaluation_export import export_evaluation
+        result = export_evaluation(workbench, batch_id, workbench.root / "evaluation-exports", body.operation_key)
         return {key: value for key, value in result.items() if key not in {"path", "location"}}
 
     # Fixed allowlist: never expose the database, root, fixture workspaces or

@@ -1,0 +1,10 @@
+--- a/eventflow/state.py
++++ b/eventflow/state.py
+@@ -1,6 +1,6 @@
+ import sqlite3
+ 
+-class State:
++class State:  # Existing behavior retained by this authored control.
+     def __init__(self, path):
+         self.db = sqlite3.connect(path)
+         self.db.execute("PRAGMA synchronous=FULL")

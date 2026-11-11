@@ -105,6 +105,9 @@ def test_live_token_only_in_headers_review_binds_current_identity(browser, origi
         elif path == '/api/batches': result = [data['batch']]
         elif path.endswith('/submissions'): result = data['items']
         elif path.endswith('/audit'): result = data['audit']
+        elif path.endswith('/evaluation'):
+            route.fulfill(status=422, content_type='application/json', body=json.dumps({'error': {'code': 'evaluation-unavailable', 'message': 'Legacy task has no evaluation definition.'}}))
+            return
         elif '/review' in path: result = data['items'][0]
         elif path.startswith('/api/submissions/'): result = data['items'][0]
         else: result = data['batch']
@@ -116,6 +119,7 @@ def test_live_token_only_in_headers_review_binds_current_identity(browser, origi
     page.get_by_role('button', name='Browser test', exact=False).wait_for()
     assert page.get_by_label('Owner token', exact=True).input_value() == ''
     assert page.get_by_role('button', name='Import trusted sample', exact=True).is_visible()
+    assert page.locator('#quality-section').is_hidden()
     page.get_by_role('tab', name='Adjudication').click()
     page.get_by_label('Reason and evidence').fill('Weak check misses the requested semantics.')
     page.get_by_label('Requested behavior', exact=True).select_option('fail')
@@ -239,4 +243,123 @@ def test_live_approved_import_and_deliberate_scripted_mode(browser, origin):
     reviews = [body for path, body in requests if path.endswith('/review')]
     assert len(reviews) == 1 and reviews[0]['reviewer_mode'] == 'scripted_adjudication'
     assert 'actor' not in reviews[0]
+    page.close()
+
+
+def quality_browser_fixture():
+    """Synthetic view-contract data only; never publish these as measured results."""
+    import copy
+    attack = '<img src="https://example.invalid/quality" onerror="window.pwned=1">'
+    rubric = [{'id': 'ordinary', 'points': 25, 'critical': False}, {'id': 'identity', 'points': 25, 'critical': False}, {'id': 'recovery', 'points': 50, 'critical': True}]
+    finding = {'id': 'recovery-gap', 'kind': 'coverage', 'severity': 'critical', 'status': 'open', 'reason': 'Synthetic browser fixture ' + attack, 'assignee': 'test-author', 'requested_correction': 'Exercise the commit-before-ack replay window.'}
+    reviews = [{'review_id': 'synthetic-view-' + str(n), 'actor': 'test-reviewer-' + str(n), 'reviewer_mode': 'ai_assisted_adjudication', 'decision': 'needs-repair', 'reason': 'Synthetic rendering fixture', 'input_digest': 'a' * 64, 'output_digest': str(n) * 64} for n in [1, 2]]
+    calibration = {'actor': 'operator', 'reviews': reviews, 'reason': 'Synthetic browser contract calibration', 'author_feedback': 'Add replay evidence ' + attack, 'guideline_update': 'Check the committed-but-unacknowledged window.', 'agreement': {'matching_pairs': 1, 'pairs': 1, 'value': 1, 'origin': 'separately_recorded_ai_assisted_reviews'}}
+    context = {'task_id': 'ingest-recovery', 'id': 'quality-test-context', 'revision': 3, 'material_digest': 'material', 'quality': {'decision': 'needs-repair', 'reason': 'Missing recovery coverage.', 'actor': 'operator', 'reviewer_mode': 'ai_assisted_adjudication'}, 'findings': [finding], 'calibration': [calibration], 'rubric': rubric, 'requirements': [{'id': 'replay', 'text': 'An acknowledged record appears exactly once.'}], 'evaluation': {'family': 'ingestion', 'version': 'weak-test', 'kind': 'audit_challenge'}}
+    def item(label, score, critical, pending=False):
+        return {'submission_id': label, 'patch_digest': label + '-digest', 'role': label, 'origin': 'synthetic_browser_fixture', 'score': score, 'max_score': 100, 'complete': not pending, 'critical_passed': critical, 'evidence_digest': None if pending else label + '-evidence', 'criteria': [{'id': row['id'], 'points': row['points'], 'critical': row['critical'], 'earned': None if pending else row['points'], 'outcome': 'unassessed' if pending else 'passed', 'checks': []} for row in rubric]}
+    before = {'context': context, 'items': [item('reference', 100, True), item('weak-control', 100, True), item('pending', None, None, True)], 'summary': {'task_count': 1, 'unique_submissions': 3, 'unassessed_scores': 1}, 'batch_id': 'browser-test', 'cut': {'seq': 1, 'hash': 'cut'}}
+    after = copy.deepcopy(before)
+    after['context'].update(id='quality-repaired-context', revision=4, evaluation={'family': 'ingestion', 'version': 'fixed-test', 'kind': 'clean'}, quality={'decision': 'approved', 'reason': 'Synthetic browser test approval label.', 'actor': 'operator', 'reviewer_mode': 'scripted_adjudication'})
+    after['context']['findings'][0].update(status='resolved', resolution='fixed-test verifier now exercises replay.')
+    after['items'][1].update(score=50, critical_passed=False)
+    after['items'][1]['criteria'][2].update(earned=0, outcome='failed')
+    return {'schema': 'swe-workbench-quality-demo/v1', 'versions': [before, after], 'comparison': [{'patch_digest': 'weak-control-digest', 'label': 'Synthetic weak-check control', 'origin': 'synthetic_browser_fixture', 'before_score': 100, 'after_score': 50, 'before_critical': True, 'after_critical': False, 'false_pass': True}]}
+
+
+def test_recorded_quality_versions_matrix_and_feedback_are_inert_all_outcomes_visible(browser, origin):
+    page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+    calls, external, errors = [], [], []
+    recorded_routes(page, calls)
+    page.route('**/quality.json', lambda route: route.fulfill(content_type='application/json', body=json.dumps(quality_browser_fixture())))
+    page.on('request', lambda request: external.append(request.url) if not request.url.startswith(origin) else None)
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.goto(origin)
+    page.get_by_role('heading', name='Evaluation quality', exact=True).wait_for()
+    assert page.locator('#quality-section').is_visible()
+    assert page.get_by_text('False pass exposed', exact=True).is_visible()
+    assert page.get_by_role('heading', name='Before · original checker').is_visible()
+    assert page.get_by_role('heading', name='After · revised checker').is_visible()
+    versions = page.locator('.quality-version')
+    assert versions.count() == 2
+    failed = versions.nth(1).get_by_role('row', name='weak-control', exact=False)
+    assert '50 / 100' in failed.inner_text() and 'failed' in failed.inner_text()
+    assert failed.locator('td').last.inner_text() == 'failed'
+    pending = versions.nth(1).get_by_role('row', name='pending', exact=False)
+    assert 'Unassessed' in pending.inner_text() and '0 / 100' not in pending.inner_text()
+    assert page.get_by_role('heading', name='Review calibration and author feedback').count() == 2
+    assert page.get_by_text('Recorded calibration · operator', exact=True).count() == 2
+    assert page.get_by_text('test-reviewer-1 · AI-assisted adjudication', exact=True).count() == 2
+    assert page.locator('#task-quality-form').count() == 0
+    assert page.get_by_role('link', name='Prepared bundle example').get_attribute('href') == './prepared/'
+    assert page.evaluate('window.pwned') is None and page.locator('img').count() == 0
+    page.set_viewport_size({'width': 390, 'height': 844})
+    assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+    assert not calls and not external and not errors
+    page.close()
+
+
+def test_live_quality_revision_findings_calibration_and_separate_export(browser, origin):
+    page = browser.new_page()
+    data = snapshot()
+    scores = quality_browser_fixture()['versions'][0]
+    requests = []
+    def api(route):
+        request = route.request
+        path = request.url.split(origin, 1)[1]
+        body = request.post_data_json if request.method == 'POST' else None
+        requests.append((path, body))
+        if path == '/api/bundle': result = {'name': 'ingestion', 'title': 'Synthetic API view contract', 'origin': 'synthetic_fixture', 'prediction_format': 'native'}
+        elif path == '/api/batches': result = [data['batch']]
+        elif path.endswith('/submissions'): result = data['items']
+        elif path.endswith('/audit'): result = data['audit']
+        elif path.endswith('/evaluation'): result = scores
+        elif path.endswith('/quality'):
+            scores['context']['revision'] += 1
+            scores['context']['quality'] = body
+            scores['context']['findings'] = body['findings']
+            result = scores['context']
+        elif path.endswith('/calibration'):
+            scores['context']['revision'] += 1
+            scores['context']['calibration'].append(body | {'actor': 'operator'})
+            result = scores['context']
+        elif path.endswith('/evaluation-export'): result = {'manifest_digest': 'quality-only-manifest'}
+        elif path.startswith('/api/submissions/'): result = data['items'][0]
+        else: result = data['batch']
+        route.fulfill(content_type='application/json', body=json.dumps(result))
+    page.route('**/api/**', api)
+    page.goto(origin + '/?mode=live')
+    page.get_by_label('Owner token', exact=True).fill('quality-owner-test-' + 'x' * 40)
+    page.get_by_role('button', name='Connect', exact=True).click()
+    page.get_by_role('heading', name='Evaluation quality', exact=True).wait_for()
+    page.get_by_text('Review task quality', exact=True).click()
+    page.get_by_label('Task quality decision').select_option('needs-repair')
+    page.get_by_label('Task quality reason').fill('Synthetic browser revision binding check.')
+    page.get_by_label('Findings (JSON array)').fill('{broken')
+    page.get_by_role('button', name='Save task quality', exact=True).click()
+    page.get_by_text('Findings must be valid JSON.', exact=True).wait_for()
+    assert not [entry for entry in requests if entry[0].endswith('/quality')]
+    page.get_by_label('Findings (JSON array)').fill(json.dumps(scores['context']['findings']))
+    page.get_by_role('button', name='Save task quality', exact=True).click()
+    page.get_by_text('Task quality saved against the current task revision.', exact=True).wait_for()
+    saved = next(body for path, body in requests if path.endswith('/quality'))
+    assert saved['expected_revision'] == 3 and saved['reviewer_mode'] == 'ai_assisted_adjudication'
+    assert saved['findings'][0]['severity'] == 'critical' and 'actor' not in saved
+    page.get_by_text('Record calibration and author feedback', exact=True).click()
+    reviews = quality_browser_fixture()['versions'][0]['context']['calibration'][0]['reviews']
+    page.get_by_label('Recorded AI-assisted reviews (JSON array)').fill(json.dumps(reviews))
+    page.get_by_label('Calibration reason', exact=True).fill('Compare two separately recorded test reviews.')
+    page.get_by_label('Author feedback', exact=True).fill('Synthetic feedback payload.')
+    page.get_by_label('Guideline update', exact=True).fill('Synthetic guideline payload.')
+    page.get_by_role('button', name='Save calibration', exact=True).click()
+    page.get_by_text('Calibration, author feedback and guideline update recorded.', exact=True).wait_for()
+    calibration = next(body for path, body in requests if path.endswith('/calibration'))
+    assert calibration['reviews'] == reviews and calibration['author_feedback'] == 'Synthetic feedback payload.'
+    assert 'actor' not in calibration
+    page.get_by_role('button', name='Freeze evaluation dataset').click()
+    page.get_by_text('Evaluation dataset frozen with every candidate outcome.', exact=True).wait_for()
+    assert 'quality-only-manifest' in page.locator('#evaluation-export-receipt').inner_text()
+    exported = [body for path, body in requests if path.endswith('/evaluation-export')]
+    assert len(exported) == 1 and set(exported[0]) == {'operation_key'}
+    page.get_by_role('button', name='Disconnect', exact=True).click()
+    assert page.locator('#quality-section').is_hidden()
     page.close()

@@ -1,0 +1,14 @@
+--- a/eventflow/state.py
++++ b/eventflow/state.py
+@@ -35,10 +35,9 @@
+             raise ValueError("total outside signed 64-bit range")
+         with self.db:
+             self.db.execute("INSERT INTO totals VALUES(?,?) ON CONFLICT(tenant) DO UPDATE SET amount=excluded.amount", (event.tenant,total))
++            self.db.execute("INSERT INTO receipts VALUES(?,?,?)", (event.tenant,event.event_id,event.amount))
+         if after_commit is not None:
+             after_commit()
+-        with self.db:
+-            self.db.execute("INSERT INTO receipts VALUES(?,?,?)", (event.tenant,event.event_id,event.amount))
+         return True
+ 
+     def close(self):

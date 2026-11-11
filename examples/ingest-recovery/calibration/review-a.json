@@ -1,0 +1,218 @@
+{
+  "schema": "task-quality-calibration-review-v1",
+  "actor": "codex-calibration-review-a",
+  "reviewer_mode": "ai_assisted_adjudication",
+  "independence": {
+    "other_review_outputs_read": false,
+    "scope": "Separate assessment of the assigned brief, visible source, verifier versions, patch bytes and supplied actual measurements.",
+    "prior_context": "This Codex instance previously implemented the workbench protected-verifier worker. This is not a blind human review or a separate model-performance experiment."
+  },
+  "decision": "needs-repair",
+  "reason": "weak-v1 cannot judge the stated recovery requirement: an unchanged-behavior control earns100 and passes the critical gate. fixed-v2 materially improves the check and detects that control, while reference, alternate and the recorded candidate still pass. However fixed-v2 replays before checking the reopened durable state, so it does not establish that the callback actually followed a durable effect. Current evidence supports the demonstrated failure diagnosis and repair, but does not yet justify clean approval against the complete stated R1-R3 contract.",
+  "versions": [
+    {
+      "version": "weak-v1",
+      "context_id": "task-8df427e3988b645d0f294457ed68ae08f2a0af5371965c45b239398849734030",
+      "decision": "quarantined",
+      "reason": "Retain as a labeled audit challenge and exclude from the clean evaluation set. Its recovery check closes after normally acknowledged processing; it never interrupts the committed-effect/pre-ack boundary.",
+      "observed": {
+        "unchanged_control": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "reference": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "alternate": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "recorded_candidate": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "unadmitted_variant": {
+          "score": null,
+          "critical_passed": null
+        }
+      }
+    },
+    {
+      "version": "fixed-v2",
+      "context_id": "task-2075573c1b90ef62e8efd3ea50d7ed4fbb3a15032002f8167fb4f7809ea9d599",
+      "decision": "needs-repair",
+      "reason": "The abrupt-exit test reaches its injection callback and detects replay double-application, but omits a pre-replay durable-effect assertion. Resolve this material hook-contract gap before approving this verifier as clean for the stated task.",
+      "observed": {
+        "unchanged_control": {
+          "score": 50,
+          "critical_passed": false,
+          "failure": "Recovery expected alpha total5, observed12."
+        },
+        "reference": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "alternate": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "recorded_candidate": {
+          "score": 100,
+          "critical_passed": true
+        },
+        "unadmitted_variant": {
+          "score": null,
+          "critical_passed": null
+        }
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "A1",
+      "severity": "critical",
+      "status": "open-for-weak-v1",
+      "versions": [
+        "weak-v1"
+      ],
+      "requirements": [
+        "R3"
+      ],
+      "category": "verifier-coverage",
+      "finding": "The recovery test exercises an ordinary completed checkpoint restart rather than the stated interrupted-effect boundary.",
+      "evidence": [
+        "weak-v1-verifier.json recovery(): process(DATA[:1],state) returns normally before close/reopen.",
+        "observed.json: unchanged-control.patch earns100 with recovery passed and critical_passed true.",
+        "unchanged-control.patch only adds a class comment; visible State.apply_event commits totals, invokes the hook, and only later writes its receipt."
+      ],
+      "repair": "Keep weak-v1 explicitly labeled audit_challenge. Use actual post-effect/pre-ack interruption and replay assertions in a separately versioned clean verifier; do not rewrite its historical results."
+    },
+    {
+      "id": "A2",
+      "severity": "high",
+      "status": "open",
+      "versions": [
+        "fixed-v2"
+      ],
+      "requirements": [
+        "R3"
+      ],
+      "category": "durable-hook-boundary",
+      "finding": "Exit73 establishes that the callback ran, but the verifier does not inspect durable effects before replay. A callback incorrectly invoked before the event commit could therefore satisfy this particular test after ordinary replay.",
+      "evidence": [
+        "fixed-v2-verifier.json recovery() asserts child.returncode==73, opens State(path), immediately calls process(DATA,reopened), and checks totals only afterward."
+      ],
+      "evidence_kind": "Static verifier analysis and a logical counterexample; no early-hook mutant was executed in this review.",
+      "repair": "After child exit, inspect reopened public State before process replay: the first event must already contribute alpha=7. Then replay and assert total5/checkpoint3. Permit any safe checkpoint consistent with committed effects; do not mandate an implementation-specific lagging checkpoint. Add a controlled early-hook implementation as a verifier regression if needed to demonstrate that this assertion rejects the gap.",
+      "approval_effect": "Blocking for clean approval against the explicit after-durable-effect hook contract."
+    },
+    {
+      "id": "A3",
+      "severity": "medium",
+      "status": "open",
+      "versions": [
+        "fixed-v2"
+      ],
+      "requirements": [
+        "R3"
+      ],
+      "category": "recovery-coverage",
+      "finding": "Only abrupt exit at the first positive event is measured. The stated exception path and a later interruption after earlier progress/negative amounts are unmeasured.",
+      "evidence": [
+        "fixed-v2-verifier.json recovery() injects os._exit(73) only when position==1."
+      ],
+      "repair": "Add a callback that raises after a new durable event, reopen the same state, and replay. Exercise a later event position as well. Assert no loss/double-application and no skipped unapplied record through public APIs. These should be focused contract cases rather than random timing races."
+    },
+    {
+      "id": "A4",
+      "severity": "medium",
+      "status": "open",
+      "versions": [
+        "weak-v1",
+        "fixed-v2"
+      ],
+      "requirements": [
+        "R1"
+      ],
+      "category": "input-and-overflow-coverage",
+      "finding": "The named ordinary check does not cover signed64 total overflow, both signed32 amount boundaries, or the full declared malformed tenant/event_id/amount rules. Passing ordinary currently means the sampled examples passed.",
+      "evidence": [
+        "Both ordinary() versions test a negative amount and reject None,{},bool amount,empty tenant and amount2**31. Neither exercises total overflow or lower amount boundary, and there is no direct CLI check.",
+        "visible/events.py currently implements stricter validation than these cases exercise; the gap concerns verifier coverage, not an observed parser defect."
+      ],
+      "repair": "Add a compact input-boundary table, including valid signed32 extrema and invalid below-minimum/float/non-string/empty-ID inputs with checkpoint/effect assertions. For total overflow, either provide a documented lawful high-total setup usable by both valid designs, or explicitly mark that obligation unassessed until such a setup exists. Do not seed only the totals table and treat it as the sole valid storage design."
+    },
+    {
+      "id": "A5",
+      "severity": "medium",
+      "status": "open",
+      "versions": [
+        "weak-v1",
+        "fixed-v2"
+      ],
+      "requirements": [
+        "R2",
+        "public APIs and CLI"
+      ],
+      "category": "compatibility-coverage",
+      "finding": "Reopening a database created by the same candidate does not test compatibility with previously successful starter state. CLI preservation is stated but not exercised.",
+      "evidence": [
+        "identity() creates its state with the candidate implementation, closes it, then reopens with that implementation.",
+        "Verifier imports State/process but never invokes eventflow.cli."
+      ],
+      "repair": "Prepare one completed, internally consistent saved state using the supplied starter, then reopen it through each candidate public API and append/replay records. Add one CLI invocation over an ordinary JSONL source and inspect its durable checkpoint/totals. Preserve a legitimate receipt-derived implementation rather than asserting a particular physical totals table."
+    }
+  ],
+  "valid_alternate_assessment": {
+    "judgment": "The receipt-derived alternate is a legitimate design for the stated sequential immutable-source contract.",
+    "reason": "It commits the identity receipt before the callback and derives total() from those committed receipts. It need not update a redundant totals cache to satisfy public API results. The reference and recorded candidate instead commit receipt and materialized total together. Supplied fixed-v2 results show all three pass the measured behaviors. This is useful evidence of some implementation independence, with compatibility/overflow scope still limited as noted."
+  },
+  "credit_and_critical_gate": {
+    "judgment": "Retain the25/25/50 diagnostic split and recovery critical gate, with narrower interpretation of each tested group.",
+    "guidance": [
+      "The unchanged control in fixed-v2 correctly retains50 points for measured ordinary/identity behavior while failing the critical recovery gate;50 is not overall task success.",
+      "A100 score reports success on the named measured checks. It is not proof that untested clauses or all APIs satisfy the full task contract.",
+      "Missing/unadmitted evidence correctly remains score=null and critical_passed=null; it must not become an observed zero or a failure.",
+      "Task-quality approval and candidate scores are separate decisions. A defective audit challenge remains outside the clean set even if every candidate scores100."
+    ]
+  },
+  "author_feedback": [
+    "Preserve the weak-v1 challenge and its false-pass evidence. The useful demonstrated change is that fixed-v2 turns the unchanged control from100/critical-pass to50/critical-fail while preserving the passing reference, alternate and recorded candidate.",
+    "Before clean approval, add the pre-replay durable-total observation so a pre-commit callback cannot satisfy R3 accidentally. Then add focused exception/later-position coverage or explicitly narrow the task claim.",
+    "Reconcile ordinary/compatibility coverage with the task statement: add focused representation-neutral cases for retained requirements and label unresolved coverage, particularly overflow and prior successful state.",
+    "Keep reference/alternate implementation details out of grader assertions and future candidate-visible solution hints. Preserve the actual candidate input/access receipt; supplied code/results alone do not establish held-out evaluation."
+  ],
+  "guideline_update": [
+    "For every fault-injection check, state and observe the precondition at the injection boundary, then check post-replay invariants. Exit status alone does not establish a durable boundary.",
+    "Map each task clause to an actual assertion or an explicit unassessed limitation. A broad check name such as ordinary is not evidence of every ordinary requirement.",
+    "Use public behavior when validating alternate designs. Compatibility fixtures must be valid previously processed states; avoid table-layout-specific assertions.",
+    "Keep partial credit, critical-gate outcome, evidence completeness and task approval separate in review language.",
+    "Attribute this calibration to separately recorded AI-assisted judgments. Do not infer human agreement, model accuracy, difficulty or production reliability from this one authored task and one recorded attempt."
+  ],
+  "limitations": [
+    "No task code, patch, verifier or new test was executed during this review; observed outcomes are from the supplied observed.json and source analysis.",
+    "No implementation changes, new model calls, helpers or other reviewers outputs were used.",
+    "The brief describes one original synthetic task with authored controls and one recorded Codex candidate, not a representative model benchmark.",
+    "The material shows current supplied verdicts as draft. This report is a proposed calibration judgment, not a committed owner task-quality decision.",
+    "The protected verifier worker was previously implemented by this reviewer instance, so familiarity with that infrastructure is disclosed. Independence here means the judgments were recorded without reading the other review output.",
+    "Fresh-process abrupt-exit results establish the supplied process boundary only; they do not establish power-loss durability, arbitrary concurrency safety or hostile-code isolation."
+  ],
+  "input_sha256": {
+    "BRIEF.txt": "adf2efd4fafc9ccaefa80db583f48da4dafd859eec2b8415351cef4b47c830b9",
+    "alternate.patch": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
+    "candidate-001.patch": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
+    "fixed-v2-verifier.json": "c4d8c6906599386aa8c385e335268c82f11a29cba8f16d36b60f1d96bd11c5ce",
+    "observed.json": "8d6993eee65c8a6bb02ad887a07f2232e68690e0a9e1e702c59653cd5ce2807f",
+    "reference.patch": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
+    "requirements.json": "ccc123b6814ac76b374f8f41d6d72205a86d0b8eeb561b1f87d97facbc455ea5",
+    "task.txt": "4c8c630383079cec17ebd656063ca4998694ff6da682fe9a5556d208012f3014",
+    "unchanged-control.patch": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
+    "visible/eventflow/__init__.py": "6a8df84fbcd5b19b06fe03aafeec68f2a91ce938d5d93afbe27c1fe39c8e80e6",
+    "visible/eventflow/cli.py": "218e519cae5b3ff2b1480e14e1ab771c3f2af9de458a6eee4d6c9d4d5444d4af",
+    "visible/eventflow/events.py": "be3870a72b7e9c9d4e8223a86526c9244bcbbdb1a982ef7aef950bca1069e4e7",
+    "visible/eventflow/pipeline.py": "24030538d1f7156685e5730840467f6ce24596c4f1b777be41cc4677af482313",
+    "visible/eventflow/state.py": "8077cc4c1ad5e914f955ed1aea4815c0d0fca76067e5c515e3a269c563a3bd7c",
+    "weak-v1-verifier.json": "9ae41e525c215bfb0fcc6ea4ab7b711991a59b78ecd44210ff69ae9c1993846e"
+  }
+}

@@ -234,3 +234,21 @@ video { background: #112b3c; }
 summary .badge { margin-left: 10px; }
 #submit-review { margin-top: 16px; }
 @media (max-width: 900px) { .sidebar-note { display: none; } .sidebar > .eyebrow { display: none; } }
+/* Task-quality audit keeps missing observations and critical failures visible. */
+#quality-section { border-top: 4px solid var(--accent); }
+.quality-version { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; min-width: 0; }
+.quality-version > .badge { margin-right: 7px; }
+.quality-version h4 { margin-top: 20px; margin-bottom: 8px; }
+.table-scroll { max-width: 100%; overflow-x: auto; margin: 16px 0; }
+.table-scroll table { min-width: 620px; }
+.table-scroll caption { text-align: left; font-weight: 650; margin-bottom: 10px; }
+.table-scroll td .badge, .table-scroll th .small, .table-scroll th .digest { display: block; margin-top: 6px; }
+.table-scroll td .badge { width: fit-content; }
+.table-scroll th { max-width: 230px; overflow-wrap: anywhere; }
+.false-pass { background: var(--warn-soft); }
+.critical-failure { box-shadow: inset 3px 0 var(--danger); }
+.quality-finding { border-left: 3px solid var(--line); padding-left: 14px; margin: 18px 0; }
+.quality-finding .badge { margin-right: 6px; }
+#quality-content form { margin: 16px 0; }
+#quality-content form > button { margin-top: 14px; }
+#task-findings, #calibration-reviews { font-family: ui-monospace, monospace; font-size: .8rem; }

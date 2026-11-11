@@ -44,7 +44,8 @@ class Workbench:
         task_id, patch = record['task_id'], record.get('patch')
         task = self.catalog['tasks'].get(task_id)
         source_digest = digest(canonical(task['source_files'])) if task else None
-        check_digest = digest(canonical(task['checks'])) if task else None
+        check_digest = digest(canonical({'checks': task['checks'], 'verifier_files': task['verifier_files']}
+                                        if 'verifier_files' in task else task['checks'])) if task else None
         task_text = record.get('task_text', task['task_text'] if task else '')
         patch_digest = digest(patch.encode('utf-8')) if patch is not None else None
         trusted = bool(task and patch in task['patches'] and task_text == task['task_text'])
@@ -252,7 +253,7 @@ class Workbench:
             segment['completed_ids'] = json.loads(segment['completed_ids'])
         return {'batch': batch, 'items': items, 'audit': audit, 'cut': cut, 'timing_segments': segments,
                 'runtime': {'python': platform.python_version(), 'sqlite': sqlite3.sqlite_version,
-                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-task-worker-v3',
+                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-task-worker-v4',
                             'intake_version': 'raw-occurrence-v2', 'bundle': self.bundle_info(),
                             'fixture_catalog_digest': digest(canonical(self.catalog)), 'rubric_digest': self.rubric_digest}}
 

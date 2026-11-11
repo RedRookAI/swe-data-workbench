@@ -1,0 +1,29 @@
+[
+  {
+    "name": "ordinary",
+    "argv": [
+      "{python}",
+      "{verifier}/check.py",
+      "ordinary"
+    ],
+    "timeout": 5
+  },
+  {
+    "name": "identity",
+    "argv": [
+      "{python}",
+      "{verifier}/check.py",
+      "identity"
+    ],
+    "timeout": 5
+  },
+  {
+    "name": "recovery",
+    "argv": [
+      "{python}",
+      "{verifier}/check.py",
+      "recovery"
+    ],
+    "timeout": 5
+  }
+]

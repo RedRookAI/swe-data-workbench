@@ -19,6 +19,8 @@ def main(argv=None):
     prepare.add_argument('--task-text', type=Path, required=True)
     prepare.add_argument('--source', action='append', dest='sources', required=True, help='Tracked repository-relative regular file; repeat to select more')
     prepare.add_argument('--checks', type=Path, required=True, help='JSON list of {name,argv,timeout}')
+    prepare.add_argument('--verifier-files', type=Path, help='Optional JSON mapping of protected verifier paths to UTF-8 text')
+    prepare.add_argument('--evaluation', type=Path, help='Optional versioned evaluation requirements/rubric and admitted reference roles')
     prepare.add_argument('--candidates', type=Path, required=True, help='JSON list of {patch_file,model_name_or_path,provenance}; these exact patches are admitted')
     prepare.add_argument('--provenance', type=Path, required=True, help='Source JSON with origin,license,repository')
     prepare.add_argument('--notice', action='append', dest='notices', required=True, help='Tracked repository-relative notice; repeat as needed')

@@ -18,7 +18,8 @@ TOP_LEVEL = {"index.html", "app.js", "styles.css", "style.css"}
 ASSET_SUFFIXES = {".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".woff2"}
 
 
-def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prior_upstream_export=None):
+def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prior_upstream_export=None,
+                 prepared_export=None, quality_record=None, evaluation_exports=None):
     web, exported = Path(web_dir).resolve(), Path(export_path).resolve()
     output = Path(output_dir or REPO / "dist").absolute()
     if output.name != "dist" or output.is_symlink():
@@ -57,7 +58,26 @@ def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prio
         copied = verify_export(data)
         if not copied["ok"]:
             raise ExportError("Copied public evidence failed verification.")
-        for view, previous_export in [('synthetic', legacy_export), ('unicode-hyphen', prior_upstream_export)]:
+        if quality_record is not None:
+            from swe_workbench.evaluation_export import verify_evaluation, FILES as EVALUATION_FILES
+            quality = json.loads(Path(quality_record).read_text())
+            if quality.get('schema') != 'swe-workbench-quality-demo/v1' or len(quality.get('versions', [])) != 2 or not evaluation_exports or len(evaluation_exports) != 2:
+                raise ExportError('Quality publication requires two verified evaluation snapshots.')
+            for index, folder in enumerate(evaluation_exports):
+                folder = Path(folder)
+                if not verify_evaluation(folder)['ok']:
+                    raise ExportError('Evaluation export failed verification.')
+                evidence = json.loads((folder / 'evidence.json').read_text())
+                if evidence['scores'] != quality['versions'][index]:
+                    raise ExportError('Quality display differs from its evaluation evidence.')
+                target = stage / 'evaluation' / ('before' if index == 0 else 'after')
+                target.mkdir(parents=True)
+                for name in EVALUATION_FILES:
+                    shutil.copyfile(folder / name, target / name)
+                if not verify_evaluation(target)['ok']:
+                    raise ExportError('Copied evaluation evidence failed verification.')
+            shutil.copyfile(quality_record, stage / 'quality.json')
+        for view, previous_export in [('synthetic', legacy_export), ('unicode-hyphen', prior_upstream_export), ('prepared', prepared_export)]:
             if previous_export is None:
                 continue
             # A separate frozen cut keeps the original authored example inspectable.
@@ -100,8 +120,14 @@ def main():
     parser.add_argument("--output", type=Path, default=REPO / "dist")
     parser.add_argument('--legacy-export', type=Path, help='Preserved original synthetic frozen export')
     parser.add_argument('--prior-upstream-export', type=Path, help='Preserved first upstream frozen export')
+    parser.add_argument('--prepared-export', type=Path, help='Preserved prepared repository frozen export')
+    parser.add_argument('--quality-record', type=Path, help='Actual paired quality record, matched against both exports')
+    parser.add_argument('--evaluation-before', type=Path)
+    parser.add_argument('--evaluation-after', type=Path)
     args = parser.parse_args()
-    print(json.dumps(build_public(args.web, args.export, args.output, args.legacy_export, args.prior_upstream_export), indent=2))
+    paired = [args.evaluation_before, args.evaluation_after] if args.evaluation_before and args.evaluation_after else None
+    print(json.dumps(build_public(args.web, args.export, args.output, args.legacy_export, args.prior_upstream_export,
+                                  args.prepared_export, args.quality_record, paired), indent=2))
 
 
 if __name__ == "__main__":

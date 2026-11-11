@@ -46,3 +46,11 @@ The prepare-bundle command reads explicitly selected committed Git blobs, check 
 ## Capture while commands run
 
 The v3 worker concurrently drains both nonblocking pipes with a selector. Each stream retains at most65536 payload bytes; reads are at most16384 bytes and excess is discarded. UTF-8 replacement decoding, attempt-path redaction and actual exit status remain available. The monotonic deadline is checked even when output is continuously ready. Timeout closes descriptors and reaps the owned direct child with finite cleanup; the controller's existing group/uncertain reconciliation remains authoritative. This bounds retained output, not total child memory or hostile-code behavior. Historical v1/v2 evidence retains its identities.
+
+## Task-quality repair and protected checks
+
+The v4 worker optionally materializes verifier files in a sibling directory outside baseline/candidate. Verifier-enabled check identities include both argv and exact protected content; legacy bundles keep their original digest rule. Ordinary patches cannot target that directory. The worker records protected file hashes before/after each phase and refuses changed material. Same-user arbitrary code remains outside this trust boundary; it could inspect or mutate and restore files between observations.
+
+The ingestion verifier's direct child inherits the owned worker group and uses a short process timeout. Its exit intentionally exercises application recovery inside an attempt-owned directory. This does not add a detached service or change the existing worker ownership/capture protocol.
+
+Task-quality records reuse schema1 meta pointers, immutable artifacts and transactional audit rows. Task-global revision tokens prevent stale decisions crossing material versions. Evaluation export preserves all measured or missing candidate outcomes; accepted-code export remains unchanged. The first original ingestion profile and feedback loop are implemented; migration/concurrency profiles remain planned.

@@ -12,7 +12,7 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import signal
 import selectors
 import subprocess
@@ -112,9 +112,10 @@ def _output(data: bytes, root: Path) -> tuple[str, bool]:
     return value.replace(str(root), "<attempt>"), truncated
 
 
-def _invoke(name: str, argv: list[str], cwd: Path, timeout: float, root: Path) -> dict[str, Any]:
+def _invoke(name: str, argv: list[str], cwd: Path, timeout: float, root: Path, *, verifier: Path | None = None) -> dict[str, Any]:
     started = time.monotonic()
-    actual_argv = [sys.executable if arg == "{python}" else arg for arg in argv]
+    actual_argv = [sys.executable if arg == "{python}" else
+                   arg.replace("{verifier}", str(verifier)) if verifier is not None else arg for arg in argv]
     env = {
         "PATH": os.defpath,
         "LC_ALL": "C.UTF-8",
@@ -157,9 +158,9 @@ def _invoke(name: str, argv: list[str], cwd: Path, timeout: float, root: Path) -
         }
 
 
-def _phase(checks: list[dict[str, Any]], directory: Path, root: Path) -> dict[str, Any]:
+def _phase(checks: list[dict[str, Any]], directory: Path, root: Path, verifier: Path | None = None) -> dict[str, Any]:
     measured = [
-        _invoke(check["name"], check["argv"], directory, float(check.get("timeout", 5)), root)
+        _invoke(check["name"], check["argv"], directory, float(check.get("timeout", 5)), root, verifier=verifier)
         for check in checks
     ]
     outcomes = {check["outcome"] for check in measured}
@@ -180,12 +181,53 @@ def _write_sources(files: dict[str, str], directory: Path) -> None:
         target.write_bytes(content.encode("utf-8"))
 
 
-def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]:
-    """Measure baseline and exact candidate in separate disposable directories.
+def _verifier_manifest(directory: Path) -> dict[str, str]:
+    """Hash regular protected files; unsupported entries cannot match a manifest."""
+    if not directory.is_dir() or directory.is_symlink():
+        return {"<directory>": "missing-or-unsupported"}
+    actual = {}
+    for path in sorted(directory.rglob("*")):
+        relative = path.relative_to(directory).as_posix()
+        if path.is_symlink() or not (path.is_file() or path.is_dir()):
+            actual[relative] = "unsupported"
+        elif path.is_file():
+            hasher = hashlib.sha256()
+            with path.open("rb") as stream:
+                for block in iter(lambda: stream.read(65536), b""):
+                    hasher.update(block)
+            actual[relative] = hasher.hexdigest()
+    return actual
 
-    The parent supplies a manifest-pinned task. This function also refuses a
-    patch not present byte-for-byte in that task's allowlist.
-    """
+
+def _verifier_files(value):
+    if not isinstance(value, dict) or not value:
+        raise ValueError("Protected verifier files require a nonempty UTF-8 text mapping")
+    for relative, content in value.items():
+        if not isinstance(relative, str) or not isinstance(content, str):
+            raise ValueError("Protected verifier files require text paths and contents")
+        path = PurePosixPath(relative)
+        if (not relative or path.is_absolute() or str(path) != relative or
+                any(part in (".", "..", ".git") for part in path.parts) or
+                any(ord(char) < 32 for char in relative)):
+            raise ValueError("Protected verifier paths must be canonical relative paths")
+    return value
+
+
+def _candidate_regular(directory):
+    # Ordinary Git path validation stays enabled. Symlink/mode changes are an
+    # unsupported task profile and are refused before any candidate check runs.
+    for path in directory.rglob("*"):
+        if path.is_symlink() or ".git" in path.relative_to(directory).parts:
+            return False
+        if path.is_file() and path.stat().st_mode & 0o111:
+            return False
+        if not (path.is_file() or path.is_dir()):
+            return False
+    return True
+
+
+def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]:
+    """Measure exact admitted patches; optional verifiers are outside both trees."""
     if not isinstance(patch, str) or patch not in task.get("patches", []):
         return {
             "overall": "not-run", "baseline": {"overall": "not-run", "checks": []},
@@ -200,24 +242,56 @@ def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]
     baseline_dir, candidate_dir = root / "baseline", root / "candidate"
     _write_sources(files, baseline_dir)
     _write_sources(files, candidate_dir)
+    protected = "verifier_files" in task
+    verifier_dir, integrity, expected = None, None, None
+    if protected:
+        verifier_files = _verifier_files(task["verifier_files"])
+        verifier_dir = root / "verifier"
+        _write_sources(verifier_files, verifier_dir)
+        expected = {name: hashlib.sha256(text.encode("utf-8")).hexdigest() for name, text in verifier_files.items()}
+        integrity = {"verifier_digest": hashlib.sha256(_canonical(verifier_files)).hexdigest(),
+                     "expected_digest": hashlib.sha256(_canonical(expected)).hexdigest(),
+                     "expected_files": expected, "observations": [], "unchanged": True}
+
+    def observe(stage):
+        if not protected:
+            return True
+        try:
+            actual = _verifier_manifest(verifier_dir)
+        except OSError:
+            actual = {"<unreadable>": "unavailable"}
+        unchanged = actual == expected
+        integrity["observations"].append({"stage": stage, "files": actual,
+             "digest": hashlib.sha256(_canonical(actual)).hexdigest(), "unchanged": unchanged})
+        integrity["unchanged"] = integrity["unchanged"] and unchanged
+        return integrity["unchanged"]
+
+    def not_run(reason, overall="not-run"):
+        return {"overall": overall, "checks": [{"name": check["name"], "outcome": "not-run",
+                                                 "explanation": reason} for check in task["checks"]]}
+
     started = time.monotonic()
-    baseline = _phase(task["checks"], baseline_dir, root)
+    baseline = (_phase(task["checks"], baseline_dir, root, verifier_dir)
+                if observe("before_baseline") else not_run("Protected verifier integrity failed.", "error"))
+    baseline_integrity = observe("after_baseline")
     patch_path = root / "candidate.patch"
     patch_path.write_bytes(patch.encode("utf-8"))
-    # git apply works outside a repository. No init/config/hook or shell is used.
-    application = _invoke("apply-exact-patch", ["git", "apply", "--", str(patch_path)], candidate_dir, 5, root)
-    # Keep the internal patch path out of evidence; the exact bytes are already
-    # bound by patch_digest in the controller's submission record.
+    application = ({"name": "apply-exact-patch", "outcome": "not-run", "explanation": "Protected verifier integrity failed."}
+                   if not baseline_integrity else
+                   _invoke("apply-exact-patch", ["git", "apply", "--", str(patch_path)], candidate_dir, 5, root))
     application["argv"] = ["git", "apply", "--", "<exact-patch>"]
-    if application["outcome"] == "passed":
-        candidate = _phase(task["checks"], candidate_dir, root)
+    candidate_integrity = observe("before_candidate")
+    supported = not protected or _candidate_regular(candidate_dir)
+    if application["outcome"] == "passed" and candidate_integrity and supported:
+        candidate = _phase(task["checks"], candidate_dir, root, verifier_dir)
     else:
-        candidate = {
-            "overall": "timeout" if application["outcome"] == "timeout" else "error",
-            "checks": [{"name": check["name"], "outcome": "not-run", "explanation": "Exact patch application did not succeed."} for check in task["checks"]],
-        }
+        reason = ("Unsupported candidate symlink, executable mode or protected path." if not supported
+                  else "Exact patch application or protected verifier integrity did not succeed.")
+        candidate = not_run(reason, "timeout" if application["outcome"] == "timeout" else "error")
+    observe("after_candidate")
     source_unchanged = source_digest == hashlib.sha256(_canonical(task["source_files"])).hexdigest()
-    baseline_preserved = all((baseline_dir / key).read_bytes() == content.encode("utf-8") for key, content in files.items())
+    baseline_preserved = all((baseline_dir / key).is_file() and not (baseline_dir / key).is_symlink()
+                             and (baseline_dir / key).read_bytes() == content.encode("utf-8") for key, content in files.items())
     source_unchanged = source_unchanged and baseline_preserved
     checks = [dict(check, phase="baseline") for check in baseline["checks"]]
     checks += [dict(application, phase="patch")]
@@ -225,14 +299,17 @@ def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]
     overall = candidate["overall"]
     if baseline["overall"] in {"error", "timeout", "not-run"}:
         overall = baseline["overall"]
-    if not source_unchanged:
+    if not source_unchanged or (protected and not integrity["unchanged"]):
         overall = "error"
-    return {
-        "overall": overall, "baseline": baseline, "candidate": candidate,
-        "patch_application": application, "source_unchanged": source_unchanged,
-        "checks": checks, "duration_seconds": time.monotonic() - started,
-        "runner": "trusted-task-worker-v3",
-    }
+    result = {"overall": overall, "baseline": baseline, "candidate": candidate,
+              "patch_application": application, "source_unchanged": source_unchanged,
+              "checks": checks, "duration_seconds": time.monotonic() - started,
+              "runner": "trusted-task-worker-v4"}
+    if protected:
+        result["verifier_integrity"] = integrity
+        result["checks"].append({"name": "protected-verifier-integrity", "phase": "integrity",
+                                "outcome": "passed" if integrity["unchanged"] else "error"})
+    return result
 
 
 def _watch_control(control_fd: int) -> None:
