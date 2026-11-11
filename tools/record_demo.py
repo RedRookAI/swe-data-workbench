@@ -23,7 +23,7 @@ def main():
     parser.add_argument("--root",type=Path,default=REPO/".state/recorded-demo")
     parser.add_argument("--output",type=Path,default=REPO/"recordings")
     args=parser.parse_args();root=args.root.resolve();out=args.output.resolve()
-    if (root/"state.sqlite").exists() or (root/"workbench.sqlite").exists():
+    if root.exists() and any(root.iterdir()):
         parser.error("Use a fresh owned root for a new recording; existing run evidence is preserved.")
     root.mkdir(parents=True,exist_ok=True);out.mkdir(parents=True,exist_ok=True)
     token=secrets.token_urlsafe(40)
@@ -75,7 +75,8 @@ def main():
             page.get_by_role("button",name="Refresh",exact=True).click();page.wait_for_timeout(1800)
             mark("Resume through the owner UI. Completed evidence is retained; only unfinished work executes.")
             page.get_by_role("button",name="Run checks · 1 worker",exact=True).click()
-            page.wait_for_function("document.querySelector('#process').textContent === 'Run checks · 1 worker' && !document.querySelector('#process').disabled")
+            from playwright.sync_api import expect
+            expect(page.get_by_role("button",name="Run checks · 1 worker",exact=True)).to_be_enabled()
             items=api("/api/batches/"+batch_id+"/submissions")
             assert len([i for i in items if i["execution_status"]=="completed"])==4
             assert all(next(i for i in items if i["id"]==key)["result"]["evidence_digest"]==value for key,value in before.items())
@@ -142,7 +143,9 @@ def main():
             (out/"captions.srt").write_text("\n".join(srt))
             print(json.dumps({"recording_receipt":str(out/"receipt.json"),"raw_video":str(raw),"export_path":str(exported["path"]),"accepted":2,"rejected":2,"pending":2,"browser_errors":0}))
     finally:
-        if browser:browser.close()
+        if browser:
+            try:browser.close()
+            except Exception:pass  # Playwright may already have closed its context after the original error.
         server.terminate()
         try:server.wait(timeout=10)
         except subprocess.TimeoutExpired:
