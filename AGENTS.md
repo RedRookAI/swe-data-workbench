@@ -1,12 +1,16 @@
-# SWE Data Workbench
+# Contributing to SWE Data Workbench
 
-This standalone application is explicitly authorized for implementation. Work only in this repository and assigned paths. Keep and every other project/service on this host are outside scope. User authorized independent Codex instances and useful narrow helpers; avoid recursive delegation/review loops.
+Read README.md, SECURITY.md and the relevant implementation/tests. This is an independent Linux/Python 3.12 portfolio preview. No Keep installation, private planning repository or maintainer credential is required to contribute.
 
-Read /root/keep-portfolio-processing-design-20261111/DESIGN.md, RESEARCH.md and assigned ticket before implementation. Follow /root/AGENTS.md. Planning stays private; working product/docs/selected evidence may be published by the coordinating instance after audit. No global installs, shared-service restarts, host resets, native builds or new model API calls.
+- Preserve exact input bytes, content-bound review decisions and original fixture sources.
+- Keep SQLite state/audit updates transactional; execute checks outside database transactions.
+- Preserve uncertain attempts and current-generation fencing. A timer is not proof of worker exit.
+- Only trusted manifest-listed tuples may execute. Do not weaken this boundary to run arbitrary submitted commands.
+- Label synthetic fixtures, scripted decisions, actual measurements and unavailable evidence accurately.
+- Run focused checks for changed behavior; repeat only after a change, failure or specific new concern.
+- Public assets are read-only and contain selected evidence. Keep owner tokens, databases and run workspaces private.
+- Install dependencies in a project-local environment. Never change unrelated workspaces or shared services.
+- Do not autoplay audio. Public recording players start paused and muted with visible controls.
 
-Before creating/materially revising tickets read the QuickTicket skill. Existing tickets are private outside this repo. Each task requires current relevant research, working change and focused verification. Do not repeatedly run the same successful checks or a full project suite from each instance.
-
-Ownership and frozen interfaces are in coordination/INTERFACES.md and each handoff. Do not change another lane's files or interfaces unilaterally. Coordinate via files/messages. Helpers get narrower disjoint paths and must stop after their deliverable. One coordinator owns Git commits, remote publication, dependency installation and final integration. Report concrete blockers rather than silently weakening invariants.
-
-All public URLs go on their own line. The user is headless; a server path is not a preview. Playback starts paused/muted with explicit controls. Label synthetic fixtures, scripted decisions and measured results accurately. Human direction/acceptance and substantial AI implementation assistance must be attributable.
+Report the implemented change, exact revision, observed checks and remaining limits. Code assistance and human direction must remain accurately attributable.
 

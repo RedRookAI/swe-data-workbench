@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "origin": "synthetic_fixture",
+  "provenance": {
+    "origin": "synthetic_fixture",
+    "license": "MIT",
+    "author": "Red Rook AI with substantial AI implementation assistance",
+    "created_at": "2026-11-11",
+    "source": "Authored for this standalone demonstration; no third-party benchmark data."
+  },
+  "rubric": {
+    "version": 1,
+    "criteria": [
+      "task_clarity",
+      "evidence_adequacy",
+      "requested_behavior",
+      "preserved_behavior",
+      "unsupported_claims"
+    ]
+  },
+  "tasks": {
+    "order-dedupe": {
+      "title": "Deduplicate strings while preserving first-seen order",
+      "task_text": "Fix dedupe(items) so it removes duplicate strings while preserving the order in which each distinct string first appeared. Preserve empty-input behavior and return a list. The visible checks cover ascending inputs only; review the stated ordering requirement separately.",
+      "source_files": {
+        "solution.py": "def dedupe(items):\n    \"\"\"Return distinct strings in first-seen order.\"\"\"\n    return list(items)\n",
+        "check_requested.py": "from solution import dedupe\nassert dedupe([\"a\", \"a\", \"b\"]) == [\"a\", \"b\"], \"duplicates must be removed\"\nprint(\"PASS duplicate removal for ascending strings\")\n",
+        "check_preserved.py": "from solution import dedupe\nassert dedupe([]) == [], \"empty input must remain empty\"\nassert dedupe([\"a\", \"b\"]) == [\"a\", \"b\"], \"distinct ascending strings remain stable\"\nprint(\"PASS empty and distinct ascending inputs\")\n"
+      },
+      "checks": [
+        {
+          "name": "requested-duplicate-removal",
+          "argv": [
+            "{python}",
+            "check_requested.py"
+          ],
+          "timeout": 5
+        },
+        {
+          "name": "preserved-empty-and-distinct",
+          "argv": [
+            "{python}",
+            "check_preserved.py"
+          ],
+          "timeout": 5
+        }
+      ],
+      "patches": [
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return list(dict.fromkeys(items))\n",
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return sorted(set(items))\n",
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return list(items[:1])\n"
+      ],
+      "provenance": {
+        "origin": "synthetic_fixture",
+        "license": "MIT",
+        "author": "Red Rook AI with substantial AI implementation assistance",
+        "created_at": "2026-11-11",
+        "source": "Authored for this standalone demonstration; no third-party benchmark data."
+      },
+      "fixture_expectations": {
+        "good": {
+          "overall": "passed",
+          "semantic": "correct"
+        },
+        "weak-check-wrong": {
+          "overall": "passed",
+          "semantic": "wrong",
+          "counterexample": {
+            "input": [
+              "b",
+              "a",
+              "b"
+            ],
+            "expected": [
+              "b",
+              "a"
+            ],
+            "actual": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        "failing": {
+          "overall": "failed",
+          "semantic": "wrong"
+        }
+      }
+    },
+    "order-dedupe-unicode": {
+      "title": "Deduplicate Unicode strings in first-seen order",
+      "task_text": "Fix dedupe(items) to remove duplicate Unicode strings in first-seen order. Return a list, preserve empty inputs, and retain exact string values. This is a separate task context using the same base source, visible checks and patch bytes.",
+      "source_files": {
+        "solution.py": "def dedupe(items):\n    \"\"\"Return distinct strings in first-seen order.\"\"\"\n    return list(items)\n",
+        "check_requested.py": "from solution import dedupe\nassert dedupe([\"a\", \"a\", \"b\"]) == [\"a\", \"b\"], \"duplicates must be removed\"\nprint(\"PASS duplicate removal for ascending strings\")\n",
+        "check_preserved.py": "from solution import dedupe\nassert dedupe([]) == [], \"empty input must remain empty\"\nassert dedupe([\"a\", \"b\"]) == [\"a\", \"b\"], \"distinct ascending strings remain stable\"\nprint(\"PASS empty and distinct ascending inputs\")\n"
+      },
+      "checks": [
+        {
+          "name": "requested-duplicate-removal",
+          "argv": [
+            "{python}",
+            "check_requested.py"
+          ],
+          "timeout": 5
+        },
+        {
+          "name": "preserved-empty-and-distinct",
+          "argv": [
+            "{python}",
+            "check_preserved.py"
+          ],
+          "timeout": 5
+        }
+      ],
+      "patches": [
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return list(dict.fromkeys(items))\n",
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return sorted(set(items))\n",
+        "--- a/solution.py\n+++ b/solution.py\n@@ -1,3 +1,3 @@\n def dedupe(items):\n     \"\"\"Return distinct strings in first-seen order.\"\"\"\n-    return list(items)\n+    return list(items[:1])\n"
+      ],
+      "provenance": {
+        "origin": "synthetic_fixture",
+        "license": "MIT",
+        "author": "Red Rook AI with substantial AI implementation assistance",
+        "created_at": "2026-11-11",
+        "source": "Authored for this standalone demonstration; no third-party benchmark data."
+      },
+      "fixture_expectations": {
+        "good": {
+          "overall": "passed",
+          "semantic": "correct"
+        },
+        "weak-check-wrong": {
+          "overall": "passed",
+          "semantic": "wrong",
+          "counterexample": {
+            "input": [
+              "b",
+              "a",
+              "b"
+            ],
+            "expected": [
+              "b",
+              "a"
+            ],
+            "actual": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        "failing": {
+          "overall": "failed",
+          "semantic": "wrong"
+        }
+      }
+    }
+  }
+}
