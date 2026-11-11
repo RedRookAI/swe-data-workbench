@@ -21,10 +21,34 @@ from swe_workbench.exporter import export_batch, verify_export
 from run_real_demo import review_requests
 
 
+def examined_replay(workbench, batch_id, assessment_file):
+    """Bind previously examined reasons to this recording's actual evidence."""
+    assessments = json.loads(assessment_file.read_text())['assessments']
+    requests = []
+    for item in workbench.submissions(batch_id):
+        assessment = assessments.get(item['patch_digest'])
+        if assessment is None:
+            assert not item['trusted_tuple'] and item['result'] is None
+            continue
+        assert item['trusted_tuple'] and item['context_current'] and item['result']['source_unchanged']
+        for key in ('source_digest', 'check_digest', 'rubric_digest', 'task_text'):
+            assert item[key] == assessment[key], 'Changed assessment context: ' + key
+        for phase in ('baseline', 'candidate'):
+            assert [c['outcome'] for c in item['result'][phase]['checks']] == assessment[phase + '_outcomes']
+        requests.append((item, dict(expected_revision=item['revision'], evidence_digest=item['result']['evidence_digest'],
+            rubric_digest=item['rubric_digest'], decision=assessment['decision'], criteria=assessment['criteria'],
+            reason='Scripted browser replay of the examined assessment: ' + assessment['reason'],
+            reviewer_mode='scripted_adjudication', operation_key='examined-replay-' + item['id'])))
+    assert len(requests) == len(assessments)
+    return requests
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=REPO / '.state/recorded-real')
     parser.add_argument('--output', type=Path, default=REPO / 'recordings/real')
+    parser.add_argument('--bundle', default='unicode-hyphen', help='Owner-selected local bundle or built-in name')
+    parser.add_argument('--assessment-file', type=Path, help='Actual prior examined assessments to replay explicitly as scripted')
     args = parser.parse_args()
     root, out = args.root.resolve(), args.output.resolve()
     if root.exists() and any(root.iterdir()):
@@ -37,7 +61,7 @@ def main():
     env = os.environ.copy(); env['SWE_WORKBENCH_OWNER_TOKEN'] = token
     serverlog = (out / 'server.log').open('wb')
     server = subprocess.Popen([sys.executable, '-m', 'swe_workbench.server', '--root', str(root),
-        '--bundle', 'unicode-hyphen', '--port', str(port)], cwd=REPO, env=env,
+        '--bundle', args.bundle, '--port', str(port)], cwd=REPO, env=env,
         stdout=serverlog, stderr=subprocess.STDOUT)
     browser = None; events = []; started = time.monotonic()
     def mark(caption):
@@ -79,8 +103,8 @@ def main():
             mark('Run actual baseline, Git application and candidate checks in separate workspaces. The unknown variant stays pending.')
             page.get_by_role('button', name='Run checks · 1 worker', exact=True).click()
             expect(page.get_by_role('button', name='Run checks · 1 worker', exact=True)).to_be_enabled()
-            workbench = Workbench(root, fixture_dir='unicode-hyphen'); workbench.initialize()
-            assessed = review_requests(workbench, batch_id)
+            workbench = Workbench(root, fixture_dir=args.bundle); workbench.initialize()
+            assessed = examined_replay(workbench, batch_id, args.assessment_file) if args.assessment_file else review_requests(workbench, batch_id)
             def select(item):
                 items = api('/api/batches/' + batch_id + '/submissions')
                 index = next(n for n, value in enumerate(items) if value['id'] == item['id'])
@@ -90,7 +114,8 @@ def main():
             # The plan is derived from examined exact code, not fixture_label or an input author claim.
             for item, request in sorted(assessed, key=lambda pair: pair[1]['decision'] == 'accepted'):
                 select(item)
-                mark('Inspect the ' + ('human upstream fix' if request['decision'] == 'accepted' else 'synthetic comment-only control') + ': exact diff, actual check output and source preservation.')
+                label = 'selected upstream PR revision' if args.assessment_file else ('human upstream fix' if request['decision'] == 'accepted' else 'synthetic comment-only control')
+                mark('Inspect the ' + label + ': exact diff, actual check output and source preservation.')
                 page.get_by_role('tab', name='Task & patch', exact=True).click()
                 page.locator('#inspector').scroll_into_view_if_needed(); page.wait_for_timeout(1800)
                 page.get_by_role('tab', name='Machine evidence', exact=True).click(); page.wait_for_timeout(2200)
@@ -127,6 +152,7 @@ def main():
                     for p in sorted([*REPO.glob('swe_workbench/*.py'), *REPO.glob('web/*')]) if p.is_file()},
                 'case_origin': 'public upstream issue and human patch; labeled synthetic controls',
                 'decision_origin': 'scripted browser replay of Codex-assisted code assessment', 'model_calls': 0,
+                'assessment_reference_sha256': hashlib.sha256(args.assessment_file.read_bytes()).hexdigest() if args.assessment_file else None,
                 'keep_dependency': False, 'batch': batch, 'export_path': exported['path'],
                 'manifest_digest': exported['manifest_digest'], 'verification': verification, 'integrity': workbench.verify(),
                 'browser_errors': errors, 'raw_video': str(raw), 'raw_video_sha256': hashlib.sha256(raw.read_bytes()).hexdigest(),

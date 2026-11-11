@@ -1,0 +1,65 @@
+{
+  "schema": "swe-workbench-examined-assessments/v1",
+  "attribution": "Actual Codex-assisted implementation review after examining observed checks/source/diffs; later UI recording may explicitly replay it in scripted mode. No independent human review claimed.",
+  "assessments": {
+    "e0b840a3885a527a4aaf9593928762073037194034d6d019aad4f20aaa388b3e": {
+      "submission_id": "sub-9a75afee25aac2fd212727728c363ccd58b0d5494219a44e61360b1db405e8db",
+      "source_digest": "733138d2ff8fc9bc9a008b69b857dff398b22b41cc1faab2befc660bcfd1b767",
+      "check_digest": "d2b3c192ebae6d1d085ab3c291f40ad3e7d16ae3e8cce861948f38928d13d0e3",
+      "rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+      "task_text": "Allow htmlEscapeTag and htmlUnescapeTag to interpolate non-string values by converting each substitution with String before escaping or unescaping it. Preserve ordinary string escaping/unescaping and the existing string-only behavior of htmlEscape and htmlUnescape; the regular functions must not acquire implicit non-string coercion. Preserve literal template segments.\n",
+      "source_evidence_digest": "548f1616d52203863f6bbde26798f4aed6f359c77c068903f7b40b2aeb95b3d8",
+      "source_revision": 3,
+      "baseline_outcomes": [
+        "failed",
+        "passed",
+        "passed"
+      ],
+      "candidate_outcomes": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "decision": "accepted",
+      "criteria": {
+        "task_clarity": "pass",
+        "evidence_adequacy": "pass",
+        "requested_behavior": "pass",
+        "preserved_behavior": "pass",
+        "unsupported_claims": "pass"
+      },
+      "reason": "Codex-assisted implementation review: this genuine revised PR patch applies String() to each template substitution before calling the unchanged regular escape/unescape functions. It preserves literal segments and the regular string-only API. Actual baseline fails tag coercion; this candidate passes tag behavior, ordinary string/one-pass-unescape preservation and regular-method rejection. Original source is preserved. Assessment covers this pinned three-check recipe and examined diff; AVA/TypeScript suites were not executed.",
+      "reviewer_mode": "ai_assisted_adjudication"
+    },
+    "bce7ba18673118e2f4db4e1e7f9b51ae2940ade475b26b3bede3615960c5ec87": {
+      "submission_id": "sub-f38d631db0d3e6ed6db2bb47da35f0e68c0bbfef24ffdcc3a6d8d16aaec80885",
+      "source_digest": "733138d2ff8fc9bc9a008b69b857dff398b22b41cc1faab2befc660bcfd1b767",
+      "check_digest": "d2b3c192ebae6d1d085ab3c291f40ad3e7d16ae3e8cce861948f38928d13d0e3",
+      "rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+      "task_text": "Allow htmlEscapeTag and htmlUnescapeTag to interpolate non-string values by converting each substitution with String before escaping or unescaping it. Preserve ordinary string escaping/unescaping and the existing string-only behavior of htmlEscape and htmlUnescape; the regular functions must not acquire implicit non-string coercion. Preserve literal template segments.\n",
+      "source_evidence_digest": "879553ce3c6cb56e0ec836c98cee0c57b541c17c14f6d58dca171aac6b7e2ffe",
+      "source_revision": 3,
+      "baseline_outcomes": [
+        "failed",
+        "passed",
+        "passed"
+      ],
+      "candidate_outcomes": [
+        "passed",
+        "passed",
+        "failed"
+      ],
+      "decision": "rejected",
+      "criteria": {
+        "task_clarity": "pass",
+        "evidence_adequacy": "pass",
+        "requested_behavior": "pass",
+        "preserved_behavior": "fail",
+        "unsupported_claims": "pass"
+      },
+      "reason": "Codex-assisted implementation review: this genuine early PR revision adds String() to the regular htmlEscape/htmlUnescape functions. Tag interpolation and ordinary string checks pass, but the actual preservation check fails because non-string regular inputs are now coerced instead of rejected. The pinned TypeScript signatures and upstream review require coercion only in template tags. This revision violates that preserved contract.",
+      "reviewer_mode": "ai_assisted_adjudication"
+    }
+  },
+  "original_export_manifest": "5f2564946f8a312c0fe911108ffdb74973bde0970940732e1e8b38fec8f36a7d"
+}

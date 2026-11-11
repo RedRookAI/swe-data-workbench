@@ -1,0 +1,26 @@
+[
+  {
+    "patch_file": "early-revision.patch",
+    "model_name_or_path": "upstream-early-revision",
+    "provenance": {
+      "origin": "public_upstream",
+      "source_commit": "a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
+      "source_url": "https://github.com/sindresorhus/escape-goat/commit/a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
+      "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+      "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
+      "license": "MIT"
+    }
+  },
+  {
+    "patch_file": "revised-fix.patch",
+    "model_name_or_path": "upstream-revised-fix",
+    "provenance": {
+      "origin": "public_upstream",
+      "source_commit": "ee3349151564b5ed225136e9d2e48e55107d775f",
+      "source_url": "https://github.com/sindresorhus/escape-goat/commit/ee3349151564b5ed225136e9d2e48e55107d775f",
+      "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+      "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
+      "license": "MIT"
+    }
+  }
+]

@@ -1,12 +1,18 @@
 {
-  "version": "0.1.0a2",
+  "version": "0.1.0a3",
   "checked": "2026-11-11",
-  "runtime_profile": "Linux x64,Python3.12.3,SQLite3.45.1,Git2.43.0,Node22.23.4",
-  "component_check_scope": "Focused implementation lane checks listed in verification.md; no new full-suite execution claimed.",
-  "wheel_sha256": "30648a7b0c3829ae361f377e90a390b0e97ff2a06c401dbf7c7c88b97be3aee9",
+  "baseline_commit": "ef63c60fe9f48b4daea612eb36d949c94f01fc71",
+  "worker": "trusted-task-worker-v3",
+  "wheel_sha256": "c5fb54bda1b920b837921936e32827fe61e22c373429de7cc4b0acbd3d605f4f",
+  "focused_checks": {
+    "worker_capture": 6,
+    "actual_runner_and_controller_kill": 2,
+    "bundle_preparation": 8
+  },
+  "scope": "Separate focused lane runs, not one final full-suite execution.",
   "installed_wheel": {
-    "profile": "installed-wheel-a2",
-    "version": "0.1.0a2",
+    "profile": "installed-wheel-a3",
+    "version": "0.1.0a3",
     "imports_from_site_packages": true,
     "matched_source_files": [
       "swe_workbench/worker.py",
@@ -16,6 +22,7 @@
       "swe_workbench/assets.py",
       "swe_workbench/api.py",
       "swe_workbench/server.py",
+      "swe_workbench/bundle.py",
       "swe_workbench/store.py",
       "swe_workbench/exporter.py",
       "swe_workbench/runner.py",
@@ -36,27 +43,31 @@
       "bundles/unicode-hyphen/catalog.json",
       "bundles/unicode-hyphen/upstream.patch"
     ],
+    "preparation_no_state_or_execution": true,
+    "source_checkout_unchanged": true,
     "verification": {
       "ok": true,
       "errors": [],
-      "manifest_digest": "120976adb3546318bdc4e7157790f60b352e4fbbfe6123e134c5c8c04e893e42",
-      "export_id": "export-4a28d31801f1b9fe609d1a5c2416013f68dcaf5328f4b5ce7b9add121ed65d6e",
+      "manifest_digest": "472372b3c9c95d1d89a5e3a749906821517307d0067a8e81c2ee26e88512c6bd",
+      "export_id": "export-8f941ad8213b775dcf92962e9feba9d210db73cfba68279c44fccbb4d8672c7c",
       "accepted_count": 1
     },
     "integrity": {
       "ok": true,
       "schema_version": 1,
-      "audit_root": "e5123f5eebc08a6cebf738eb56a0e7a7ac60b383368ad04058568625cc63bab8",
+      "audit_root": "6d6b1deac7ff9adbe5d3f6a85dd265cf644b94728f6c1af699c817cae7ff796a",
       "audit_events": 13,
       "verified_results": 2,
       "journal_mode": "delete",
       "synchronous": 2,
       "foreign_keys": 1
     },
-    "installed_owner_api": "authenticated bundle,unauthenticated rejection,web assets served"
+    "same_cut_repeat": true,
+    "owner_api": "authenticated bundle, unauthorized rejection, installed web assets passed"
   },
-  "documented_cli": {
+  "documented_example": {
     "passed": true,
+    "preparation_checks_executed": false,
     "counts": {
       "queued": 0,
       "running": 0,
@@ -65,46 +76,154 @@
       "execution-error": 0,
       "uncertain": 0,
       "pending-evidence": 1,
-      "accepted": 1,
-      "rejected": 1,
+      "accepted": 0,
+      "rejected": 0,
       "needs-work": 0,
-      "pending_review": 1
+      "pending_review": 3
     },
-    "retained_first_result": true,
-    "resumed_unfinished": 1,
-    "same_cut_reexport": true
+    "retained_completed_result": true,
+    "review_state": "No decisions made by this driver; inspect actual evidence before review."
+  },
+  "preparation": {
+    "schema": "swe-workbench-bundle-preparation-v1",
+    "base_commit": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+    "task_id": "sindresorhus__escape-goat-pr13",
+    "source_files": [
+      {
+        "path": "index.d.ts",
+        "git_blob": "4f46024d4491c64ef61c9741f1818935ec87d10a",
+        "mode": "100644",
+        "sha256": "3bcc26119b56f23b4cc5fe82897a359d40aa414d3901a613833adedbc4ada12e",
+        "bytes": 1738
+      },
+      {
+        "path": "index.js",
+        "git_blob": "c669f6dff621ff17743cb619500bba0dfea529ad",
+        "mode": "100644",
+        "sha256": "5a0cd8d362b99c7038fd8fb6524e2435f31541f73647ae1293de956c5621e213",
+        "bytes": 779
+      },
+      {
+        "path": "license",
+        "git_blob": "e7af2f77107d73046421ef56c4684cbfdd3c1e89",
+        "mode": "100644",
+        "sha256": "48da2f39e100d4085767e94966b43f4fa95ff6a0698fba57ed460914e35f94a0",
+        "bytes": 1109
+      },
+      {
+        "path": "test.js",
+        "git_blob": "ee9cdd95e896e31ee487d6e52736364f6161f9ed",
+        "mode": "100644",
+        "sha256": "7493beaefe9503470a3a954d4c762253520420de6aae777b22c04e2ac7624dcb",
+        "bytes": 1362
+      }
+    ],
+    "source_digest": "733138d2ff8fc9bc9a008b69b857dff398b22b41cc1faab2befc660bcfd1b767",
+    "check_digest": "d2b3c192ebae6d1d085ab3c291f40ad3e7d16ae3e8cce861948f38928d13d0e3",
+    "rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+    "catalog_digest": "96247edd291cedf2292918a0393a3067fe6456c937f0db2821703f6707dbb3d2",
+    "checks": [
+      {
+        "name": "tag-non-string-coercion",
+        "argv": [
+          "/usr/bin/node",
+          "-e",
+          "const assert = require('node:assert/strict');\nconst {htmlEscapeTag, htmlUnescapeTag} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.equal(htmlEscapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n assert.equal(htmlUnescapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n}\nassert.equal(htmlEscapeTag`<b>${{toString: () => '<&>'}}</b>`, '<b>&lt;&amp;&gt;</b>');\nassert.equal(htmlUnescapeTag`<b>${{toString: () => '&lt;&amp;&gt;'}}</b>`, '<b><&></b>');\nconsole.log('tag substitutions converted; literal template segments preserved');\n"
+        ],
+        "timeout": 5
+      },
+      {
+        "name": "ordinary-string-preservation",
+        "argv": [
+          "/usr/bin/node",
+          "-e",
+          "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const input of ['', 'plain text', '<&>\\\"\\'', '\ud83e\udd84 & \ud83d\udc10']) {\n assert.equal(htmlUnescape(htmlEscape(input)), input);\n}\nassert.equal(htmlUnescape('&amp;lt;'), '&lt;');\nconsole.log('ordinary string round trips and single-pass unescape preserved');\n"
+        ],
+        "timeout": 5
+      },
+      {
+        "name": "regular-function-type-contract",
+        "argv": [
+          "/usr/bin/node",
+          "-e",
+          "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.throws(() => htmlEscape(value), TypeError);\n assert.throws(() => htmlUnescape(value), TypeError);\n}\nconsole.log('regular functions retain existing non-string rejection');\n"
+        ],
+        "timeout": 5
+      }
+    ],
+    "candidates": [
+      {
+        "patch_digest": "bce7ba18673118e2f4db4e1e7f9b51ae2940ade475b26b3bede3615960c5ec87",
+        "bytes": 1619,
+        "model_name_or_path": "upstream-early-revision",
+        "provenance": {
+          "origin": "public_upstream",
+          "source_commit": "a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
+          "source_url": "https://github.com/sindresorhus/escape-goat/commit/a904fcedc12ba61371fc8db79215caf1e1cb9d0a",
+          "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+          "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
+          "license": "MIT"
+        }
+      },
+      {
+        "patch_digest": "e0b840a3885a527a4aaf9593928762073037194034d6d019aad4f20aaa388b3e",
+        "bytes": 1905,
+        "model_name_or_path": "upstream-revised-fix",
+        "provenance": {
+          "origin": "public_upstream",
+          "source_commit": "ee3349151564b5ed225136e9d2e48e55107d775f",
+          "source_url": "https://github.com/sindresorhus/escape-goat/commit/ee3349151564b5ed225136e9d2e48e55107d775f",
+          "source_base": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+          "author_kind": "upstream human-authored PR revision; transport label is not model authorship",
+          "license": "MIT"
+        }
+      }
+    ],
+    "notices": [
+      "notices/license"
+    ],
+    "prediction_format": "swebench",
+    "prediction_digest": "39d497c88b8948b3a7aa292fb18e6c21167635bec31b8904ba9299f69214db95",
+    "checks_executed": false,
+    "execution_trust": "The operator admits these exact patch/check tuples for trusted execution; preparation reads inputs only.",
+    "prediction_records": 4,
+    "unapproved_prediction_records": 1
   },
   "recording": {
-    "actual_browser": true,
-    "seconds": 19.619,
-    "browser_errors": [],
-    "decision_origin": "scripted browser replay of Codex-assisted code assessment",
-    "video_sha256": "e584925b13723796f58294dae1762388d737b7572fd768c725e5829c9c97da53",
-    "source_commit_role": "Baseline HEAD at recording; runtime/UI changes were uncommitted. Actual frozen application bytes are identified below; no newer run is claimed.",
+    "duration_seconds": 19.695,
+    "source_commit": "ef63c60fe9f48b4daea612eb36d949c94f01fc71",
+    "source_commit_role": "Repository HEAD at recording; source_file_sha256 identifies the actual bytes, including uncommitted work.",
     "source_file_sha256": {
       "swe_workbench/__init__.py": "53ca2d514e038528d9f611fb5b1afc09ba55ee3ada776ab511fbb38d6a76e601",
       "swe_workbench/api.py": "e7396c84f749247319f87e249aa18ebd88be1e43adb87050dfa1ed86025c48a0",
       "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
-      "swe_workbench/cli.py": "d8c88edfe8908020cea455807b43bb7a378ae1cc7e0480efdd2dc8d54eb6e170",
-      "swe_workbench/core.py": "63dcdf366fa52964db09bf590bcbf4e42b6589c69c112f5bb8f53f72a4112317",
+      "swe_workbench/bundle.py": "0c162ae80e8e349adba05804f29ba991b2ff0eae80d56e0e36bf39abf74e57d3",
+      "swe_workbench/cli.py": "c3da61927c752bbbaa64103d97e128c7e2eb48ce659804149456259fb15e1ab7",
+      "swe_workbench/core.py": "dd496351de50d3b988aab384e4634c4afa27f92540b77106d273a5fbc61b0925",
       "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
       "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
       "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
       "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
       "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
       "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
-      "swe_workbench/worker.py": "ac0a7ed25b3dd845faa596bee170d6a0a2bd7c78219fbd98884c2785698d39da",
+      "swe_workbench/worker.py": "bdca2b4d7454127d17f0e1232070ddaeb4ab11a65efa1ad760e07094bbbcbf18",
       "web/app.js": "77b81f6e3cbb272238926062a4c26f23bb73f348202daab461ab83eb1d4cf555",
       "web/index.html": "507bace4ab854fed54e2e66994cfedfb8d34d402303e1ebc79d94c9adc5e821b",
       "web/style.css": "e3e9be596c07edffaf64f0942ebdceaf3dbd7fdde44983bc5508bb7aba3d18f6"
-    }
+    },
+    "raw_video_sha256": "3a083abff3a572d29a8e5392c3fd720ad7f05078eda1594ecfdcf0103255dc70",
+    "browser_errors": [],
+    "decision_origin": "scripted browser replay of Codex-assisted code assessment",
+    "assessment_reference_sha256": "daaed48231cf9184567849c107b047e9fca64c730e30b980793a4d8d081f0c99"
   },
-  "frozen_manifest_sha256": "e198d661745b60da3a07a1c8b973f5f72a0756f8d45ab1c4d3bcf77f92fe6aab",
-  "public_browser_local": {
+  "frozen_manifest_sha256": "54304e40a5fd9a799ef7b61188b6cfdee154034ac5f50d1a21c69c90726080ac",
+  "original_assessment": "examples/prepared-run/assessment.json",
+  "local_public_browser": {
     "profile": "local-static-public",
     "root_http": 200,
     "real_unique_items": 3,
     "original_synthetic_unique_items": 6,
+    "first_upstream_unique_items": 3,
     "owner_controls_hidden": true,
     "browser_errors": [],
     "api_requests": [],
@@ -120,34 +239,6 @@
     "deliberate_zero_volume_retained": true,
     "mobile_no_horizontal_overflow": true
   },
-  "pilot_report": "pilot-report.json",
-  "historical_a1_verification": "verification-v0.1.0a1.json",
-  "hosted_publication_status": "succeeded",
-  "hosted_public_browser": {
-    "profile": "hosted-public",
-    "root_http": 200,
-    "real_unique_items": 3,
-    "original_synthetic_unique_items": 6,
-    "owner_controls_hidden": true,
-    "browser_errors": [],
-    "api_requests": [],
-    "external_requests": [],
-    "initial_player": {
-      "paused": true,
-      "muted": true,
-      "controls": true,
-      "volume": 0.1,
-      "autoplay": false,
-      "tracks": 1
-    },
-    "deliberate_zero_volume_retained": true,
-    "mobile_no_horizontal_overflow": true
-  },
-  "publication": {
-    "site_source_commit": "db6564856ccd17dc5a88b368293e8aae7e880380",
-    "site_version": 2,
-    "status": "succeeded",
-    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
-    "historical_release_preserved": "v0.1.0a1"
-  }
+  "historical_a2_verification": "verification-v0.1.0a2.json",
+  "hosted_publication_status": "pending private save/audit and public checkpoint"
 }

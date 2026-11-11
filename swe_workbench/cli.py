@@ -12,6 +12,21 @@ def main(argv=None):
     parser.add_argument('--root', type=Path, default=Path('.workbench'))
     parser.add_argument('--bundle', help='Owner-selected built-in name or local bundle directory')
     commands = parser.add_subparsers(dest='command', required=True)
+    prepare = commands.add_parser('prepare-bundle', help='Read committed source and selected inputs into a fresh trusted bundle; runs no checks')
+    prepare.add_argument('--repo', type=Path, required=True, help='Local Git repository with all selected objects present')
+    prepare.add_argument('--commit', required=True, help='Explicit base commit/revision, resolved to its exact commit ID')
+    prepare.add_argument('--task-id', required=True)
+    prepare.add_argument('--task-text', type=Path, required=True)
+    prepare.add_argument('--source', action='append', dest='sources', required=True, help='Tracked repository-relative regular file; repeat to select more')
+    prepare.add_argument('--checks', type=Path, required=True, help='JSON list of {name,argv,timeout}')
+    prepare.add_argument('--candidates', type=Path, required=True, help='JSON list of {patch_file,model_name_or_path,provenance}; these exact patches are admitted')
+    prepare.add_argument('--provenance', type=Path, required=True, help='Source JSON with origin,license,repository')
+    prepare.add_argument('--notice', action='append', dest='notices', required=True, help='Tracked repository-relative notice; repeat as needed')
+    prepare.add_argument('--output', type=Path, required=True, help='Fresh directory outside the repository; parent must exist')
+    prepare.add_argument('--predictions', type=Path, help='Optional JSONL copied exactly; does not admit additional patches')
+    prepare.add_argument('--format', choices=('native', 'swebench'), default='native', dest='input_format')
+    prepare.add_argument('--name')
+    prepare.add_argument('--title')
     commands.add_parser('init')
     commands.add_parser('verify')
     commands.add_parser('batches')
@@ -39,6 +54,14 @@ def main(argv=None):
     export.add_argument('--operation-key', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == 'prepare-bundle':
+            from .bundle import prepare_bundle
+            arguments = vars(args).copy()
+            for name in ('command', 'root', 'bundle'):
+                arguments.pop(name)
+            result = prepare_bundle(**arguments)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
         workbench = Workbench(args.root, fixture_dir=args.bundle)
         workbench.initialize()
         command = args.command

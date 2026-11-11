@@ -98,7 +98,7 @@ class WorkerGitDiscoveryTests(unittest.TestCase):
             for relative, text in task['source_files'].items():
                 self.assertEqual((work / 'baseline' / relative).read_bytes(), text.encode())
             self.assertTrue(result['source_unchanged'])
-            self.assertEqual(result['runner'], 'trusted-task-worker-v2')
+            self.assertEqual(result['runner'], 'trusted-task-worker-v3')
 
 
 if __name__=='__main__':unittest.main()

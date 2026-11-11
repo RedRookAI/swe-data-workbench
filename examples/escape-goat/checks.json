@@ -1,0 +1,29 @@
+[
+  {
+    "name": "tag-non-string-coercion",
+    "argv": [
+      "/usr/bin/node",
+      "-e",
+      "const assert = require('node:assert/strict');\nconst {htmlEscapeTag, htmlUnescapeTag} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.equal(htmlEscapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n assert.equal(htmlUnescapeTag`prefix:${value}:suffix`, `prefix:${String(value)}:suffix`);\n}\nassert.equal(htmlEscapeTag`<b>${{toString: () => '<&>'}}</b>`, '<b>&lt;&amp;&gt;</b>');\nassert.equal(htmlUnescapeTag`<b>${{toString: () => '&lt;&amp;&gt;'}}</b>`, '<b><&></b>');\nconsole.log('tag substitutions converted; literal template segments preserved');\n"
+    ],
+    "timeout": 5
+  },
+  {
+    "name": "ordinary-string-preservation",
+    "argv": [
+      "/usr/bin/node",
+      "-e",
+      "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const input of ['', 'plain text', '<&>\\\"\\'', '🦄 & 🐐']) {\n assert.equal(htmlUnescape(htmlEscape(input)), input);\n}\nassert.equal(htmlUnescape('&amp;lt;'), '&lt;');\nconsole.log('ordinary string round trips and single-pass unescape preserved');\n"
+    ],
+    "timeout": 5
+  },
+  {
+    "name": "regular-function-type-contract",
+    "argv": [
+      "/usr/bin/node",
+      "-e",
+      "const assert = require('node:assert/strict');\nconst {htmlEscape, htmlUnescape} = require('./index.js');\nfor (const value of [undefined, true, 42, null]) {\n assert.throws(() => htmlEscape(value), TypeError);\n assert.throws(() => htmlUnescape(value), TypeError);\n}\nconsole.log('regular functions retain existing non-string rejection');\n"
+    ],
+    "timeout": 5
+  }
+]

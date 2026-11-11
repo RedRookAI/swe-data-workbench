@@ -1,0 +1,1 @@
+Allow htmlEscapeTag and htmlUnescapeTag to interpolate non-string values by converting each substitution with String before escaping or unescaping it. Preserve ordinary string escaping/unescaping and the existing string-only behavior of htmlEscape and htmlUnescape; the regular functions must not acquire implicit non-string coercion. Preserve literal template segments.

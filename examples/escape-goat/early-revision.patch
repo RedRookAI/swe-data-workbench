@@ -1,0 +1,49 @@
+diff --git a/index.js b/index.js
+index c669f6d..4e00fbb 100644
+--- a/index.js
++++ b/index.js
+@@ -1,13 +1,13 @@
+ 'use strict';
+ 
+-exports.htmlEscape = string => string
++exports.htmlEscape = string => String(string)
+ 	.replace(/&/g, '&amp;')
+ 	.replace(/"/g, '&quot;')
+ 	.replace(/'/g, '&#39;')
+ 	.replace(/</g, '&lt;')
+ 	.replace(/>/g, '&gt;');
+ 
+-exports.htmlUnescape = htmlString => htmlString
++exports.htmlUnescape = htmlString => String(htmlString)
+ 	.replace(/&gt;/g, '>')
+ 	.replace(/&lt;/g, '<')
+ 	.replace(/&#39;/g, '\'')
+diff --git a/test.js b/test.js
+index ee9cdd9..62a6e80 100644
+--- a/test.js
++++ b/test.js
+@@ -24,12 +24,24 @@ test('htmlEscapeTag', t => {
+ 	t.is(htmlEscapeTag`Hello <em><>${'<>'}</em>`, 'Hello <em><>&lt;&gt;</em>');
+ });
+ 
++test('htmlEscapeTag non-strings', t => {
++	t.is(htmlEscapeTag`foobarz${undefined}`, 'foobarzundefined');
++	t.is(htmlEscapeTag`🦄 ${true}`, '🦄 true');
++	t.is(htmlEscapeTag`Hello <em><>${1}</em>`, 'Hello <em><>1</em>');
++});
++
+ test('htmlUnescapeTag', t => {
+ 	t.is(htmlUnescapeTag`foobarz${'&amp;&lt;&gt;&quot;&#39;'}`, 'foobarz&<>"\'');
+ 	t.is(htmlUnescapeTag`🦄 ${'&amp;'} 🐐`, '🦄 & 🐐');
+ 	t.is(htmlUnescapeTag`Hello <em><>${'&lt;&gt;'}</em>`, 'Hello <em><><></em>');
+ });
+ 
++test('htmlUnescapeTag non-strings', t => {
++	t.is(htmlUnescapeTag`foobarz${undefined}`, 'foobarzundefined');
++	t.is(htmlUnescapeTag`🦄 ${true}`, '🦄 true');
++	t.is(htmlUnescapeTag`Hello <em><>${1}</em>`, 'Hello <em><>1</em>');
++});
++
+ test('htmlEscapeTag & htmlUnescapeTag', t => {
+ 	const input = '&<>"\'';
+ 	const actual = htmlUnescapeTag`${htmlEscapeTag`${input}`}`;

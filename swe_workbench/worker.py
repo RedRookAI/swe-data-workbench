@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import selectors
 import subprocess
 import sys
 import threading
@@ -22,6 +23,75 @@ from typing import Any
 
 
 OUTPUT_LIMIT = 65536
+READ_CHUNK = 16384
+REAP_TIMEOUT = 1.0
+
+
+class _StreamCapture:
+    """Retain only the fixed prefix; excess bytes are consumed and discarded."""
+
+    def __init__(self):
+        self.prefix = bytearray()
+        self.truncated = False
+
+    def append(self, data: bytes) -> None:
+        remaining = OUTPUT_LIMIT - len(self.prefix)
+        if len(data) > remaining:
+            self.truncated = True
+        self.prefix.extend(data[:remaining])
+
+
+def _bounded_capture(child, deadline):
+    captures = {"stdout": _StreamCapture(), "stderr": _StreamCapture()}
+    timed_out = False
+    try:
+        with selectors.DefaultSelector() as selector:
+            for name in captures:
+                stream = getattr(child, name)
+                os.set_blocking(stream.fileno(), False)
+                selector.register(stream, selectors.EVENT_READ, name)
+            while selector.get_map():
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    timed_out = True
+                    break
+                for key, _ in selector.select(remaining):
+                    # Readiness can remain continuous on a noisy pipe. Check
+                    # time before every fixed read, including across both FDs.
+                    if time.monotonic() >= deadline:
+                        timed_out = True
+                        break
+                    try:
+                        chunk = os.read(key.fd, READ_CHUNK)
+                    except BlockingIOError:
+                        continue
+                    if chunk:
+                        captures[key.data].append(chunk)
+                    else:
+                        selector.unregister(key.fileobj)
+                        key.fileobj.close()
+                if timed_out:
+                    break
+        if not timed_out:
+            try:
+                child.wait(timeout=max(0, deadline - time.monotonic()))
+            except subprocess.TimeoutExpired:
+                timed_out = True
+    finally:
+        # Closing pipes is bounded even if another process inherited a writer.
+        # Only this owned direct child is signaled; group reconciliation remains
+        # the controller's job. A timeout never establishes descendant death.
+        for name in captures:
+            getattr(child, name).close()
+        if child.poll() is None:
+            child.kill()
+            try:
+                child.wait(timeout=REAP_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                # Keep returncode=None: an uninterruptible/live child must not
+                # be reported as reaped. Controller ownership checks still run.
+                pass
+    return captures, timed_out
 
 
 def _canonical(value: Any) -> bytes:
@@ -67,23 +137,15 @@ def _invoke(name: str, argv: list[str], cwd: Path, timeout: float, root: Path) -
         # Children inherit this group by construction. Reading getpgid(child)
         # can race a very short Git process exiting before the read.
         identity = {"pid": child.pid, "start_ticks": _start_ticks(child.pid), "pgid": os.getpgrp()}
-        try:
-            stdout, stderr = child.communicate(timeout=timeout)
-            outcome = "passed" if child.returncode == 0 else "failed"
-        except subprocess.TimeoutExpired:
-            # Authored fixture commands do not spawn their own children.  The
-            # controller's loss-of-channel watchdog additionally covers the
-            # whole owned group, including Git/check processes.
-            child.kill()
-            stdout, stderr = child.communicate()
-            outcome = "timeout"
-        out, out_truncated = _output(stdout, root)
-        err, err_truncated = _output(stderr, root)
+        captures, timed_out = _bounded_capture(child, started + timeout)
+        outcome = "timeout" if timed_out else ("passed" if child.returncode == 0 else "failed")
+        out, _ = _output(captures["stdout"].prefix, root)
+        err, _ = _output(captures["stderr"].prefix, root)
         return {
             "name": name, "outcome": outcome, "argv": argv,
             "stdout": out, "stderr": err, "exit_code": child.returncode,
             "duration_seconds": time.monotonic() - started,
-            "output_truncated": out_truncated or err_truncated,
+            "output_truncated": any(capture.truncated for capture in captures.values()),
             "process": identity,
         }
     except OSError as exc:
@@ -169,7 +231,7 @@ def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]
         "overall": overall, "baseline": baseline, "candidate": candidate,
         "patch_application": application, "source_unchanged": source_unchanged,
         "checks": checks, "duration_seconds": time.monotonic() - started,
-        "runner": "trusted-task-worker-v2",
+        "runner": "trusted-task-worker-v3",
     }
 
 

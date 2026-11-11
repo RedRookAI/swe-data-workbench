@@ -38,3 +38,11 @@ The owner selects a local bundle before serving/importing it. SWE-bench-style fi
 The complete upstream Git diff exposed an ancestor-discovery problem: Git can return success after skipping paths outside a nested directory prefix. Each disposable command now stops Git discovery at its workspace parent. A regression verifies actual changed candidate bytes under an enclosing repository and preserves both baseline and ancestor metadata. Existing ordinary path validation remains intact.
 
 Reviewer mode is an explicit recorded attribute. Owner, developer, AI-assisted and scripted decisions have the same exact-evidence acceptance requirements. This field records an operator declaration; it does not independently authenticate the named person or review quality. The shipped assessment plan documents the examined semantic reasons and refuses changed source/check/rubric identities or unexpected actual outcomes.
+
+## Read-only local preparation
+
+The prepare-bundle command reads explicitly selected committed Git blobs, check argv and exact patch/prediction bytes. It generates the existing catalog format and an inspectable preparation summary. Selection is deliberate operator admission; structural validation does not certify code safety. Git working copies are never reset or checked out, and untracked/dirty bytes do not enter the pinned source snapshot. Partial clones and unsupported source modes/types are refused. Preparation dispatches before Workbench initialization, so it creates no runtime database. A staged, fsynced Linux no-replace publication preserves existing inputs and outputs.
+
+## Capture while commands run
+
+The v3 worker concurrently drains both nonblocking pipes with a selector. Each stream retains at most65536 payload bytes; reads are at most16384 bytes and excess is discarded. UTF-8 replacement decoding, attempt-path redaction and actual exit status remain available. The monotonic deadline is checked even when output is continuously ready. Timeout closes descriptors and reaps the owned direct child with finite cleanup; the controller's existing group/uncertain reconciliation remains authoritative. This bounds retained output, not total child memory or hostile-code behavior. Historical v1/v2 evidence retains its identities.

@@ -40,3 +40,15 @@ https://github.com/sindresorhus/escape-string-regexp/commit/732905da074f0220487a
 SWE-bench's documented prediction keys informed a compatible input adapter. This particular issue is not claimed as a member of its dataset.
 
 https://raw.githubusercontent.com/SWE-bench/SWE-bench/main/docs/guides/evaluation.md
+
+## Reusable workflow follow-up
+
+Checked2026-11-11. Native Git object reads and Python selector-based bounded capture were chosen over repository checkout/filter execution and full output accumulation. The second case uses two actual cumulative revisions of one MIT-licensed upstream PR; its review specifies the regular-method contract. Small Node assertion checks examine that requirement without installing the original AVA ecosystem. Outcomes are local observations, not model or benchmark scores.
+
+https://docs.python.org/3.12/library/selectors.html
+
+https://git-scm.com/docs/git-show/2.43.0
+
+https://git-scm.com/docs/git-ls-tree
+
+https://github.com/sindresorhus/escape-goat/pull/13#discussion_r288880742

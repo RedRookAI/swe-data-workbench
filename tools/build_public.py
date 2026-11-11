@@ -18,7 +18,7 @@ TOP_LEVEL = {"index.html", "app.js", "styles.css", "style.css"}
 ASSET_SUFFIXES = {".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".woff2"}
 
 
-def build_public(web_dir, export_path, output_dir=None, legacy_export=None):
+def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prior_upstream_export=None):
     web, exported = Path(web_dir).resolve(), Path(export_path).resolve()
     output = Path(output_dir or REPO / "dist").absolute()
     if output.name != "dist" or output.is_symlink():
@@ -57,20 +57,27 @@ def build_public(web_dir, export_path, output_dir=None, legacy_export=None):
         copied = verify_export(data)
         if not copied["ok"]:
             raise ExportError("Copied public evidence failed verification.")
-        if legacy_export is not None:
+        for view, previous_export in [('synthetic', legacy_export), ('unicode-hyphen', prior_upstream_export)]:
+            if previous_export is None:
+                continue
             # A separate frozen cut keeps the original authored example inspectable.
             # Use current safe assets, preserve the old three export files verbatim.
-            legacy = Path(legacy_export).resolve()
+            legacy = Path(previous_export).resolve()
             check_legacy = verify_export(legacy)
             if not check_legacy['ok']:
-                raise ExportError('Original synthetic export failed verification.')
+                raise ExportError('Preserved export failed verification: ' + view)
             for source, relative in sources:
-                target = stage / 'synthetic' / relative
+                target = stage / view / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
-            (stage / 'synthetic' / 'data').mkdir()
+                if relative == Path('index.html'):
+                    # Preserved views live one directory below the public root.
+                    # Their fixed history links must still reach sibling views.
+                    target.write_text(target.read_text().replace('href="./synthetic/"', 'href="../synthetic/"')
+                                      .replace('href="./unicode-hyphen/"', 'href="../unicode-hyphen/"'))
+            (stage / view / 'data').mkdir()
             for name in FILES:
-                shutil.copyfile(legacy / name, stage / 'synthetic' / 'data' / name)
+                shutil.copyfile(legacy / name, stage / view / 'data' / name)
         if output.exists():
             # Only replace a prior generated build, never recursively erase an arbitrary directory.
             marker = output / ".swe-public-build"
@@ -92,8 +99,9 @@ def main():
     parser.add_argument("--web", type=Path, default=REPO / "web")
     parser.add_argument("--output", type=Path, default=REPO / "dist")
     parser.add_argument('--legacy-export', type=Path, help='Preserved original synthetic frozen export')
+    parser.add_argument('--prior-upstream-export', type=Path, help='Preserved first upstream frozen export')
     args = parser.parse_args()
-    print(json.dumps(build_public(args.web, args.export, args.output, args.legacy_export), indent=2))
+    print(json.dumps(build_public(args.web, args.export, args.output, args.legacy_export, args.prior_upstream_export), indent=2))
 
 
 if __name__ == "__main__":

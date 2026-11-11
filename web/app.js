@@ -101,6 +101,7 @@ function renderCase() {
   $('case-description').textContent = description;
   $('case-sidebar').textContent = publicCase ? 'Public upstream case. Labeled synthetic controls. Real check observations.' : synthetic ? 'Synthetic coding fixtures. Real executable checks. Version-bound adjudication.' : 'Recorded coding submissions. Real executable checks. Version-bound adjudication.';
   $('synthetic-link').hidden = live || !publicCase;
+  $('first-upstream-link').hidden = live || !publicCase || state.snapshot?.runtime?.bundle?.name !== 'escape-goat';
   $('import').textContent = approvedInput() ? 'Import approved task' : 'Import trusted sample';
 }
 function renderIntake() {

@@ -252,7 +252,7 @@ class Workbench:
             segment['completed_ids'] = json.loads(segment['completed_ids'])
         return {'batch': batch, 'items': items, 'audit': audit, 'cut': cut, 'timing_segments': segments,
                 'runtime': {'python': platform.python_version(), 'sqlite': sqlite3.sqlite_version,
-                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-task-worker-v2',
+                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-task-worker-v3',
                             'intake_version': 'raw-occurrence-v2', 'bundle': self.bundle_info(),
                             'fixture_catalog_digest': digest(canonical(self.catalog)), 'rubric_digest': self.rubric_digest}}
 

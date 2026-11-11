@@ -1,0 +1,139 @@
+{
+  "schema": "swe-workbench-browser-recording/v2",
+  "recorded_at": "2026-11-11T22:05:45.088075+00:00",
+  "source_commit": "ef63c60fe9f48b4daea612eb36d949c94f01fc71",
+  "source_commit_role": "Repository HEAD at recording; source_file_sha256 identifies the actual bytes, including uncommitted work.",
+  "source_file_sha256": {
+    "swe_workbench/__init__.py": "53ca2d514e038528d9f611fb5b1afc09ba55ee3ada776ab511fbb38d6a76e601",
+    "swe_workbench/api.py": "e7396c84f749247319f87e249aa18ebd88be1e43adb87050dfa1ed86025c48a0",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/bundle.py": "0c162ae80e8e349adba05804f29ba991b2ff0eae80d56e0e36bf39abf74e57d3",
+    "swe_workbench/cli.py": "c3da61927c752bbbaa64103d97e128c7e2eb48ce659804149456259fb15e1ab7",
+    "swe_workbench/core.py": "dd496351de50d3b988aab384e4634c4afa27f92540b77106d273a5fbc61b0925",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
+    "swe_workbench/worker.py": "bdca2b4d7454127d17f0e1232070ddaeb4ab11a65efa1ad760e07094bbbcbf18",
+    "web/app.js": "77b81f6e3cbb272238926062a4c26f23bb73f348202daab461ab83eb1d4cf555",
+    "web/index.html": "507bace4ab854fed54e2e66994cfedfb8d34d402303e1ebc79d94c9adc5e821b",
+    "web/style.css": "e3e9be596c07edffaf64f0942ebdceaf3dbd7fdde44983bc5508bb7aba3d18f6"
+  },
+  "case_origin": "public upstream issue and human patch; labeled synthetic controls",
+  "decision_origin": "scripted browser replay of Codex-assisted code assessment",
+  "model_calls": 0,
+  "assessment_reference_sha256": "daaed48231cf9184567849c107b047e9fca64c730e30b980793a4d8d081f0c99",
+  "keep_dependency": false,
+  "batch": {
+    "id": "batch-bb0c53749c47daff63fe663d",
+    "created_at": "2026-11-11T22:05:26.822779+00:00",
+    "raw_digest": "39d497c88b8948b3a7aa292fb18e6c21167635bec31b8904ba9299f69214db95",
+    "raw_lines": 4,
+    "invalid_lines": 0,
+    "duplicate_lines": 1,
+    "unique_items": 3,
+    "counts": {
+      "queued": 0,
+      "running": 0,
+      "interrupted": 0,
+      "completed": 2,
+      "execution-error": 0,
+      "uncertain": 0,
+      "pending-evidence": 1,
+      "accepted": 1,
+      "rejected": 1,
+      "needs-work": 0,
+      "pending_review": 1
+    },
+    "invalid_records": [],
+    "occurrences": [
+      {
+        "line": 1,
+        "submission_id": "sub-f38d631db0d3e6ed6db2bb47da35f0e68c0bbfef24ffdcc3a6d8d16aaec80885",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "309463f4f1d9157a57e3fa0ff7953b108bea5af42bbcb752f522f5df219c1973"
+      },
+      {
+        "line": 2,
+        "submission_id": "sub-9a75afee25aac2fd212727728c363ccd58b0d5494219a44e61360b1db405e8db",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "3304635d806c7804c1b51052a056fc98d840d86fe3955f6d68e4a12fcb5f6b59"
+      },
+      {
+        "line": 3,
+        "submission_id": "sub-9a75afee25aac2fd212727728c363ccd58b0d5494219a44e61360b1db405e8db",
+        "duplicate_of": 2,
+        "error": null,
+        "raw_digest": "3304635d806c7804c1b51052a056fc98d840d86fe3955f6d68e4a12fcb5f6b59"
+      },
+      {
+        "line": 4,
+        "submission_id": "sub-8351858d119bfe98ce95c4971a9ee8f87abcd5e0ccd45489b3a5450628de0ae6",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "4a638e0ae1ab48e009233cd3df83ef42332c0525458214048aa71ff08afc4986"
+      }
+    ]
+  },
+  "export_path": "docs/examples/prepared-run/export",
+  "manifest_digest": "54304e40a5fd9a799ef7b61188b6cfdee154034ac5f50d1a21c69c90726080ac",
+  "verification": {
+    "ok": true,
+    "errors": [],
+    "manifest_digest": "54304e40a5fd9a799ef7b61188b6cfdee154034ac5f50d1a21c69c90726080ac",
+    "export_id": "export-ad4cf847b9c314795f84fbc33adf6c4ccab60196a82161b87e99e2e6ecdb4e5a",
+    "accepted_count": 1
+  },
+  "integrity": {
+    "ok": true,
+    "schema_version": 1,
+    "audit_root": "66f696526e63b00c8a992d582cfab35fab182b85b67c8b9545d0a1ea942bacac",
+    "audit_events": 13,
+    "verified_results": 2,
+    "journal_mode": "delete",
+    "synchronous": 2,
+    "foreign_keys": 1
+  },
+  "browser_errors": [],
+  "raw_video": "release asset walkthrough.webm",
+  "raw_video_sha256": "3a083abff3a572d29a8e5392c3fd720ad7f05078eda1594ecfdcf0103255dc70",
+  "events": [
+    {
+      "seconds": 0.0,
+      "caption": "Real historical upstream case. Human reference patch, labeled synthetic controls. No model calls."
+    },
+    {
+      "seconds": 1.399,
+      "caption": "Import four exact records: three unique patches and one repeated delivery. Only two tuples are approved."
+    },
+    {
+      "seconds": 3.301,
+      "caption": "Run actual baseline, Git application and candidate checks in separate workspaces. The unknown variant stays pending."
+    },
+    {
+      "seconds": 4.154,
+      "caption": "Inspect the selected upstream PR revision: exact diff, actual check output and source preservation."
+    },
+    {
+      "seconds": 8.306,
+      "caption": "Replay the Codex-assisted code assessment through real controls. This is scripted adjudication, not independent human review."
+    },
+    {
+      "seconds": 9.887,
+      "caption": "Inspect the selected upstream PR revision: exact diff, actual check output and source preservation."
+    },
+    {
+      "seconds": 14.038,
+      "caption": "Replay the Codex-assisted code assessment through real controls. This is scripted adjudication, not independent human review."
+    },
+    {
+      "seconds": 15.595,
+      "caption": "Freeze one accepted upstream patch with its full lineage. The failing and unapproved controls remain visible."
+    }
+  ],
+  "duration_seconds": 19.695
+}

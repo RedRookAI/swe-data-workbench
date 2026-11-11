@@ -1,0 +1,10 @@
+{
+  "origin": "public_upstream",
+  "repository": "https://github.com/sindresorhus/escape-goat",
+  "base_commit": "235683eb791e13336cf4bd9705ea9df97e0d8e51",
+  "pull_request": "https://github.com/sindresorhus/escape-goat/pull/13",
+  "review_requirement": "https://github.com/sindresorhus/escape-goat/pull/13#discussion_r288880742",
+  "license": "MIT",
+  "case_kind": "historical public upstream PR revisions, not an official SWE-bench instance",
+  "checker_origin": "Red Rook AI, authored with Codex assistance using Node built-in assertions; upstream AVA not run"
+}
