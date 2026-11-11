@@ -86,7 +86,7 @@ def run_demo(root: Path, workers: int = 1) -> dict:
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root",type=Path,default=Path(".state/documented-demo"))
+    parser.add_argument("--root",type=Path,default=Path(".state/documented-example"))
     parser.add_argument("--workers",type=int,choices=[1,2],default=1)
     args=parser.parse_args()
     print(json.dumps(run_demo(args.root,args.workers),ensure_ascii=False,indent=2))

@@ -61,13 +61,18 @@ def read_jsonl(path):
 def import_jsonl(workbench, path, operation_key):
     file_digest, rows = read_jsonl(path)
     store = workbench.store
-    payload = {'file_digest': file_digest}
+    contexts = []
+    for row in rows:
+        if not row['error']:
+            item = workbench._record(row['record'])
+            contexts.append({'line': row['ordinal'], 'submission_id': item['id'], 'trusted_tuple': item['trusted_tuple']})
+    payload = {'file_digest': file_digest, 'context_digest': digest(canonical(contexts))}
     with store.transaction() as con:
         prior = store.operation(con, 'import', operation_key, payload)
         if prior is not None:
             return workbench._batch(con, prior['id'])
-        # Same bytes imported under another key retain one batch and occurrence set.
-        batch_id = 'batch-' + file_digest[:24]
+        # Replay shares membership only within the same effective task context.
+        batch_id = 'batch-' + digest(canonical(payload))[:24]
         if con.execute('SELECT 1 FROM batches WHERE id=?', (batch_id,)).fetchone():
             response = workbench._batch(con, batch_id)
             store.remember(con, 'import', operation_key, payload, {'id': batch_id})
@@ -94,7 +99,7 @@ def import_jsonl(workbench, path, operation_key):
             con.execute('INSERT INTO memberships VALUES(?,?,?,?,?,?,?)',
                         (batch_id, row['ordinal'], item['id'] if item else None, error, duplicate_of, row['raw'], row['raw_digest']))
         response = workbench._batch(con, batch_id)
-        store.event(con, 'batch-imported', {'batch_id': batch_id, 'file_digest': file_digest,
+        store.event(con, 'batch-imported', {'batch_id': batch_id, **payload,
                                           'raw_lines': response['raw_lines'], 'invalid_lines': response['invalid_lines'],
                                           'duplicate_lines': response['duplicate_lines'], 'unique_items': response['unique_items']}, actor='operator')
         store.remember(con, 'import', operation_key, payload, {'id': batch_id})

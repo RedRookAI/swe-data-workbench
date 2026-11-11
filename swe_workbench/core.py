@@ -63,12 +63,34 @@ class Workbench:
     def import_sample(self, operation_key):
         return self.import_jsonl(self.fixture_dir / 'sample.jsonl', operation_key)
 
+    def _project_context(self, item):
+        """Expose current eligibility without rewriting historical decisions.
+
+        Evidence and reviews remain bound to their immutable imported context.
+        A changed catalog requires importing the new tuple and new evidence.
+        Frozen export snapshots retain the eligibility recorded at their cut.
+        """
+        current = self._record({'task_id': item['task_id'], 'patch': item['patch']})
+        changed = [key for key in ('source_digest', 'check_digest', 'rubric_digest', 'task_text')
+                   if item.get(key) != current.get(key)]
+        if item.get('trusted_tuple') and not current['trusted_tuple']:
+            changed.append('trusted_tuple')
+        projected = item | {'context_current': not changed, 'stale_context': changed}
+        if changed:
+            projected['recorded_disposition'] = item['disposition']
+            projected['recorded_execution_status'] = item['execution_status']
+            projected['disposition'] = 'pending'
+            if item['execution_status'] not in {'running', 'uncertain', 'interrupted'}:
+                projected['execution_status'] = 'pending-evidence'
+        return projected
+
     def _batch(self, con, batch_id):
         batch = con.execute('SELECT * FROM batches WHERE id=?', (batch_id,)).fetchone()
         if not batch:
             raise WorkbenchError('batch-not-found', 'Batch does not exist.', 404)
         members = con.execute('SELECT * FROM memberships WHERE batch_id=? ORDER BY ordinal', (batch_id,)).fetchall()
-        items = con.execute('SELECT DISTINCT s.id,s.execution_status,s.disposition FROM submissions s JOIN memberships m ON s.id=m.submission_id WHERE m.batch_id=?', (batch_id,)).fetchall()
+        rows = con.execute('SELECT DISTINCT s.id,s.data,s.execution_status,s.disposition FROM submissions s JOIN memberships m ON s.id=m.submission_id WHERE m.batch_id=?', (batch_id,)).fetchall()
+        items = [self._project_context(json.loads(row['data']) | {'execution_status': row['execution_status'], 'disposition': row['disposition']}) for row in rows]
         counts = {k: 0 for k in ('queued','running','interrupted','completed','execution-error','uncertain','pending-evidence','accepted','rejected','needs-work','pending_review')}
         for item in items:
             counts[item['execution_status']] += 1
@@ -100,11 +122,11 @@ class Workbench:
             if record.get('correction_of'):
                 lineage['correction_of'] = record['correction_of']
             lineages.append(lineage)
-        return json.loads(row['data']) | {'batch_id': batch_id or lineages[0]['batch_id'], 'revision': row['revision'],
+        return self._project_context(json.loads(row['data']) | {'batch_id': batch_id or lineages[0]['batch_id'], 'revision': row['revision'],
                                            'execution_status': row['execution_status'], 'disposition': row['disposition'],
                                            'result': json.loads(row['result']) if row['result'] else None,
                                            'review': json.loads(row['review']) if row['review'] else None, 'lineage': lineages,
-                                           'attempt_generation': row['generation']}
+                                           'attempt_generation': row['generation']})
 
     def submissions(self, batch_id):
         self._ready()
@@ -143,14 +165,14 @@ class Workbench:
         with self.store.transaction() as con:
             prior = self.store.operation(con, 'review', operation_key, payload)
             if prior is not None:
-                return prior
+                return self._project_context(prior)
             item = self._item(con, submission_id)
             if type(expected_revision) is not int or item['revision'] != expected_revision:
                 raise WorkbenchError('stale-review', 'Submission revision changed; reload current evidence.', 409)
             if rubric_digest != item['rubric_digest'] or rubric_digest != self.rubric_digest:
                 raise WorkbenchError('stale-rubric', 'Review rubric does not match current submission rubric.', 409)
             current_context = self._record({'task_id': item['task_id'], 'patch': item['patch'], 'task_text': item['task_text']})
-            if any(item.get(key) != current_context.get(key) for key in ('source_digest', 'check_digest', 'patch_digest', 'task_text')):
+            if not item['context_current'] or any(item.get(key) != current_context.get(key) for key in ('source_digest', 'check_digest', 'patch_digest', 'task_text')):
                 raise WorkbenchError('stale-context', 'Source or check context changed; current machine evidence is required.', 409)
             if not item['result'] or not evidence_digest or evidence_digest != item['result']['evidence_digest']:
                 raise WorkbenchError('stale-evidence', 'Review requires the current existing evidence digest.', 409)

@@ -30,7 +30,7 @@ git clone https://github.com/RedRookAI/swe-data-workbench.git
 cd swe-data-workbench
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock
-.venv/bin/python tools/run_demo.py --root .state/documented-demo
+.venv/bin/python tools/run_demo.py --root .state/documented-example
 ```
 
 The command imports the sample, runs a controller that stops after one committed result, resumes in a fresh process, records scripted exact-evidence decisions and verifies a repeated export. Its JSON receipt identifies observed counts and artifact hashes. It preserves existing state rather than resetting a workspace.
@@ -39,7 +39,7 @@ Inspect the commands separately:
 
 ```sh
 .venv/bin/python -m swe_workbench.cli --help
-.venv/bin/python -m swe_workbench.cli --root .state/documented-demo verify
+.venv/bin/python -m swe_workbench.cli --root .state/documented-example verify
 ```
 
 The package also includes its fixture catalog and browser assets for an installed-wheel workflow.

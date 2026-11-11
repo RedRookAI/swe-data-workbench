@@ -1,4 +1,6 @@
 from pathlib import Path
+import copy
+import json
 import tempfile
 import unittest
 from swe_workbench.core import Workbench, CRITERIA
@@ -77,6 +79,60 @@ class CoreTests(unittest.TestCase):
         self.assertNotEqual(first['export_id'],third['export_id'])
         self.assertEqual(first['snapshot']['items'],self.w.exports(self.batch['id'])[0]['snapshot']['items'] if self.w.exports(self.batch['id'])[0]['export_id']==first['export_id'] else self.w.exports(self.batch['id'])[1]['snapshot']['items'])
         self.assertNotIn(str(self.w.root),canonical(first['snapshot']).decode())
+
+    def test_catalog_change_invalidates_current_acceptance_and_reimport_context(self):
+        from swe_workbench.exporter import metrics_for_snapshot
+        accepted = {}
+        for label in ('good', 'same-patch-different-context'):
+            item = self.items[label]
+            accepted[label] = self.w.review(item['id'], **self.request(item))
+        frozen = self.w.prepare_export(self.batch['id'], 'frozen-before-change')
+        self.assertEqual(frozen['snapshot']['batch']['counts']['accepted'], 2)
+        for change, expected_accepted in (('rubric', 0), ('source', 1), ('checks', 1)):
+            with self.subTest(change=change):
+                catalog = copy.deepcopy(self.w.catalog)
+                if change == 'rubric':
+                    catalog['rubric']['version'] = 2
+                elif change == 'source':
+                    catalog['tasks']['order-dedupe']['source_files']['solution.py'] += '\n# revised source context\n'
+                else:
+                    catalog['tasks']['order-dedupe']['checks'][0]['timeout'] = 6
+                fixtures = Path(self.tmp.name) / ('fixtures-' + change)
+                fixtures.mkdir()
+                (fixtures / 'catalog.json').write_bytes(canonical(catalog))
+                (fixtures / 'sample.jsonl').write_bytes((self.w.fixture_dir / 'sample.jsonl').read_bytes())
+                current = Workbench(self.w.root, fixture_dir=fixtures)
+                current.initialize()
+                snapshot = current.snapshot(self.batch['id'])
+                self.assertEqual(snapshot['batch']['counts']['accepted'], expected_accepted)
+                self.assertEqual(metrics_for_snapshot(snapshot)['accepted_yield']['numerator'], expected_accepted)
+                historical = current.submission(accepted['good']['id'])
+                self.assertFalse(historical['context_current'])
+                self.assertEqual(historical['disposition'], 'pending')
+                self.assertEqual(historical['recorded_disposition'], 'accepted')
+                self.assertEqual(historical['execution_status'], 'pending-evidence')
+                self.assertEqual(historical['review'], accepted['good']['review'])
+                self.assertEqual(historical['result'], accepted['good']['result'])
+                self.assertEqual(historical['revision'], accepted['good']['revision'])
+                if change != 'rubric':
+                    self.assertTrue(current.submission(accepted['same-patch-different-context']['id'])['context_current'])
+                # Previously frozen snapshots are historical records, immutable
+                # even though a new snapshot has no stale current acceptance.
+                self.assertEqual(current.prepare_export(self.batch['id'], 'frozen-before-change'), frozen)
+                self.assertNotEqual(current.prepare_export(self.batch['id'], 'after-' + change)['export_id'], frozen['export_id'])
+                with self.assertRaises(WorkbenchError) as caught:
+                    current.import_sample('sample')
+                self.assertEqual(caught.exception.code, 'operation-conflict')
+                replacement = current.import_sample('reimport-' + change)
+                self.assertNotEqual(replacement['id'], self.batch['id'])
+                self.assertEqual(replacement['raw_digest'], self.batch['raw_digest'])
+                replacements = {i['fixture_label']: i for i in current.submissions(replacement['id'])}
+                self.assertNotEqual(replacements['good']['id'], accepted['good']['id'])
+                self.assertIsNone(replacements['good']['result'])
+                self.assertEqual(current.import_sample('reimport-' + change)['id'], replacement['id'])
+                if change != 'rubric':
+                    self.assertEqual(replacements['same-patch-different-context']['id'], accepted['same-patch-different-context']['id'])
+                    self.assertEqual(replacements['same-patch-different-context']['disposition'], 'accepted')
 
     def test_missing_artifact_and_audit_tampering_are_integrity_failures(self):
         item=self.items['good'];name=item['result']['evidence_digest']

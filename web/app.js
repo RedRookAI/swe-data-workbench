@@ -122,6 +122,7 @@ function renderQueue() {
     const button = node('button', null, 'submission' + (item.id === state.selected ? ' selected' : ''));
     button.type = 'button'; button.setAttribute('aria-pressed', String(item.id === state.selected));
     button.append(node('span', item.task_id || short(item.id), 'eyebrow'), node('strong', item.title || 'Untitled submission'));
+    button.append(node('span', short(item.id), 'small muted'));
     const statuses = node('span', null, 'submission-status'); statuses.append(badge(item.execution_status), badge(item.disposition)); button.append(statuses);
     button.addEventListener('click', () => selectItem(item.id)); list.append(button);
   }
@@ -134,6 +135,7 @@ function renderInspector() {
   head.append(node('p', item.task_id || 'SUBMISSION', 'eyebrow'), node('h2', item.title || 'Untitled submission'));
   const statuses = node('div', null, 'actions'); statuses.append(badge(item.execution_status), badge(item.result?.overall || 'no machine evidence'), badge(item.disposition));
   head.append(statuses, node('p', 'Revision ' + item.revision + ' · ' + (item.origin || 'origin unavailable'), 'small muted')); root.append(head);
+  if (item.context_current === false) root.append(node('p', 'Context changed. This earlier evidence and adjudication are historical; import the current context and obtain new evidence before acceptance.', 'notice'));
   const tabs = node('div', null, 'tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Submission details');
   const panels = [];
   for (const [name, title] of [['task', 'Task & patch'], ['evidence', 'Machine evidence'], ['review', 'Adjudication'], ['provenance', 'Provenance']]) {
@@ -170,9 +172,10 @@ function renderEvidence(panel, item) {
 }
 function renderReview(panel, item) {
   const review = item.review;
-  if (review) { panel.append(node('h3', 'Current developer adjudication'), badge(review.decision), node('p', review.reason || 'No reason recorded.')); appendField(panel, 'Criterion judgments and attribution', {criteria: review.criteria, actor: review.actor, origin: review.origin}); }
+  if (review) { panel.append(node('h3', item.context_current === false ? 'Historical developer adjudication' : 'Current developer adjudication'), badge(review.decision), node('p', review.reason || 'No reason recorded.')); appendField(panel, 'Criterion judgments and attribution', {criteria: review.criteria, actor: review.actor, origin: review.origin}); }
   else panel.append(node('p', 'No developer adjudication recorded.', 'muted'));
   if (!live) { panel.append(node('p', 'Recorded read-only evidence. Decisions cannot be changed in this view.', 'notice')); return; }
+  if (item.context_current === false) { panel.append(node('p', 'Import the current task context to obtain a new evidence-bound revision. The historical decision is preserved.', 'notice')); return; }
   if (!item.result?.evidence_digest) { panel.append(node('p', 'Run the required checks before binding a review to machine evidence.', 'notice')); return; }
   const form = node('form'); form.id = 'review-form';
   form.append(node('h3', 'Review exact current evidence'), node('p', 'Assess each criterion. Acceptance requires five passes, completed passing machine evidence, and no unresolved execution.', 'small muted'));
@@ -228,6 +231,7 @@ async function start() {
     const recording = await fetch('./recording.webm', {method: 'HEAD', credentials: 'omit'});
     if (recording.ok && (recording.headers.get('content-type') || '').startsWith('video/')) {
       const video = $('walkthrough'); video.muted = true; video.volume = 0.1; video.autoplay = false; video.src = './recording.webm';
+      const track = node('track'); track.kind = 'captions'; track.label = 'Walkthrough captions'; track.srclang = 'en'; track.src = './recording.vtt'; track.default = true; video.append(track);
       try { const volume = Number(sessionStorage.getItem('workbench-preview-volume')); if (volume > 0 && volume <= 1) video.volume = volume; } catch {}
       video.addEventListener('volumechange', () => { try { sessionStorage.setItem('workbench-preview-volume', String(video.volume)); } catch {} });
       $('recording-section').hidden = false;
