@@ -33,4 +33,4 @@ Captured-output retention is bounded while pipes are drained. The selected prefi
 
 Runtime dependencies stayed unchanged. An upstream Starlette TestClient deprecation warning appeared during installed qualification; checks passed. The earlier small pilot remains historical workload evidence and was not repeated for this change.
 
-Hosted publication confirmation is recorded after private save/audit and deployment. No hosted success is claimed in this prepublication checkpoint.
+Hosted Site version3 succeeded from a69616c174c007c5c923473c0a325953722c8450. Ordinary Chromium returned HTTP200, rendered the new3-item case and preserved3-item upstream/6-item synthetic views, followed sibling history links and observed no API/external requests or browser errors. Owner controls were hidden; paused/muted controls, chosen volume0 and mobile fit passed. This final update records hosted evidence only; qualified package/runtime/public-asset bytes are unchanged.
