@@ -10,6 +10,12 @@ https://swe-data-workbench.flyswatterghost.chatgpt.site
 
 The public view is read-only. It includes synthetic tasks, actual executable-check results, scripted developer adjudications and downloadable evidence. The walkthrough records the real application. It makes no model requests.
 
+![Recorded workbench with real synthetic-fixture evidence](docs/images/workbench.png)
+
+Release files and installable wheel:
+
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a1
+
 ## What you can inspect
 
 - Eight input lines become six unique submissions, one duplicate occurrence and one invalid record.

@@ -1,0 +1,195 @@
+{
+  "schema": "swe-workbench-browser-recording/v1",
+  "recorded_at": "2026-11-11T20:45:45.391544+00:00",
+  "source_commit": "6adaf3d4dbafa11f14922e6405a9a885e0de3cc6",
+  "fixture_origin": "synthetic authored fixtures",
+  "decision_origin": "scripted developer adjudication through actual browser controls",
+  "model_calls": 0,
+  "keep_dependency": false,
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "cooperative_stop": {
+    "batch_id": "batch-610e816c1d417115608ca35b",
+    "run_id": "run-3d59f0bd2be54485bebb981009c2269c",
+    "workers": 1,
+    "processed": 1,
+    "completed_ids": [
+      "sub-0e681d4e18a539759934facf04d8ecc6d37d560720467663b640c8203d7bffc4"
+    ],
+    "interrupted": true,
+    "elapsed_seconds": 0.08128534257411957,
+    "observed_max_workers": 1,
+    "counts": {
+      "queued": 3,
+      "running": 0,
+      "interrupted": 0,
+      "completed": 1,
+      "execution-error": 0,
+      "uncertain": 0,
+      "pending-evidence": 2,
+      "accepted": 0,
+      "rejected": 0,
+      "needs-work": 0,
+      "pending_review": 6
+    }
+  },
+  "preserved_completed_evidence": {
+    "sub-0e681d4e18a539759934facf04d8ecc6d37d560720467663b640c8203d7bffc4": "95f4f42df94599605ef9283ed12fb312fa65f980074dcc51d18d9669f24e04ac"
+  },
+  "batch": {
+    "id": "batch-610e816c1d417115608ca35b",
+    "created_at": "2026-11-11T20:45:19.831174+00:00",
+    "raw_digest": "8a0c65e75b67e4419f3f7db1a1eff07ea4bff838d17197a4e5cab4ce956e44a8",
+    "raw_lines": 8,
+    "invalid_lines": 1,
+    "duplicate_lines": 1,
+    "unique_items": 6,
+    "counts": {
+      "queued": 0,
+      "running": 0,
+      "interrupted": 0,
+      "completed": 4,
+      "execution-error": 0,
+      "uncertain": 0,
+      "pending-evidence": 2,
+      "accepted": 2,
+      "rejected": 2,
+      "needs-work": 0,
+      "pending_review": 2
+    },
+    "invalid_records": [
+      {
+        "line": 5,
+        "error": "invalid-json",
+        "raw_digest": "8f8eaa6d2fdfced706edf7d557715fb1fddccbe8a93c374b8d7fb429a7537eb4"
+      }
+    ],
+    "occurrences": [
+      {
+        "line": 1,
+        "submission_id": "sub-31b2e978fd6569295ce9fdfc98df832d182466c2ba1146604a66b71ef124b8f3",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "3a431bf8bc397ed124766eb5108b50497b9585a145a647d60840c2bebba95524"
+      },
+      {
+        "line": 2,
+        "submission_id": "sub-0e681d4e18a539759934facf04d8ecc6d37d560720467663b640c8203d7bffc4",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "8d341c7772482ff216ccbd4cf7a43188d5cc6a9996d694cff84ffa02a1632003"
+      },
+      {
+        "line": 3,
+        "submission_id": "sub-341002336fd470c22c73533540deb210ac74619b2ca2f0e15e28e3cd60a35b70",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "4cd7f6d61a3909c59fe1c23c71fd9d4ea20172c5db2c599b746f85c96cb20501"
+      },
+      {
+        "line": 4,
+        "submission_id": "sub-b7542050de38bd36f29858fb8e7dad5f17ed33990b2f0ed6318c78107ad796be",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "4253a804d917000731d35d433c773d6d7197a0a32fb9469d00e259f9aa4f7610"
+      },
+      {
+        "line": 5,
+        "submission_id": null,
+        "duplicate_of": null,
+        "error": "invalid-json",
+        "raw_digest": "8f8eaa6d2fdfced706edf7d557715fb1fddccbe8a93c374b8d7fb429a7537eb4"
+      },
+      {
+        "line": 6,
+        "submission_id": "sub-31b2e978fd6569295ce9fdfc98df832d182466c2ba1146604a66b71ef124b8f3",
+        "duplicate_of": 1,
+        "error": null,
+        "raw_digest": "3a431bf8bc397ed124766eb5108b50497b9585a145a647d60840c2bebba95524"
+      },
+      {
+        "line": 7,
+        "submission_id": "sub-447d0b3bddde45b841f472b15b54f6a4a746e0c0eac7e5debad335fc04927fe8",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "fe4cbce14d2fc8aa4b47df266129a6af72341355deb3d3ea9a8817018e0f0d34"
+      },
+      {
+        "line": 8,
+        "submission_id": "sub-12935ec978071fd9909c69097a59d031233f14b0db19763d8d022f19431bbaa1",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "c2dcbcd4d4ea71277a9583d655bd0fd1c35b5c8ef96415aaafc2708f1d7f7130"
+      }
+    ]
+  },
+  "export_id": "export-d9834405877c2fc29a1b6d514740cf36b755a44878ef9533bcd05b3bac075aea",
+  "manifest_digest": "16cd48ea6b95dda0ee6a3c6c9d9a3ede4d46e9be61d82afb1c23835e4ab62d6e",
+  "verification": {
+    "ok": true,
+    "errors": [],
+    "manifest_digest": "16cd48ea6b95dda0ee6a3c6c9d9a3ede4d46e9be61d82afb1c23835e4ab62d6e",
+    "export_id": "export-d9834405877c2fc29a1b6d514740cf36b755a44878ef9533bcd05b3bac075aea",
+    "accepted_count": 2
+  },
+  "browser_errors": [],
+  "raw_video_sha256": "bf238bf1ac5e14bcf98f249c9b7330a7899fc8f0cba537b035e8933a9c523fc5",
+  "events": [
+    {
+      "seconds": 0.0,
+      "caption": "Synthetic inputs. Real application, patches and executable checks. No model calls."
+    },
+    {
+      "seconds": 1.703,
+      "caption": "Import eight authored records: six unique submissions, one duplicate and one invalid line."
+    },
+    {
+      "seconds": 4.002,
+      "caption": "A real controller stops after one committed result. Existing work remains durable."
+    },
+    {
+      "seconds": 5.94,
+      "caption": "Resume through the owner UI. Completed evidence is retained; only unfinished work executes."
+    },
+    {
+      "seconds": 8.507,
+      "caption": "The sorting patch passes weak visible checks. It violates the required first-seen order."
+    },
+    {
+      "seconds": 14.654,
+      "caption": "Scripted developer adjudication through real controls rejects the semantic defect."
+    },
+    {
+      "seconds": 16.872,
+      "caption": "The order-preserving fix is accepted against its exact check evidence and rubric."
+    },
+    {
+      "seconds": 19.072,
+      "caption": "Separate task contexts stay distinct. A failing candidate is rejected; missing evidence remains pending."
+    },
+    {
+      "seconds": 21.522,
+      "caption": "Freeze accepted data with a content-bound manifest and traceable evidence."
+    },
+    {
+      "seconds": 24.214,
+      "caption": "Final recorded batch: two accepted, two rejected, two pending. Synthetic outcomes are not model accuracy."
+    }
+  ],
+  "duration_seconds": 27.287,
+  "integrity": {
+    "ok": true,
+    "schema_version": 1,
+    "audit_root": "ede3bd602bbb25131c5b44738710a3f92d773c8ba7077788dfce1d9d7e5c4d94",
+    "audit_events": 23,
+    "verified_results": 4,
+    "journal_mode": "delete",
+    "synchronous": 2,
+    "foreign_keys": 1
+  },
+  "recording": "recording.webm",
+  "caption_track": "recording.vtt",
+  "recording_sha256": "bf238bf1ac5e14bcf98f249c9b7330a7899fc8f0cba537b035e8933a9c523fc5"
+}
