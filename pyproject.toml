@@ -9,7 +9,7 @@ description = "Inspect coding submissions from real checks through adjudication 
 requires-python = ">=3.12"
 license = {text = "MIT"}
 authors = [{name = "Red Rook AI"}]
-dependencies = []
+dependencies = ["fastapi==0.162.4", "uvicorn==0.54.0", "starlette==1.10.0"]
 
 [project.scripts]
 swe-workbench = "swe_workbench.cli:main"
