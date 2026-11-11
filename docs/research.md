@@ -28,3 +28,15 @@ Keep supplies prior art for content-bound decisions, write-ahead intent and pres
 
 https://github.com/RedRookAI/keep-research-preview
 
+
+## Historical real-case follow-up
+
+The selected 2020 Unicode-hyphen issue has a pinned MIT-licensed source and complete human-authored upstream patch. The issue text is paraphrased locally; the original license notice is retained. A small Node built-in assertion recipe replaces installing the historical AVA dependency tree for this focused reproduction. The original AVA suite is not claimed executed. Case selection was rechecked against actual source, patch and Git blob bytes on2026-11-11.
+
+https://github.com/sindresorhus/escape-string-regexp/issues/20
+
+https://github.com/sindresorhus/escape-string-regexp/commit/732905da074f0220487ad6a27590f89bd0819374
+
+SWE-bench's documented prediction keys informed a compatible input adapter. This particular issue is not claimed as a member of its dataset.
+
+https://raw.githubusercontent.com/SWE-bench/SWE-bench/main/docs/guides/evaluation.md

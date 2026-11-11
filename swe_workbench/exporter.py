@@ -18,6 +18,9 @@ from .errors import WorkbenchError
 SCHEMA = "swe-workbench-export-v1"
 FILES = ("accepted.jsonl", "evidence.json", "manifest.json")
 CRITERIA = ("task_clarity", "evidence_adequacy", "requested_behavior", "preserved_behavior", "unsupported_claims")
+REVIEWER_MODES = frozenset(("developer_adjudication", "ai_assisted_adjudication", "owner_adjudication", "scripted_adjudication"))
+OCCURRENCE_VERSION = "raw-occurrence-v2"
+OCCURRENCE_FIELDS = frozenset(("input_format", "raw_record_base64", "declared_model", "declared_source"))
 HEX = re.compile(r"[0-9a-f]{64}\Z")
 
 
@@ -48,6 +51,114 @@ def _ratio(numerator, denominator):
             "unavailable_reason": None if denominator else "No eligible population."}
 
 
+def _reviewer_mode_valid(review):
+    origin = review.get("origin")
+    if not isinstance(origin, str) or origin not in REVIEWER_MODES:
+        return False
+    # Historical v1 reviews used this one origin without a separate mode.
+    if "reviewer_mode" not in review:
+        return origin == "developer_adjudication"
+    return review["reviewer_mode"] == origin
+
+
+def _invalid_json_constant(value):
+    raise ValueError(f"Unsupported non-finite JSON number: {value}")
+
+
+def _verify_lineage(item, required):
+    """Bind each delivered attribution to its exact raw occurrence bytes.
+
+    Declarations are input claims. Matching them does not authenticate their
+    publisher/model identity or authorize execution of the patch.
+    """
+    lineages = item.get("lineage", [])
+    _require(isinstance(lineages, list), "Occurrence lineage must be a list.")
+    if required:
+        _require(bool(lineages), "Raw-occurrence-v2 item is missing its occurrence lineage.")
+    identities = set()
+    for lineage in lineages:
+        _require(isinstance(lineage, dict), "Invalid occurrence lineage.")
+        if not required and not OCCURRENCE_FIELDS.intersection(lineage):
+            # Legacy exports retain their original reduced lineage contract.
+            continue
+        _require(OCCURRENCE_FIELDS.issubset(lineage), "Raw occurrence fields are missing.")
+        _require(isinstance(lineage.get("batch_id"), str) and bool(lineage["batch_id"])
+                 and type(lineage.get("line")) is int and lineage["line"] > 0,
+                 "Occurrence batch/line identity is invalid.")
+        identity = (lineage["batch_id"], lineage["line"])
+        _require(identity not in identities, "Duplicate occurrence identity in item lineage.")
+        identities.add(identity)
+        _require("duplicate_of" in lineage and (lineage["duplicate_of"] is None
+                 or (type(lineage["duplicate_of"]) is int and 0 < lineage["duplicate_of"] < lineage["line"])),
+                 "Invalid duplicate occurrence relation.")
+        fmt = lineage["input_format"]
+        _require(fmt in ("native", "swebench"), "Unsupported occurrence input format.")
+        raw_digest = lineage.get("raw_digest")
+        _require(isinstance(raw_digest, str) and HEX.fullmatch(raw_digest), "Invalid raw occurrence digest.")
+        try:
+            encoded = lineage["raw_record_base64"]
+            _require(isinstance(encoded, str), "Invalid raw occurrence encoding.")
+            raw = base64.b64decode(encoded, validate=True)
+            record = json.loads(raw.decode("utf-8"), parse_constant=_invalid_json_constant)
+        except (ValueError, TypeError, UnicodeError, RecursionError) as exc:
+            raise ExportError("Invalid raw occurrence encoding or JSON.") from exc
+        _require(digest(raw) == raw_digest, "Raw occurrence digest mismatch.")
+        _require(isinstance(record, dict), "Raw occurrence must be a JSON object.")
+        if fmt == "swebench":
+            task_id, patch = record.get("instance_id"), record.get("model_patch")
+            model = record.get("model_name_or_path")
+        else:
+            _require(type(record.get("schema_version")) is int and record["schema_version"] == 1,
+                     "Raw native occurrence has an unsupported schema.")
+            task_id, patch = record.get("task_id"), record.get("patch")
+            model = record.get("model_name_or_path", record.get("model"))
+        _require(isinstance(task_id, str) and task_id == item.get("task_id")
+                 and (isinstance(patch, str) or patch is None)
+                 and type(patch) is type(item.get("patch")) and patch == item.get("patch"),
+                 "Raw occurrence task/patch differs from its submission.")
+        source = record.get("source", record.get("origin", "unspecified"))
+        _require(canonical_bytes(model) == canonical_bytes(lineage["declared_model"])
+                 and canonical_bytes(source) == canonical_bytes(lineage["declared_source"]),
+                 "Occurrence attribution differs from its raw source/model declaration.")
+
+
+def _verify_batch_occurrences(snap):
+    """Require every valid occurrence of the selected v2 batch to survive export."""
+    batch = snap["batch"]
+    occurrences = batch.get("occurrences")
+    _require(isinstance(occurrences, list) and len(occurrences) == batch["raw_lines"],
+             "Raw-occurrence-v2 batch is missing its occurrence accounting.")
+    expected, invalid = {}, 0
+    for occurrence in occurrences:
+        _require(isinstance(occurrence, dict) and type(occurrence.get("line")) is int
+                 and 0 < occurrence["line"] <= batch["raw_lines"], "Invalid batch occurrence identity.")
+        line = occurrence["line"]
+        _require(line not in expected, "Duplicate batch occurrence identity.")
+        expected[line] = occurrence
+        invalid += occurrence.get("error") is not None
+    _require(invalid == batch["invalid_lines"], "Invalid occurrence count differs from the batch.")
+    actual = {}
+    for item in snap["items"]:
+        for lineage in item.get("lineage", []):
+            if lineage["batch_id"] != batch["id"]:
+                continue
+            line = lineage["line"]
+            _require(line not in actual, "Batch occurrence is attributed to multiple items.")
+            actual[line] = {"submission_id": item["id"], "duplicate_of": lineage["duplicate_of"],
+                            "raw_digest": lineage["raw_digest"]}
+    valid = {line: occurrence for line, occurrence in expected.items() if occurrence.get("error") is None}
+    _require(set(actual) == set(valid), "Valid batch occurrence lineage is missing or extra.")
+    for line, occurrence in valid.items():
+        _require(all(occurrence.get(key) == value for key, value in actual[line].items()),
+                 "Batch occurrence does not match its item lineage.")
+        duplicate = occurrence.get("duplicate_of")
+        if duplicate is not None:
+            _require(duplicate in valid and valid[duplicate].get("submission_id") == occurrence.get("submission_id"),
+                     "Duplicate occurrence does not refer to the same submission.")
+    _require(sum(occurrence.get("duplicate_of") is not None for occurrence in valid.values()) == batch["duplicate_lines"],
+             "Duplicate occurrence count differs from the batch.")
+
+
 def _eligible(item):
     result, review = item.get("result") or {}, item.get("review") or {}
     return (item.get("disposition") == "accepted" and item.get("execution_status") == "completed"
@@ -63,7 +174,7 @@ def _eligible(item):
             and review.get("evidence_digest") == result.get("evidence_digest")
             and review.get("rubric_digest") == item.get("rubric_digest")
             and all(review.get("criteria", {}).get(key) == "pass" for key in CRITERIA)
-            and bool(review.get("actor")) and review.get("origin") == "developer_adjudication"
+            and bool(review.get("actor")) and _reviewer_mode_valid(review)
             and all(isinstance(item.get(key), str) and HEX.fullmatch(item[key])
                     for key in ("source_digest", "patch_digest", "check_digest", "rubric_digest")))
 
@@ -86,7 +197,11 @@ def _snapshot(snapshot):
         _require(type(batch.get(key)) is int and batch[key] >= 0, f"Invalid intake count: {key}.")
     _require(batch["raw_lines"] == batch["invalid_lines"] + batch["duplicate_lines"] + batch["unique_items"], "Intake accounting does not reconcile.")
     _require(batch["unique_items"] == len(ids), "Unique membership count does not reconcile.")
+    raw_occurrences_required = snap.get("runtime", {}).get("intake_version") == OCCURRENCE_VERSION
     for item in snap["items"]:
+        _verify_lineage(item, raw_occurrences_required)
+        if item.get("review"):
+            _require(_reviewer_mode_valid(item["review"]), "Current review has an unsupported or inconsistent reviewer mode.")
         if item.get("disposition") == "accepted":
             _require(_eligible(item), f"Accepted item lacks exact-version eligibility: {item['id']}.")
             review = item["review"]
@@ -96,6 +211,8 @@ def _snapshot(snapshot):
                          and event["payload"].get("revision") == item["revision"]
                          and all(event["payload"].get(key) == value for key, value in review.items())
                          for event in snap["audit"]), "Accepted review is not bound by the frozen audit chain.")
+    if raw_occurrences_required:
+        _verify_batch_occurrences(snap)
     return snap
 
 

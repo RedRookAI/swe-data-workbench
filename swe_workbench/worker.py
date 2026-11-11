@@ -1,9 +1,9 @@
-"""Execute only the exact trusted fixture tuples supplied by the controller.
+"""Execute only the exact trusted task tuples supplied by the controller.
 
 The CLI is an owned child, never a database writer.  The controller must launch
 it with ``start_new_session=True`` and record its identity before sending G over
 the inherited control pipe.  EOF kills this worker's session process group.
-This is bounded execution of authored fixtures, not an arbitrary-code sandbox.
+This is bounded execution of owner-admitted tasks, not an arbitrary-code sandbox.
 """
 
 from __future__ import annotations
@@ -53,6 +53,10 @@ def _invoke(name: str, argv: list[str], cwd: Path, timeout: float, root: Path) -
         "PYTHONHASHSEED": "0",
         "GIT_CONFIG_NOSYSTEM": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null",
+        # Full Git diffs otherwise discover an enclosing repository and may
+        # silently skip candidate-root paths as outside its worktree prefix.
+        # Stop discovery before leaving this disposable command workspace.
+        "GIT_CEILING_DIRECTORIES": str(cwd.resolve().parent),
     }
     identity: dict[str, Any] = {}
     try:
@@ -165,7 +169,7 @@ def evaluate(task: dict[str, Any], patch: str, work_dir: Path) -> dict[str, Any]
         "overall": overall, "baseline": baseline, "candidate": candidate,
         "patch_application": application, "source_unchanged": source_unchanged,
         "checks": checks, "duration_seconds": time.monotonic() - started,
-        "runner": "trusted-fixture-worker-v1",
+        "runner": "trusted-task-worker-v2",
     }
 
 

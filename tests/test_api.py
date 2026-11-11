@@ -1,5 +1,7 @@
 """Focused transport/security checks; doubles do not claim core semantics."""
 import sys
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -14,8 +16,9 @@ POST = AUTH | {'Origin': 'http://testserver', 'Content-Type': 'application/json'
 
 
 class AdapterDouble:
-    def __init__(self, root):
+    def __init__(self, root, fixture_dir=None):
         self.calls = []
+        self.fixture_dir = fixture_dir
 
     def initialize(self):
         pass
@@ -23,6 +26,13 @@ class AdapterDouble:
     def import_sample(self, **body):
         self.calls.append(('import', body))
         return {'id': 'batch-one'}
+
+    def bundle_info(self):
+        return {"name": "synthetic", "title": "Authored sample", "origin": "synthetic_fixture", "prediction_format": None}
+
+    def import_approved(self, **body):
+        self.calls.append(("approved", body))
+        return {"id": "approved-batch"}
 
     def list_batches(self):
         return [{'id': 'batch-one'}]
@@ -189,3 +199,100 @@ def test_real_core_process_exact_reviews_and_frozen_export(tmp_path):
         assert frozen.json()['metrics']['counts']['needs-work'] == 1
         assert 'path' not in frozen.json()
         assert app.state.workbench.verify()['ok'] is True
+
+
+def test_configured_bundle_and_approved_import_remain_owner_only(tmp_path, monkeypatch):
+    monkeypatch.setattr('swe_workbench.core.Workbench', AdapterDouble)
+    resolved = tmp_path / 'owner-selected-bundle'
+    monkeypatch.setattr('swe_workbench.assets.resolve_bundle', lambda value: resolved if value == 'unicode-hyphen' else pytest.fail('unexpected bundle selector'), raising=False)
+    app = create_app(tmp_path / 'api', owner_token=TOKEN, bundle_dir='unicode-hyphen')
+    assert app.state.workbench.fixture_dir == resolved
+    with TestClient(app) as test:
+        assert test.get('/api/bundle').status_code == 401
+        info = test.get('/api/bundle', headers=AUTH)
+        assert info.status_code == 200
+        assert set(info.json()) == {'name', 'title', 'origin', 'prediction_format'}
+        assert test.post('/api/import-approved', json={'operation_key': 'approved'}).status_code == 401
+        assert test.post('/api/import-approved', headers=AUTH | {'Origin': 'https://evil.example'}, json={'operation_key': 'approved'}).status_code == 403
+        assert test.post('/api/import-approved', headers=POST, json={'operation_key': 'approved', 'path': '/tmp/arbitrary.jsonl'}).status_code == 422
+        result = test.post('/api/import-approved', headers=POST, json={'operation_key': 'approved'})
+        assert result.json() == {'id': 'approved-batch'}
+        assert app.state.workbench.calls == [('approved', {'operation_key': 'approved'})]
+
+
+@pytest.mark.parametrize('mode', ['developer_adjudication', 'ai_assisted_adjudication', 'owner_adjudication', 'scripted_adjudication'])
+def test_reviewer_mode_is_controlled_attribution_not_actor_authority(client, mode):
+    payload = {'operation_key': 'review-mode', 'expected_revision': 2, 'evidence_digest': 'evidence', 'rubric_digest': 'rubric', 'decision': 'needs-work', 'reason': 'Review with declared assistance.', 'criteria': {name: 'uncertain' for name in CRITERIA}, 'reviewer_mode': mode}
+    response = client.post('/api/submissions/one/review', headers=POST, json=payload)
+    assert response.status_code == 200
+    assert response.json()['review']['reviewer_mode'] == mode
+    assert response.json()['review']['actor'] == 'operator'
+    assert client.post('/api/submissions/one/review', headers=POST, json=payload | {'reviewer_mode': 'independent_human_verified'}).status_code == 422
+    assert client.post('/api/submissions/one/review', headers=POST, json=payload | {'actor': 'independent_human_verified'}).status_code == 422
+
+
+def test_server_bundle_is_operator_configuration(tmp_path, monkeypatch):
+    from swe_workbench import server
+    calls = []
+    monkeypatch.setenv('SWE_WORKBENCH_OWNER_TOKEN', TOKEN)
+    monkeypatch.setattr(sys, 'argv', ['swe-workbench-server', '--root', str(tmp_path), '--bundle', 'unicode-hyphen', '--port', '8099'])
+    monkeypatch.setattr('swe_workbench.api.create_app', lambda root, **kwargs: calls.append((root, kwargs)) or 'test-app')
+    monkeypatch.setattr('uvicorn.run', lambda app, **kwargs: calls.append((app, kwargs)))
+    server.main()
+    assert calls[0] == (tmp_path, {'owner_token': TOKEN, 'bundle_dir': 'unicode-hyphen'})
+    assert calls[1] == ('test-app', {'host': '127.0.0.1', 'port': 8099, 'log_level': 'warning', 'proxy_headers': False})
+
+
+def test_real_approved_bundle_api_claims_checks_and_scripted_export(tmp_path):
+    """One actual admitted upstream case; review decisions are scripted test actions."""
+    import base64
+    from swe_workbench.exporter import verify_export
+    app = create_app(tmp_path / 'upstream-api', owner_token=TOKEN, bundle_dir='unicode-hyphen')
+    with TestClient(app) as test:
+        info = test.get('/api/bundle', headers=AUTH)
+        assert info.json() == {'name': 'unicode-hyphen', 'title': 'Real upstream case: Unicode hyphen escaping', 'origin': 'public_upstream', 'prediction_format': 'swebench'}
+        imported = test.post('/api/import-approved', headers=POST, json={'operation_key': 'admitted-upstream'})
+        assert imported.status_code == 200, imported.text
+        batch = imported.json()
+        assert (batch['raw_lines'], batch['unique_items'], batch['duplicate_lines'], batch['invalid_lines']) == (4, 3, 1, 0)
+        prefix = '/api/batches/' + batch['id']
+        measured = test.post(prefix + '/process', headers=POST, json={'workers': 1})
+        assert measured.status_code == 200, measured.text
+        items = test.get(prefix + '/submissions', headers=AUTH).json()
+        genuine = next(item for item in items if item['origin'] == 'public_upstream')
+        control = next(item for item in items if item['origin'] == 'synthetic_control')
+        refused = next(item for item in items if item['origin'] == 'imported_unverified')
+        assert genuine['result']['baseline']['overall'] == 'failed'
+        assert genuine['result']['candidate']['overall'] == genuine['result']['overall'] == 'passed'
+        assert genuine['result']['source_unchanged'] is True
+        assert control['result']['overall'] == 'failed'
+        assert refused['result'] is None and refused['execution_status'] == 'pending-evidence'
+        assert len(genuine['lineage']) == 2
+        assert {line['declared_model'] for line in genuine['lineage']} == {'upstream-human-reference'}
+        assert len({line['line'] for line in genuine['lineage']}) == 2
+        assert all(line['input_format'] == 'swebench' for line in genuine['lineage'])
+        for lineage in genuine['lineage']:
+            source_record = json.loads(base64.b64decode(lineage['raw_record_base64']))
+            assert source_record['model_patch'] == genuine['patch']
+            assert source_record['model_name_or_path'] == lineage['declared_model']
+        review_url = '/api/submissions/' + genuine['id'] + '/review'
+        payload = {'expected_revision': genuine['revision'], 'evidence_digest': genuine['result']['evidence_digest'], 'rubric_digest': genuine['rubric_digest'], 'decision': 'accepted', 'reason': 'Scripted integration decision after inspecting actual upstream Unicode-regex and preserved-behavior measurements; no independent human review claimed.', 'criteria': {name: 'pass' for name in CRITERIA}, 'operation_key': 'scripted-upstream-review', 'reviewer_mode': 'scripted_adjudication'}
+        stale = test.post(review_url, headers=POST, json=payload | {'evidence_digest': 'obsolete', 'operation_key': 'stale-public'})
+        assert stale.status_code == 409
+        reviewed = test.post(review_url, headers=POST, json=payload)
+        assert reviewed.status_code == 200, reviewed.text
+        assert reviewed.json()['review']['reviewer_mode'] == reviewed.json()['review']['origin'] == 'scripted_adjudication'
+        assert reviewed.json()['review']['actor'] == 'operator'
+        assert test.post(review_url, headers=POST, json=payload | {'reviewer_mode': 'owner_adjudication'}).status_code == 409
+        exported = test.post(prefix + '/export', headers=POST, json={'operation_key': 'upstream-freeze'})
+        assert exported.status_code == 200, exported.text
+        repeated = test.post(prefix + '/export', headers=POST, json={'operation_key': 'upstream-same-cut'})
+        assert repeated.status_code == 200, repeated.text
+        assert repeated.json()['manifest_digest'] == exported.json()['manifest_digest']
+        assert exported.json()['metrics']['counts']['accepted'] == 1
+        location = app.state.workbench.exports(batch['id'])[0]['location']
+        assert verify_export(location)['ok'] is True
+        evidence = json.loads((Path(location) / 'evidence.json').read_text())
+        retained = next(item for item in evidence['items'] if item['id'] == genuine['id'])
+        assert retained['lineage'] == genuine['lineage']
+        assert retained['review']['reviewer_mode'] == 'scripted_adjudication'

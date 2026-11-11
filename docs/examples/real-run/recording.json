@@ -1,0 +1,138 @@
+{
+  "schema": "swe-workbench-browser-recording/v2",
+  "recorded_at": "2026-11-11T21:37:46.773497+00:00",
+  "source_commit": "1388751c2d721c4d7bc921d74cb46b91273beba4",
+  "case_origin": "public upstream issue and human patch; labeled synthetic controls",
+  "decision_origin": "scripted browser replay of Codex-assisted code assessment",
+  "model_calls": 0,
+  "keep_dependency": false,
+  "batch": {
+    "id": "batch-62e2fc560d805496fc13e393",
+    "created_at": "2026-11-11T21:37:28.589732+00:00",
+    "raw_digest": "fb4325e8d363116a1bdfe090c9d69f06dafc2b0f0ec96825569f8282f2ae625c",
+    "raw_lines": 4,
+    "invalid_lines": 0,
+    "duplicate_lines": 1,
+    "unique_items": 3,
+    "counts": {
+      "queued": 0,
+      "running": 0,
+      "interrupted": 0,
+      "completed": 2,
+      "execution-error": 0,
+      "uncertain": 0,
+      "pending-evidence": 1,
+      "accepted": 1,
+      "rejected": 1,
+      "needs-work": 0,
+      "pending_review": 1
+    },
+    "invalid_records": [],
+    "occurrences": [
+      {
+        "line": 1,
+        "submission_id": "sub-1c509ec6ddf6b7cb81ffd41fe99371aae848ef4d2d5e4e4c65de26e5e76cd5cf",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "caf7a16a326bc1c26e0a773edbc30132d82d37f1a531266102fcc405d843ba79"
+      },
+      {
+        "line": 2,
+        "submission_id": "sub-a556558a35b26e972a37f9634e51938378dd2139a65a7fdf66fb5b7b938f5b42",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "cf898c976ce53c63aed7471f06550bdd645d6c07406b7933fe80654570176757"
+      },
+      {
+        "line": 3,
+        "submission_id": "sub-1c509ec6ddf6b7cb81ffd41fe99371aae848ef4d2d5e4e4c65de26e5e76cd5cf",
+        "duplicate_of": 1,
+        "error": null,
+        "raw_digest": "caf7a16a326bc1c26e0a773edbc30132d82d37f1a531266102fcc405d843ba79"
+      },
+      {
+        "line": 4,
+        "submission_id": "sub-f6e8cab772f1b59f0b06c9e4254e81a964a2cc03c9770b693ca39a06bcf862f8",
+        "duplicate_of": null,
+        "error": null,
+        "raw_digest": "405bab8f25a5882f579dd355a32f17ea4ecfaf14672bbc1d103260c47d771def"
+      }
+    ]
+  },
+  "export_path": "docs/examples/real-run/export",
+  "manifest_digest": "e198d661745b60da3a07a1c8b973f5f72a0756f8d45ab1c4d3bcf77f92fe6aab",
+  "verification": {
+    "ok": true,
+    "errors": [],
+    "manifest_digest": "e198d661745b60da3a07a1c8b973f5f72a0756f8d45ab1c4d3bcf77f92fe6aab",
+    "export_id": "export-d31b6482162110a243872955fdf622a62e6e9c07ba25239cfa98e625133456f3",
+    "accepted_count": 1
+  },
+  "integrity": {
+    "ok": true,
+    "schema_version": 1,
+    "audit_root": "3db00eee0de157a72ffe9c147fbade8bd3403d49286b5d3bfb28a8c0fc55c1e4",
+    "audit_events": 13,
+    "verified_results": 2,
+    "journal_mode": "delete",
+    "synchronous": 2,
+    "foreign_keys": 1
+  },
+  "browser_errors": [],
+  "raw_video": "release asset walkthrough.webm",
+  "raw_video_sha256": "e584925b13723796f58294dae1762388d737b7572fd768c725e5829c9c97da53",
+  "events": [
+    {
+      "seconds": 0.0,
+      "caption": "Real historical upstream case. Human reference patch, labeled synthetic controls. No model calls."
+    },
+    {
+      "seconds": 1.407,
+      "caption": "Import four exact records: three unique patches and one repeated delivery. Only two tuples are approved."
+    },
+    {
+      "seconds": 3.309,
+      "caption": "Run actual baseline, Git application and candidate checks in separate workspaces. The unknown variant stays pending."
+    },
+    {
+      "seconds": 4.163,
+      "caption": "Inspect the synthetic comment-only control: exact diff, actual check output and source preservation."
+    },
+    {
+      "seconds": 8.316,
+      "caption": "Replay the Codex-assisted code assessment through real controls. This is scripted adjudication, not independent human review."
+    },
+    {
+      "seconds": 9.846,
+      "caption": "Inspect the human upstream fix: exact diff, actual check output and source preservation."
+    },
+    {
+      "seconds": 13.997,
+      "caption": "Replay the Codex-assisted code assessment through real controls. This is scripted adjudication, not independent human review."
+    },
+    {
+      "seconds": 15.531,
+      "caption": "Freeze one accepted upstream patch with its full lineage. The failing and unapproved controls remain visible."
+    }
+  ],
+  "duration_seconds": 19.619,
+  "source_commit_role": "Baseline HEAD at recording; runtime/UI changes were uncommitted. Actual frozen application bytes are identified below; no newer run is claimed.",
+  "source_file_sha256": {
+    "swe_workbench/__init__.py": "53ca2d514e038528d9f611fb5b1afc09ba55ee3ada776ab511fbb38d6a76e601",
+    "swe_workbench/api.py": "e7396c84f749247319f87e249aa18ebd88be1e43adb87050dfa1ed86025c48a0",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/cli.py": "d8c88edfe8908020cea455807b43bb7a378ae1cc7e0480efdd2dc8d54eb6e170",
+    "swe_workbench/core.py": "63dcdf366fa52964db09bf590bcbf4e42b6589c69c112f5bb8f53f72a4112317",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
+    "swe_workbench/worker.py": "ac0a7ed25b3dd845faa596bee170d6a0a2bd7c78219fbd98884c2785698d39da",
+    "web/app.js": "77b81f6e3cbb272238926062a4c26f23bb73f348202daab461ab83eb1d4cf555",
+    "web/index.html": "507bace4ab854fed54e2e66994cfedfb8d34d402303e1ebc79d94c9adc5e821b",
+    "web/style.css": "e3e9be596c07edffaf64f0942ebdceaf3dbd7fdde44983bc5508bb7aba3d18f6"
+  },
+  "source_identity_annotation": "Added after recording while runtime/UI lanes remained frozen; only documentation and recording driver metadata were edited afterward."
+}

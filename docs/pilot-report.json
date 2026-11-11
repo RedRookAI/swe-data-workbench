@@ -1,0 +1,514 @@
+{
+  "capacity_before": {
+    "affinity_cpus": 32,
+    "effective_available_memory_bytes": 63519322112,
+    "effective_cpu_capacity": 32.0,
+    "host_memory_bytes": {
+      "MemAvailable": 63519322112,
+      "MemTotal": 134514335744
+    },
+    "load_average_1_5_15": [
+      0.267578125,
+      0.3623046875,
+      0.48876953125
+    ],
+    "logical_cpus": 32,
+    "observed_at": "2026-11-11T21:36:26.952879+00:00",
+    "proc_loadavg": "0.27 0.36 0.49 1/1591 1175416",
+    "scope": "Read-only instantaneous visible host/cgroup observations; no reservation or fleet-wide isolation.",
+    "visible_cgroup_constraints": [
+      {
+        "cpu_max": "max 100000",
+        "memory_current_bytes": "43421577216",
+        "memory_max_bytes": "max",
+        "visible_ancestor_depth": 0
+      },
+      {
+        "cpu_max": "max 100000",
+        "memory_current_bytes": "44884852736",
+        "memory_max_bytes": "max",
+        "visible_ancestor_depth": 1
+      },
+      {
+        "cpu_max": "max 100000",
+        "memory_current_bytes": "44904439808",
+        "memory_max_bytes": "max",
+        "visible_ancestor_depth": 2
+      }
+    ]
+  },
+  "combined_accounting": {
+    "completed_measurements": 6,
+    "duplicate_lines": 2,
+    "invalid_lines": 1,
+    "raw_lines": 12,
+    "scope": "Sum of separately rooted strata; task/submission uniqueness is scoped to each batch, not an assertion of global uniqueness.",
+    "unique_items": 9
+  },
+  "finished_at": "2026-11-11T21:36:27.373250+00:00",
+  "implementation": {
+    "revision_scope": "Exact source bytes at pilot start; no assertion that working files are committed.",
+    "source_sha256": {
+      "swe_workbench/core.py": "63dcdf366fa52964db09bf590bcbf4e42b6589c69c112f5bb8f53f72a4112317",
+      "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+      "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+      "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+      "swe_workbench/worker.py": "ac0a7ed25b3dd845faa596bee170d6a0a2bd7c78219fbd98884c2785698d39da",
+      "tools/profile_pilot.py": "f55787d93501478a8403bb482d1302cab7b5052fdd30eed0eaceab9127c0bd5c"
+    }
+  },
+  "limiting_stage_observation": {
+    "interpretation": "Largest elapsed stage in this single bounded workload only. No causal bottleneck, production limit, speedup, or optimization benefit established.",
+    "largest_measured_stage": "process"
+  },
+  "measurement_scope": {
+    "cpu": "RUSAGE_SELF covers all profiler/controller threads; RUSAGE_CHILDREN covers terminated children waited for by this process, including further descendants only when intervening processes waited for them. Deltas cover this stage; they exclude unrelated host processes.",
+    "memory": "Linux ru_maxrss in KiB, cumulative before/after counters: self is this profiler/controller's lifetime high-water RSS; waited_children is the largest individual waited child's high-water RSS. Neither is a per-stage peak, a sum, nor a simultaneous process-group peak.",
+    "stages": "Intake includes initialization/import; process includes controller and waited workers; export includes freeze/publication/offline verification. Workload hashing and final integrity/readback occur outside these stages."
+  },
+  "observed_stage_wall_seconds": {
+    "export": 0.021387807,
+    "intake": 0.006327884000000001,
+    "process": 0.388866135
+  },
+  "runtime": {
+    "platform": "linux",
+    "python": "3.12.3",
+    "wall_clock": "clock_gettime(CLOCK_MONOTONIC)"
+  },
+  "schema": "swe-workbench-pilot-v1",
+  "started_at": "2026-11-11T21:36:26.952996+00:00",
+  "status": "complete",
+  "strata": [
+    {
+      "batch_id": "batch-610e816c1d417115608ca35b",
+      "cache_condition": "Fresh independent state; no result replay or recovery requested.",
+      "catalog_sha256": "b42566b9fe0e8ad3200df58be7e6a61811b129683889a08e8a34dd8fb9efa144",
+      "core_verification": {
+        "audit_events": 17,
+        "audit_root": "b7a01a2a5551e46b90f0498de80dd83e484d44f5a180294b4a85a899bfc91348",
+        "foreign_keys": 1,
+        "journal_mode": "delete",
+        "ok": true,
+        "schema_version": 1,
+        "synchronous": 2,
+        "verified_results": 4
+      },
+      "export_id": "export-5b04dedb1751afde77b3580a7a1f7db4a1e1c8ce4e39fff967a5c089778dd3be",
+      "export_verification": {
+        "accepted_count": 0,
+        "errors": [],
+        "export_id": "export-5b04dedb1751afde77b3580a7a1f7db4a1e1c8ce4e39fff967a5c089778dd3be",
+        "manifest_digest": "05597284ddf67d38db46a1664b06a0f6c54df11bb0c036ffbca232b187b15c6d",
+        "ok": true
+      },
+      "input_format": "native",
+      "input_sha256": "8a0c65e75b67e4419f3f7db1a1eff07ea4bff838d17197a4e5cab4ce956e44a8",
+      "manifest_digest": "05597284ddf67d38db46a1664b06a0f6c54df11bb0c036ffbca232b187b15c6d",
+      "metrics": {
+        "accepted_yield": {
+          "denominator": 6,
+          "numerator": 0,
+          "unavailable_reason": null,
+          "value": 0.0
+        },
+        "agreement": {
+          "denominator": 0,
+          "interpretation": "Comparable paired labels under one rubric; agreement does not establish correctness.",
+          "numerator": 0,
+          "synthetic_pairs": 0,
+          "unavailable_reason": "No eligible population.",
+          "value": null
+        },
+        "cached_results": 0,
+        "counts": {
+          "accepted": 0,
+          "completed_measurements": 4,
+          "duplicate_lines": 1,
+          "execution": {
+            "completed": 4,
+            "pending-evidence": 2
+          },
+          "invalid_lines": 1,
+          "needs-work": 0,
+          "pending_review": 6,
+          "raw_lines": 8,
+          "rejected": 0,
+          "unique_items": 6
+        },
+        "denominators": {
+          "accepted_yield": "all valid unique batch memberships, including pending and incomplete",
+          "send_back_rate": "unique memberships with current accepted/rejected/needs-work adjudication"
+        },
+        "machine_throughput": {
+          "elapsed_seconds": 0.18652044422924519,
+          "numerator": 4,
+          "segments": 1,
+          "unavailable_reason": null,
+          "unit": "unique completed required measurements per second",
+          "value": 21.445370326717388
+        },
+        "origin_counts": {
+          "imported_unverified": 2,
+          "synthetic_fixture": 4
+        },
+        "recovered_results": 0,
+        "review_throughput": {
+          "unavailable_reason": "Active review duration is not measured; timestamps do not measure reviewer work.",
+          "value": null
+        },
+        "send_back_rate": {
+          "denominator": 0,
+          "numerator": 0,
+          "unavailable_reason": "No eligible population.",
+          "value": null
+        },
+        "send_back_reasons": {}
+      },
+      "name": "synthetic",
+      "origin_counts": {
+        "imported_unverified": 2,
+        "synthetic_fixture": 4
+      },
+      "processing": {
+        "batch_id": "batch-610e816c1d417115608ca35b",
+        "completed_ids": [
+          "sub-31b2e978fd6569295ce9fdfc98df832d182466c2ba1146604a66b71ef124b8f3",
+          "sub-0e681d4e18a539759934facf04d8ecc6d37d560720467663b640c8203d7bffc4",
+          "sub-447d0b3bddde45b841f472b15b54f6a4a746e0c0eac7e5debad335fc04927fe8",
+          "sub-341002336fd470c22c73533540deb210ac74619b2ca2f0e15e28e3cd60a35b70"
+        ],
+        "counts": {
+          "accepted": 0,
+          "completed": 4,
+          "execution-error": 0,
+          "interrupted": 0,
+          "needs-work": 0,
+          "pending-evidence": 2,
+          "pending_review": 6,
+          "queued": 0,
+          "rejected": 0,
+          "running": 0,
+          "uncertain": 0
+        },
+        "elapsed_seconds": 0.18652044422924519,
+        "interrupted": false,
+        "observed_max_workers": 2,
+        "processed": 4,
+        "run_id": "run-8aa6d0f449474d599e102fd28495adce",
+        "workers": 2
+      },
+      "repetitions": 1,
+      "review": {
+        "active_seconds": null,
+        "decisions_recorded_by_profiler": 0,
+        "unavailable_reason": "No review performed or active review duration measured."
+      },
+      "source_preservation": {
+        "all_measured_source_unchanged": true,
+        "measured_result_count": 4
+      },
+      "stages": {
+        "export": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 0.000787999999999997,
+              "total_seconds": 0.010072999999999999,
+              "user_seconds": 0.009285000000000002
+            },
+            "waited_children": {
+              "system_seconds": 0.0,
+              "total_seconds": 0.0,
+              "user_seconds": 0.0
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 21248,
+              "before_kib": 21248
+            }
+          },
+          "wall_seconds": 0.011201082
+        },
+        "intake": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 0.0,
+              "total_seconds": 0.002659999999999999,
+              "user_seconds": 0.002659999999999999
+            },
+            "waited_children": {
+              "system_seconds": 0.0,
+              "total_seconds": 0.0,
+              "user_seconds": 0.0
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 2048,
+              "before_kib": 2048
+            }
+          },
+          "wall_seconds": 0.003538915
+        },
+        "process": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 0.027327,
+              "total_seconds": 0.063553,
+              "user_seconds": 0.036225999999999994
+            },
+            "waited_children": {
+              "system_seconds": 0.07152299999999999,
+              "total_seconds": 0.25346799999999997,
+              "user_seconds": 0.181945
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 21248,
+              "before_kib": 2048
+            }
+          },
+          "wall_seconds": 0.193325817
+        }
+      },
+      "status": "complete",
+      "workers": 2
+    },
+    {
+      "batch_id": "batch-62e2fc560d805496fc13e393",
+      "cache_condition": "Fresh independent state; no result replay or recovery requested.",
+      "catalog_sha256": "99aa10a96fd90b40a29fda93b41315cac057c3c493f18fcb2f99a93fec93d096",
+      "core_verification": {
+        "audit_events": 11,
+        "audit_root": "e0de91fc1019a8cba17c365fe489f55bd6da0f52f618ac004a8103ccec121227",
+        "foreign_keys": 1,
+        "journal_mode": "delete",
+        "ok": true,
+        "schema_version": 1,
+        "synchronous": 2,
+        "verified_results": 2
+      },
+      "export_id": "export-71babeeb6495d6a86f89b8106d65ee347c11bc17c84c1865d7335f19823b50d0",
+      "export_verification": {
+        "accepted_count": 0,
+        "errors": [],
+        "export_id": "export-71babeeb6495d6a86f89b8106d65ee347c11bc17c84c1865d7335f19823b50d0",
+        "manifest_digest": "70f8be6a446aa70c4a69d402bb48b3a3bd6cc387a0bc8735eb92970b0069587f",
+        "ok": true
+      },
+      "input_format": "swebench",
+      "input_sha256": "fb4325e8d363116a1bdfe090c9d69f06dafc2b0f0ec96825569f8282f2ae625c",
+      "manifest_digest": "70f8be6a446aa70c4a69d402bb48b3a3bd6cc387a0bc8735eb92970b0069587f",
+      "metrics": {
+        "accepted_yield": {
+          "denominator": 3,
+          "numerator": 0,
+          "unavailable_reason": null,
+          "value": 0.0
+        },
+        "agreement": {
+          "denominator": 0,
+          "interpretation": "Comparable paired labels under one rubric; agreement does not establish correctness.",
+          "numerator": 0,
+          "synthetic_pairs": 0,
+          "unavailable_reason": "No eligible population.",
+          "value": null
+        },
+        "cached_results": 0,
+        "counts": {
+          "accepted": 0,
+          "completed_measurements": 2,
+          "duplicate_lines": 1,
+          "execution": {
+            "completed": 2,
+            "pending-evidence": 1
+          },
+          "invalid_lines": 0,
+          "needs-work": 0,
+          "pending_review": 3,
+          "raw_lines": 4,
+          "rejected": 0,
+          "unique_items": 3
+        },
+        "denominators": {
+          "accepted_yield": "all valid unique batch memberships, including pending and incomplete",
+          "send_back_rate": "unique memberships with current accepted/rejected/needs-work adjudication"
+        },
+        "machine_throughput": {
+          "elapsed_seconds": 0.19436074187979102,
+          "numerator": 2,
+          "segments": 1,
+          "unavailable_reason": null,
+          "unit": "unique completed required measurements per second",
+          "value": 10.290143887374992
+        },
+        "origin_counts": {
+          "imported_unverified": 1,
+          "public_upstream": 1,
+          "synthetic_control": 1
+        },
+        "recovered_results": 0,
+        "review_throughput": {
+          "unavailable_reason": "Active review duration is not measured; timestamps do not measure reviewer work.",
+          "value": null
+        },
+        "send_back_rate": {
+          "denominator": 0,
+          "numerator": 0,
+          "unavailable_reason": "No eligible population.",
+          "value": null
+        },
+        "send_back_reasons": {}
+      },
+      "name": "real-configured",
+      "origin_counts": {
+        "imported_unverified": 1,
+        "public_upstream": 1,
+        "synthetic_control": 1
+      },
+      "processing": {
+        "batch_id": "batch-62e2fc560d805496fc13e393",
+        "completed_ids": [
+          "sub-a556558a35b26e972a37f9634e51938378dd2139a65a7fdf66fb5b7b938f5b42",
+          "sub-1c509ec6ddf6b7cb81ffd41fe99371aae848ef4d2d5e4e4c65de26e5e76cd5cf"
+        ],
+        "counts": {
+          "accepted": 0,
+          "completed": 2,
+          "execution-error": 0,
+          "interrupted": 0,
+          "needs-work": 0,
+          "pending-evidence": 1,
+          "pending_review": 3,
+          "queued": 0,
+          "rejected": 0,
+          "running": 0,
+          "uncertain": 0
+        },
+        "elapsed_seconds": 0.19436074187979102,
+        "interrupted": false,
+        "observed_max_workers": 2,
+        "processed": 2,
+        "run_id": "run-d2a368215f7747b29d89671c4269b4e9",
+        "workers": 2
+      },
+      "repetitions": 1,
+      "review": {
+        "active_seconds": null,
+        "decisions_recorded_by_profiler": 0,
+        "unavailable_reason": "No review performed or active review duration measured."
+      },
+      "source_preservation": {
+        "all_measured_source_unchanged": true,
+        "measured_result_count": 2
+      },
+      "stages": {
+        "export": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 8.000000000001062e-06,
+              "total_seconds": 0.009058000000000004,
+              "user_seconds": 0.009050000000000002
+            },
+            "waited_children": {
+              "system_seconds": 0.0,
+              "total_seconds": 0.0,
+              "user_seconds": 0.0
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 46336,
+              "before_kib": 46336
+            }
+          },
+          "wall_seconds": 0.010186725
+        },
+        "intake": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 0.0003640000000000032,
+              "total_seconds": 0.0021830000000000044,
+              "user_seconds": 0.0018190000000000012
+            },
+            "waited_children": {
+              "system_seconds": 0.0,
+              "total_seconds": 0.0,
+              "user_seconds": 0.0
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 21248,
+              "before_kib": 21248
+            }
+          },
+          "wall_seconds": 0.002788969
+        },
+        "process": {
+          "complete": true,
+          "cpu_seconds": {
+            "self": {
+              "system_seconds": 0.012524999999999994,
+              "total_seconds": 0.029627,
+              "user_seconds": 0.017102000000000006
+            },
+            "waited_children": {
+              "system_seconds": 0.10983499999999999,
+              "total_seconds": 0.29573299999999997,
+              "user_seconds": 0.18589799999999998
+            }
+          },
+          "memory_high_water_counters": {
+            "self": {
+              "after_kib": 623516,
+              "before_kib": 623516
+            },
+            "waited_children": {
+              "after_kib": 46336,
+              "before_kib": 21248
+            }
+          },
+          "wall_seconds": 0.195540318
+        }
+      },
+      "status": "complete",
+      "workers": 2
+    }
+  ],
+  "workload": {
+    "model_calls": 0,
+    "repetitions_per_stratum": 1,
+    "representativeness": "One authored synthetic fixture batch and one configured historical upstream issue with authored controls; no production representativeness or speedup claim.",
+    "review_decisions": 0,
+    "strata": 2,
+    "workers": 2
+  }
+}

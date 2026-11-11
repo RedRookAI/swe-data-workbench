@@ -45,13 +45,14 @@ class Review(Operation):
     decision: Literal["accepted", "rejected", "needs-work"]
     reason: str = Field(max_length=8000)
     criteria: dict[str, Literal["pass", "fail", "uncertain", "not-assessed"]]
+    reviewer_mode: Literal["developer_adjudication", "ai_assisted_adjudication", "owner_adjudication", "scripted_adjudication"] = "developer_adjudication"
 
 
 def error(code: str, message: str, status: int) -> JSONResponse:
     return JSONResponse({"error": {"code": code, "message": message}}, status_code=status)
 
 
-def create_app(root: Path | str, *, owner_token: str | None = None) -> FastAPI:
+def create_app(root: Path | str, *, owner_token: str | None = None, bundle_dir: Path | str | None = None) -> FastAPI:
     # Import lazily so static assets and isolated adapter tests need no running core.
     from swe_workbench.core import Workbench
     from swe_workbench.errors import WorkbenchError
@@ -59,7 +60,11 @@ def create_app(root: Path | str, *, owner_token: str | None = None) -> FastAPI:
     if owner_token is not None and (len(owner_token) < 32 or not owner_token.isascii()):
         raise ValueError("owner_token must contain at least 32 ASCII characters")
     root = Path(root)
-    workbench = Workbench(root)
+    if bundle_dir is None:
+        workbench = Workbench(root)
+    else:
+        from swe_workbench.assets import resolve_bundle
+        workbench = Workbench(root, fixture_dir=resolve_bundle(bundle_dir))
     workbench.initialize()
     app = FastAPI(title="SWE Data Workbench", version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
     app.state.workbench = workbench
@@ -121,6 +126,10 @@ def create_app(root: Path | str, *, owner_token: str | None = None) -> FastAPI:
     def health():
         return {"ok": True, "version": __version__}
 
+    @app.get("/api/bundle")
+    def bundle():
+        return workbench.bundle_info()
+
     @app.get("/api/batches")
     def batches():
         return workbench.list_batches()
@@ -144,6 +153,10 @@ def create_app(root: Path | str, *, owner_token: str | None = None) -> FastAPI:
     @app.post("/api/import-sample")
     def import_sample(body: Operation):
         return workbench.import_sample(operation_key=body.operation_key)
+
+    @app.post("/api/import-approved")
+    def import_approved(body: Operation):
+        return workbench.import_approved(operation_key=body.operation_key)
 
     @app.post("/api/batches/{batch_id}/process")
     def process(batch_id: str, body: Processing):

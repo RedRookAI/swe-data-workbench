@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "name": "unicode-hyphen",
+  "title": "Real upstream case: Unicode hyphen escaping",
+  "origin": "public_upstream",
+  "prediction_file": "predictions.jsonl",
+  "prediction_format": "swebench",
+  "provenance": {
+    "origin": "public_upstream",
+    "repository": "https://github.com/sindresorhus/escape-string-regexp",
+    "base_commit": "21c557c7f14a112eebe196abd98d085f5fcfcf5e",
+    "issue_url": "https://github.com/sindresorhus/escape-string-regexp/issues/20",
+    "issue_date": "2020-03-12",
+    "fix_commit": "732905da074f0220487ad6a27590f89bd0819374",
+    "license": "MIT",
+    "notice_file": "license",
+    "case_kind": "Historical upstream issue; not a SWE-bench dataset instance",
+    "checker_origin": "Locally authored Node assert harness derived from the issue behavior; upstream AVA suite is not run"
+  },
+  "rubric": {
+    "version": 1,
+    "criteria": [
+      "task_clarity",
+      "evidence_adequacy",
+      "requested_behavior",
+      "preserved_behavior",
+      "unsupported_claims"
+    ]
+  },
+  "tasks": {
+    "sindresorhus__escape-string-regexp-20": {
+      "title": "Escape hyphens in Unicode regular expressions",
+      "task_text": "At the pinned upstream revision, escaped hyphens produce a SyntaxError in JavaScript Unicode regex mode. Make literal hyphens usable both in a Unicode pattern and within a character class. Preserve existing metacharacter escaping, rejection of non-string values and empty-string behavior. This is a historical upstream issue, not a newly discovered vulnerability.",
+      "origin": "public_upstream",
+      "source_files": {
+        "index.js": "'use strict';\n\nconst matchOperatorsRegex = /[|\\\\{}()[\\]^$+*?.-]/g;\n\nmodule.exports = string => {\n\tif (typeof string !== 'string') {\n\t\tthrow new TypeError('Expected a string');\n\t}\n\n\treturn string.replace(matchOperatorsRegex, '\\\\$&');\n};\n",
+        "test.js": "import test from 'ava';\nimport escapeStringRegexp from '.';\n\ntest('main', t => {\n\tt.is(\n\t\tescapeStringRegexp('\\\\ ^ $ * + ? . ( ) | { } [ ]'),\n\t\t'\\\\\\\\ \\\\^ \\\\$ \\\\* \\\\+ \\\\? \\\\. \\\\( \\\\) \\\\| \\\\{ \\\\} \\\\[ \\\\]'\n\t);\n});\n\ntest('escapes `-`', t => {\n\tt.is(\n\t\tescapeStringRegexp('foo - bar'),\n\t\t'foo \\\\- bar'\n\t);\n});\n",
+        "license": "MIT License\n\nCopyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n",
+        "check.cjs": "'use strict';\nconst assert = require('node:assert/strict');\nconst escapeStringRegexp = require('./index.js');\nconst kind = process.argv[2];\nif (kind === 'unicode') {\n  for (const value of ['-', 'foo - bar', 'a-b']) {\n    assert(new RegExp('^' + escapeStringRegexp(value) + '$', 'u').test(value));\n  }\n  assert(new RegExp('[' + escapeStringRegexp('-') + ']', 'u').test('-'));\n  console.log('PASS Unicode literal and character-class hyphens');\n} else if (kind === 'literal') {\n  const value = '\\\\ ^ $ * + ? . ( ) | { } [ ]';\n  const regex = new RegExp('^' + escapeStringRegexp(value) + '$', 'u');\n  assert(regex.test(value));\n  assert(!regex.test('different input'));\n  console.log('PASS existing metacharacter escaping');\n} else if (kind === 'types') {\n  assert.throws(() => escapeStringRegexp(null), TypeError);\n  assert.throws(() => escapeStringRegexp(42), TypeError);\n  assert.equal(escapeStringRegexp(''), '');\n  console.log('PASS type rejection and empty input');\n} else {\n  throw new Error('Unknown owner-configured check');\n}\n"
+      },
+      "checks": [
+        {
+          "name": "unicode-hyphen",
+          "argv": [
+            "/usr/bin/node",
+            "check.cjs",
+            "unicode"
+          ],
+          "timeout": 5
+        },
+        {
+          "name": "metacharacter-preservation",
+          "argv": [
+            "/usr/bin/node",
+            "check.cjs",
+            "literal"
+          ],
+          "timeout": 5
+        },
+        {
+          "name": "type-empty-preservation",
+          "argv": [
+            "/usr/bin/node",
+            "check.cjs",
+            "types"
+          ],
+          "timeout": 5
+        }
+      ],
+      "patches": [
+        "diff --git a/index.js b/index.js\nindex 58217a4..e5bb9db 100644\n--- a/index.js\n+++ b/index.js\n@@ -1,11 +1,13 @@\n 'use strict';\n \n-const matchOperatorsRegex = /[|\\\\{}()[\\]^$+*?.-]/g;\n-\n module.exports = string => {\n \tif (typeof string !== 'string') {\n \t\tthrow new TypeError('Expected a string');\n \t}\n \n-\treturn string.replace(matchOperatorsRegex, '\\\\$&');\n+\t// Escape characters with special meaning either inside or outside character sets.\n+\t// Use a simple backslash escape when it’s always valid, and a \\unnnn escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.\n+\treturn string\n+\t\t.replace(/[|\\\\{}()[\\]^$+*?.]/g, '\\\\$&')\n+\t\t.replace(/-/g, '\\\\u002d');\n };\ndiff --git a/test.js b/test.js\nindex 7fac094..fe5f549 100644\n--- a/test.js\n+++ b/test.js\n@@ -11,6 +11,13 @@ test('main', t => {\n test('escapes `-`', t => {\n \tt.is(\n \t\tescapeStringRegexp('foo - bar'),\n-\t\t'foo \\\\- bar'\n+\t\t'foo \\\\u002d bar'\n+\t);\n+});\n+\n+test('escapes `-` in a way compatible with the Unicode flag', t => {\n+\tt.regex(\n+\t\t'-',\n+\t\tnew RegExp(escapeStringRegexp('-'), 'u')\n \t);\n });\n",
+        "diff --git a/index.js b/index.js\n--- a/index.js\n+++ b/index.js\n@@ -1,3 +1,4 @@\n 'use strict';\n+// Synthetic negative control: behavior intentionally unchanged.\n \n const matchOperatorsRegex = /[|\\\\{}()[\\]^$+*?.-]/g;\n"
+      ],
+      "provenance": {
+        "origin": "public_upstream",
+        "repository": "https://github.com/sindresorhus/escape-string-regexp",
+        "base_commit": "21c557c7f14a112eebe196abd98d085f5fcfcf5e",
+        "issue_url": "https://github.com/sindresorhus/escape-string-regexp/issues/20",
+        "issue_date": "2020-03-12",
+        "fix_commit": "732905da074f0220487ad6a27590f89bd0819374",
+        "license": "MIT",
+        "notice_file": "license",
+        "case_kind": "Historical upstream issue; not a SWE-bench dataset instance",
+        "checker_origin": "Locally authored Node assert harness derived from the issue behavior; upstream AVA suite is not run"
+      },
+      "patch_provenance": {
+        "6720941b3e44652afbcb0227955ec786f94f12d73b772ea07f06acb3a25aa5e8": {
+          "origin": "public_upstream",
+          "source_url": "https://github.com/sindresorhus/escape-string-regexp/commit/732905da074f0220487ad6a27590f89bd0819374",
+          "source_commit": "732905da074f0220487ad6a27590f89bd0819374",
+          "author_kind": "upstream human-authored patch; consult commit for attribution",
+          "license": "MIT"
+        },
+        "6b59e35a7f8d401100d2c9fb6b4922b4ea4a7316f7d28b381a15c1c0f9cf6a04": {
+          "origin": "synthetic_control",
+          "author": "Red Rook AI with Codex assistance",
+          "description": "Comment-only negative control",
+          "license": "MIT"
+        }
+      }
+    }
+  }
+}

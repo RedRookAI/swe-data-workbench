@@ -1,0 +1,42 @@
+{
+  "schema": "swe-workbench-reference-assessment/v1",
+  "attribution": "Code assessment prepared with Codex assistance and replayed by script against actual current check evidence. No independent human review claimed.",
+  "task_text": "At the pinned upstream revision, escaped hyphens produce a SyntaxError in JavaScript Unicode regex mode. Make literal hyphens usable both in a Unicode pattern and within a character class. Preserve existing metacharacter escaping, rejection of non-string values and empty-string behavior. This is a historical upstream issue, not a newly discovered vulnerability.",
+  "source_digest": "0028adc8d6269a7caf249119d359e537b3afa4c0ccae667ff72df5096a0d8d1c",
+  "check_digest": "a50630abe7ab93fe073f3bfb5286e9cb310f00d5eb0778891ad471a5e82a9614",
+  "rubric_digest": "1b7052e87801d0f47d5adbb6a9eaeb2d11a7adb9239b0cd65429d77c367034f7",
+  "assessments": {
+    "6720941b3e44652afbcb0227955ec786f94f12d73b772ea07f06acb3a25aa5e8": {
+      "decision": "accepted",
+      "criteria": {
+        "task_clarity": "pass",
+        "evidence_adequacy": "pass",
+        "requested_behavior": "pass",
+        "preserved_behavior": "pass",
+        "unsupported_claims": "pass"
+      },
+      "candidate_outcomes": [
+        "passed",
+        "passed",
+        "passed"
+      ],
+      "reason": "Scripted replay of Codex-assisted code assessment: the complete human-authored upstream diff removes hyphen from the generic backslash replacement and escapes it as \\u002d, valid in Unicode literals and character classes. The exact baseline fails Unicode handling while the candidate passes it and both ordinary metacharacter/type checks. Source is preserved. The original upstream AVA suite was not executed; this acceptance is for the stated pinned three-check recipe and examined patch."
+    },
+    "6b59e35a7f8d401100d2c9fb6b4922b4ea4a7316f7d28b381a15c1c0f9cf6a04": {
+      "decision": "rejected",
+      "criteria": {
+        "task_clarity": "pass",
+        "evidence_adequacy": "pass",
+        "requested_behavior": "fail",
+        "preserved_behavior": "pass",
+        "unsupported_claims": "pass"
+      },
+      "candidate_outcomes": [
+        "failed",
+        "passed",
+        "passed"
+      ],
+      "reason": "Scripted replay of Codex-assisted code assessment: this authored negative control adds only a comment. It leaves the original hyphen replacement unchanged; the actual Unicode regression still fails while the two preserved checks pass. It does not meet the requested behavior."
+    }
+  }
+}

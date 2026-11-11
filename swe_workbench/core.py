@@ -1,6 +1,7 @@
 """Public, framework-independent Workbench API. SQLite is the mutation authority."""
 from __future__ import annotations
 import json
+import base64
 from pathlib import Path
 import platform
 import sqlite3
@@ -8,16 +9,17 @@ import sys
 import uuid
 from .errors import WorkbenchError
 from .store import Store, canonical, digest
-from .assets import bundled_directory
+from .assets import resolve_bundle
 
 CRITERIA = ('task_clarity', 'evidence_adequacy', 'requested_behavior', 'preserved_behavior', 'unsupported_claims')
 VERDICTS = {'pass', 'fail', 'uncertain', 'not-assessed'}
+REVIEWER_MODES = {'developer_adjudication', 'ai_assisted_adjudication', 'owner_adjudication', 'scripted_adjudication'}
 
 
 class Workbench:
     def __init__(self, root, fixture_dir=None):
         self.root = Path(root).resolve()
-        self.fixture_dir = Path(fixture_dir) if fixture_dir else bundled_directory('fixtures')
+        self.fixture_dir = resolve_bundle(fixture_dir)
         self.store = Store(self.root)
         self._initialized = False
         try:
@@ -46,22 +48,46 @@ class Workbench:
         task_text = record.get('task_text', task['task_text'] if task else '')
         patch_digest = digest(patch.encode('utf-8')) if patch is not None else None
         trusted = bool(task and patch in task['patches'] and task_text == task['task_text'])
+        patch_provenance = task.get('patch_provenance', {}).get(patch_digest, {}) if trusted else {}
+        origin = patch_provenance.get('origin', 'imported_unverified')
+        if trusted and not patch_provenance and self.catalog.get('origin') == 'synthetic_fixture':
+            origin = 'synthetic_fixture'
         identity = {'task_id': task_id, 'source_digest': source_digest, 'check_digest': check_digest,
                     'rubric_digest': self.rubric_digest, 'task_text': task_text, 'patch_digest': patch_digest}
         return identity | {'id': 'sub-' + digest(canonical(identity)), 'title': record.get('title', task['title'] if task else task_id),
-                           'patch': patch, 'origin': 'synthetic_fixture' if trusted else 'imported_unverified',
+                           'patch': patch, 'origin': origin, 'patch_provenance': patch_provenance,
                            'declared_origin': record.get('origin', 'unspecified'), 'trusted_tuple': trusted,
                            'fixture_label': record.get('fixture_label'), 'correction_of': record.get('correction_of'),
                            'provenance': task.get('provenance', {}) if task else {},
                            'seeded_reviews': [dict(r, origin='synthetic_seed') for r in record.get('seeded_reviews', []) if isinstance(r, dict)]}
 
-    def import_jsonl(self, path, operation_key):
+    def import_jsonl(self, path, operation_key, input_format='native'):
         self._ready()
         from .intake import import_jsonl
-        return import_jsonl(self, path, operation_key)
+        return import_jsonl(self, path, operation_key, input_format)
 
     def import_sample(self, operation_key):
         return self.import_jsonl(self.fixture_dir / 'sample.jsonl', operation_key)
+
+    def bundle_info(self):
+        return {'name': self.catalog.get('name', 'synthetic-fixtures'),
+                'title': self.catalog.get('title', 'Synthetic fixture demonstration'),
+                'origin': self.catalog.get('origin', 'unspecified'),
+                'prediction_format': self.catalog.get('prediction_format', 'native')}
+
+    def import_approved(self, operation_key):
+        """Only the configured owner bundle chooses a local prediction path."""
+        relative = self.catalog.get('prediction_file', 'sample.jsonl')
+        if not isinstance(relative, str) or not relative:
+            raise WorkbenchError('prediction-path', 'Bundle predictions require a confined relative file path.')
+        candidate = Path(relative)
+        root = self.fixture_dir.resolve()
+        if candidate.is_absolute() or '..' in candidate.parts:
+            raise WorkbenchError('prediction-path', 'Bundle predictions require a confined relative file path.')
+        path = (root / candidate).resolve()
+        if not path.is_relative_to(root) or not path.is_file():
+            raise WorkbenchError('prediction-path', 'Configured bundle prediction file is unavailable or outside the bundle.')
+        return self.import_jsonl(path, operation_key, self.catalog.get('prediction_format', 'native'))
 
     def _project_context(self, item):
         """Expose current eligibility without rewriting historical decisions.
@@ -116,9 +142,14 @@ class Workbench:
         if not row:
             raise WorkbenchError('submission-not-found', 'Submission does not exist.', 404)
         lineages = []
+        from .intake import occurrence_claims
+        formats = {event['payload']['batch_id']: event['payload'].get('input_format', 'native')
+                   for event in self.store.events(con) if event['kind'] == 'batch-imported'}
         for membership in con.execute('SELECT batch_id,ordinal AS line,raw_digest,duplicate_of,raw FROM memberships WHERE submission_id=? ORDER BY batch_id,ordinal', (submission_id,)):
             lineage = {key: membership[key] for key in ('batch_id', 'line', 'raw_digest', 'duplicate_of')}
             record = json.loads(membership['raw'])
+            lineage.update(occurrence_claims(record, formats.get(membership['batch_id'], 'native')))
+            lineage['raw_record_base64'] = base64.b64encode(membership['raw']).decode('ascii')
             if record.get('correction_of'):
                 lineage['correction_of'] = record['correction_of']
             lineages.append(lineage)
@@ -150,7 +181,7 @@ class Workbench:
         self._ready()
         return self.store.artifact_bytes(name)
 
-    def review(self, submission_id, *, expected_revision, evidence_digest, rubric_digest, decision, reason, criteria, operation_key, actor='operator'):
+    def review(self, submission_id, *, expected_revision, evidence_digest, rubric_digest, decision, reason, criteria, operation_key, actor='operator', reviewer_mode='developer_adjudication'):
         self._ready()
         if not isinstance(decision, str) or decision not in {'accepted','rejected','needs-work'} or not isinstance(reason, str) or not isinstance(criteria, dict):
             raise WorkbenchError('invalid-review', 'Review decision, criteria and reason are required.')
@@ -158,10 +189,13 @@ class Workbench:
             raise WorkbenchError('invalid-criteria', 'Supply all five rubric criteria using pass/fail/uncertain/not-assessed.')
         if not isinstance(actor, str) or not actor.strip() or len(actor) > 200:
             raise WorkbenchError('invalid-actor', 'A reviewer identity is required.')
+        if not isinstance(reviewer_mode, str) or reviewer_mode not in REVIEWER_MODES:
+            raise WorkbenchError('invalid-reviewer-mode', 'Unsupported adjudication mode.')
         if decision != 'accepted' and not reason.strip():
             raise WorkbenchError('review-reason', 'A reason is required for rejected or needs-work decisions.')
         payload = {'submission_id': submission_id, 'expected_revision': expected_revision, 'evidence_digest': evidence_digest,
-                   'rubric_digest': rubric_digest, 'decision': decision, 'reason': reason, 'criteria': criteria, 'actor': actor}
+                   'rubric_digest': rubric_digest, 'decision': decision, 'reason': reason, 'criteria': criteria, 'actor': actor,
+                   'reviewer_mode': reviewer_mode}
         with self.store.transaction() as con:
             prior = self.store.operation(con, 'review', operation_key, payload)
             if prior is not None:
@@ -183,7 +217,7 @@ class Workbench:
             if decision == 'accepted' and (item['execution_status'] != 'completed' or item['result']['overall'] != 'passed' or not item['result'].get('source_unchanged') or any(v != 'pass' for v in criteria.values()) or not item['trusted_tuple']):
                 raise WorkbenchError('ineligible-acceptance', 'Acceptance requires complete passing machine evidence and all rubric criteria passing.', 422)
             review = {'decision': decision, 'reason': reason, 'criteria': criteria, 'actor': actor,
-                      'origin': 'developer_adjudication', 'evidence_digest': evidence_digest, 'rubric_digest': rubric_digest,
+                      'origin': reviewer_mode, 'reviewer_mode': reviewer_mode, 'evidence_digest': evidence_digest, 'rubric_digest': rubric_digest,
                       'submission_revision': expected_revision}
             con.execute('UPDATE submissions SET disposition=?,review=?,revision=revision+1 WHERE id=? AND revision=?',
                         (decision, canonical(review).decode(), submission_id, expected_revision))
@@ -218,7 +252,8 @@ class Workbench:
             segment['completed_ids'] = json.loads(segment['completed_ids'])
         return {'batch': batch, 'items': items, 'audit': audit, 'cut': cut, 'timing_segments': segments,
                 'runtime': {'python': platform.python_version(), 'sqlite': sqlite3.sqlite_version,
-                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-fixtures-v1',
+                            'platform': sys.platform, 'schema_version': 1, 'runner_version': 'trusted-task-worker-v2',
+                            'intake_version': 'raw-occurrence-v2', 'bundle': self.bundle_info(),
                             'fixture_catalog_digest': digest(canonical(self.catalog)), 'rubric_digest': self.rubric_digest}}
 
     def snapshot(self, batch_id):

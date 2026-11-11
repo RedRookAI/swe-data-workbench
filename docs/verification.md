@@ -1,41 +1,37 @@
-# Verification profile: 0.1.0a1
+# Verification:0.1.0a2
 
-Checked 2026-11-11 on Linux x64, Python 3.12.3, SQLite 3.45.1 and Git 2.43.0. Exact artifact identities and structured observations are in verification.json and examples/synthetic-run/recording.json.
+Checked2026-11-11 on Linux x64, Python3.12.3, SQLite3.45.1, Git2.43.0 and Node22.23.4. Exact hashes and selected receipts are in verification.json and examples/real-run/recording.json. The previous release's verification-v0.1.0a1.md/json and synthetic evidence retain their historical identities.
 
-## Checks actually executed
+## Executed checks
 
-| Profile | Observed result | What it establishes |
-|---|---|---|
-| Intake/core/runner/recovery | 19 focused cases passed across their scoped runs | Raw lineage and bounds, transaction rollback, exact evidence/rubric binding, real Git/check execution, ownership, actual killed-controller recovery and content/generation fencing |
-| Export | 11 focused cases passed | Stable same-cut bytes, artifact/audit verification, interruption around filesystem publication, correct denominators and safe public-file selection |
-| API transport and real-core integration | 14 cases passed | Owner authorization, exact origin, schema/error boundaries and actual process/review/export integration |
-| Browser security/accessibility fixtures | 3 Chromium cases passed | Inert imported text, keyboard tabs, small-screen layout, exact review payload and paused/muted playback |
-| Documented command-line example | Passed on the current context-bound intake implementation | A real controller stopped after one result; fresh-process continuation retained that evidence and processed the remaining three candidates |
-| Installed release wheel | Passed outside the source checkout, with isolated Python imports | Installed modules/browser assets matched checkout bytes; bundled fixtures executed one actual candidate; database integrity passed; Keep was absent |
-| Actual owner-browser recording | Completed with zero browser errors | Real intake, cooperative stop/resume, scripted semantic adjudication and exact export |
-| Public static browser view | Passed with the real frozen snapshot | Six items rendered, owner controls hidden, zero API/external requests, no browser errors, mobile layout without horizontal overflow, paused/muted low-volume player and local captions |
+| Scope | Observed result |
+|---|---|
+| New intake |4 focused cases passed: exact raw bytes/final-newline distinction, model/source claims, duplicate execution identity, format idempotency, invalid records and approved-path confinement |
+| Review modes |1 focused actual execution case passed: four controlled modes, same-key conflict, failed-evidence acceptance refusal |
+| Export |8 new and11 affected existing cases passed: raw attribution/tampering, repeated lineage, modes, old v1 exports and publication/integrity invariants |
+| Default/context preservation |2 focused cases passed: sample accounting and source/check/rubric invalidation with old frozen exports preserved |
+| API/server additions |6 new cases passed: owner-only bundle/configured import, exact Origin, mode schema, actor boundary and CLI configuration |
+| Browser |5 actual Chromium cases passed with test transport fixtures: inert text, private/live behavior, keyboard/mobile, provenance/attribution and deliberate zero-volume retention |
+| Actual real-case API integration |1 passed: real baseline/candidate checks, unapproved refusal, raw occurrence claims, scripted exact-evidence review, stale/mode conflict and offline-verifiable same-cut export |
+| Affected API/browser regressions |4 passed after final default/native bundle discriminator and static title changes |
+| Git ancestor integration |1 passed with the actual two-file upstream patch: candidate bytes changed, baseline fail/pass/pass became pass/pass/pass, ancestor Git metadata and source preserved |
+| Default runner |1 focused actual two-worker allowlist/source-preservation regression passed |
+| Pilot instrumentation |6 focused cases passed using declared test doubles for accounting, memory scope, failures, fresh state and capacity refusal |
 
-The component cases were run by separate Codex instances during implementation. These results are not presented as one full-suite execution on the final documentation commit. Relevant checks were repeated after actual changes or a concrete failure.
+These are scoped lane runs, with some overlap. No combined final full-suite result is claimed. Process ownership/lifetime semantics did not change; earlier actual killed-controller recovery evidence remains in the0.1.0a1 verification rather than repeating that unchanged check.
 
-## One integration defect corrected
+## Complete working paths
 
-A changed current rubric initially left historical accepted decisions counted as current. Current read projections now invalidate only affected task/source/check/rubric/allowlist contexts while preserving historical results, decisions, revisions and audit evidence. Intake identity binds raw bytes plus effective context; reusing an old key under changed context conflicts, and a new key creates the appropriate context batch.
+The ordinary tools/run_real_demo.py path executed the actual selected case. A real controller stopped after one committed measurement; a fresh process resumed the remaining approved candidate without replacing the first evidence digest. One upstream fix was accepted, one authored control rejected and one unapproved variant left pending. The repeated same-cut export matched and verified offline.
 
-A focused regression exercised rubric, source and check changes, preserved an old frozen export and verified current counts, eligibility and reimport. The browser identifies historical decisions and prevents a stale-context review form from implying current authority.
+The actual browser recording imported the approved batch, executed checks, inspected the exact patches/evidence, selected explicit reviewer mode and disposition, and froze the accepted export. There were zero browser errors. Decisions replay the shipped Codex-assisted code assessment and are labeled scripted adjudication. No application model call was made. Its source_commit field identifies the baseline HEAD while source_file_sha256 identifies the actual uncommitted application bytes; the receipt does not claim the baseline commit already contained the follow-up changes.
 
-## Recorded result
+The release wheel was installed into the project-local environment and exercised from /tmp with isolated Python imports. Every module, web asset, fixture and real-case bundle file matched checkout bytes. Both transport formats retained model labels; actual baseline/candidate checks ran; a scripted exact-evidence acceptance exported and verified; CLI bundle selection and installed owner API authorization/assets passed. Keep was absent. One unpublished wheel was replaced after correcting the native alternate sample's model-name key; the published SHA identifies the final installed artifact.
 
-The public example contains eight authored input lines: six unique submissions, one duplicate and one invalid record. Four trusted candidates were measured. Two were accepted and two rejected through scripted developer adjudications; two remain pending for missing or unsupported evidence. The deliberately wrong sorting patch actually passed its weak visible checks before semantic rejection.
+The static root rendered three real-case submissions, linked to the preserved six-item synthetic view and made no API or external requests. Both views hid owner actions. Player controls started paused/muted at0.1; a deliberately chosen volume0 survived reload. Mobile layout had no horizontal overflow. The new public build verified both three-file evidence cuts before copying them. Receipt JSON stays alongside the exact export directory rather than inside its strictly verified three-file set.
 
-The visible interruption is a controlled cooperative stop after one committed result. A separate focused recovery case killed an actual controller and verified owned-worker cleanup, retained results and restart. The recording does not pretend that its cooperative stop is that crash test.
+The declared pilot ran once across fresh synthetic/real roots. Twelve raw deliveries became nine unique memberships; six completed measurements and three pending items remained without adjudication. docs/pilot.md explains intervals, CPU accounting and cumulative memory limitations. No aggregate memory peak, independent review quality, model accuracy or production throughput is claimed.
 
-Recording decisions were scripted by tools/record_demo.py through the actual owner browser controls. No model request was made by the application. Development itself used Codex assistance.
+An upstream Starlette TestClient deprecation warning appeared during development qualification; checks passed. Runtime dependencies were unchanged.
 
-## Reproduce proportionally
-
-Install requirements-dev.lock for focused test tools. Core/export checks use Python unittest; API/browser checks use pytest. Select the files relevant to a change. The README's ordinary example exercises the complete account-free path.
-
-The demonstration does not establish arbitrary-code containment, multi-tenant production readiness, independent review quality, a model accuracy estimate or a general throughput benchmark. Review time and incomparable seeded-label agreement remain unavailable rather than invented.
-
-A Starlette warning deprecates the development httpx testclient path; the checks passed. Runtime behavior is not dependent on that testclient. The recording driver uses locator assertions compatible with the application's strict Content Security Policy; the policy was preserved.
-
+Hosted deployment confirmation is appended after publishing this exact checked source checkpoint. No hosted success is claimed by this prepublication record.

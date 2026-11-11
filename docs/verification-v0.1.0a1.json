@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0a1",
+  "checked": "2026-11-11",
+  "runtime_profile": "Linux x64, Python3.12.3, SQLite3.45.1, Git2.43.0",
+  "runtime_code_commit": "ecdfd30",
+  "browser_recording_commit": "6adaf3d4dbafa11f14922e6405a9a885e0de3cc6",
+  "component_checks": {
+    "core_intake_runner_recovery": 19,
+    "export": 11,
+    "api_transport_and_real_core": 14,
+    "browser_synthetic_security_accessibility": 3
+  },
+  "component_check_scope": "Focused checks executed in separate implementation lanes; not a claim of one final full-suite run. The current-context regression was added after a concrete integration finding.",
+  "documented_cli": {
+    "passed": true,
+    "workers": 2,
+    "retained_first_result": true,
+    "resumed_unfinished": 3,
+    "accepted": 2,
+    "rejected": 2,
+    "pending": 2,
+    "same_cut_reexport": true
+  },
+  "release_wheel": {
+    "profile": "release-wheel",
+    "python": "3.12.3",
+    "sqlite": "3.45.1",
+    "imports_from_site_packages": true,
+    "module_and_web_bytes_match_checkout": true,
+    "bundled_fixtures": true,
+    "real_candidate_completed": 1,
+    "integrity_ok": true,
+    "keep_dependency": false
+  },
+  "wheel_sha256": "b9fb01bc96e033ea3551f7931adda16150da76edafe54fdbe506c17d73fb795a",
+  "browser_recording": {
+    "seconds": 27.287,
+    "errors": [],
+    "video_sha256": "bf238bf1ac5e14bcf98f249c9b7330a7899fc8f0cba537b035e8933a9c523fc5",
+    "fixture_origin": "synthetic authored fixtures",
+    "decision_origin": "scripted developer adjudication through actual browser controls"
+  },
+  "public_browser": {
+    "real_frozen_snapshot": true,
+    "unique_items_rendered": 6,
+    "owner_controls_hidden": true,
+    "static_api_calls": [],
+    "external_requests": [],
+    "browser_errors": [],
+    "muted_paused_controls_low_volume": true,
+    "local_caption_track": true,
+    "mobile_no_horizontal_overflow": true,
+    "browser": "project-local Chromium158 / Playwright1.65.0"
+  },
+  "frozen_manifest_sha256": "16cd48ea6b95dda0ee6a3c6c9d9a3ede4d46e9be61d82afb1c23835e4ab62d6e",
+  "model_calls": 0,
+  "keep_runtime_dependency": false,
+  "limitations": [
+    "Trusted synthetic fixture execution only; no arbitrary-code sandbox.",
+    "Scripted developer adjudications, not independent human assessment.",
+    "Small curated corpus; no general model accuracy, production throughput or eval-lift claim.",
+    "Database/filesystem/process durability depends on the declared local runtime and storage profile.",
+    "Local hash chain is not independent custody."
+  ]
+}

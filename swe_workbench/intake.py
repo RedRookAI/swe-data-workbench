@@ -14,7 +14,31 @@ def reject_constant(value):
     raise ValueError('Non-finite JSON number is unsupported')
 
 
-def read_jsonl(path):
+def occurrence_claims(record, input_format):
+    """Unverified input declarations, separate from the trusted allowlist."""
+    return {'input_format': input_format,
+            'declared_source': record.get('source', record.get('origin', 'unspecified')),
+            'declared_model': record.get('model_name_or_path', record.get('model'))}
+
+
+def adapt_record(record, input_format):
+    if input_format == 'native' or not isinstance(record, dict):
+        return record
+    if (not isinstance(record.get('instance_id'), str) or not isinstance(record.get('model_name_or_path'), str)
+            or not isinstance(record.get('model_patch'), str)):
+        raise ValueError('SWE-bench predictions require instance_id, model_name_or_path and model_patch strings')
+    mapped = {'schema_version': 1, 'task_id': record['instance_id'], 'patch': record['model_patch'],
+              'model_name_or_path': record['model_name_or_path']}
+    # Retain claims as data; extra input trust/provenance fields grant nothing.
+    for name in ('source', 'origin'):
+        if name in record:
+            mapped[name] = record[name]
+    return mapped
+
+
+def read_jsonl(path, input_format='native'):
+    if not isinstance(input_format, str) or input_format not in {'native', 'swebench'}:
+        raise WorkbenchError('unsupported-format', 'Input format must be native or swebench.')
     rows, sha = [], __import__('hashlib').sha256()
     total = 0
     try:
@@ -37,6 +61,18 @@ def read_jsonl(path):
                     except (json.JSONDecodeError, ValueError, RecursionError):
                         error = 'invalid-json'
                 if not error:
+                    try:
+                        # Canonical validation catches non-finite values and bad
+                        # Unicode even in fields omitted by the input adapter.
+                        canonical(record)
+                    except (ValueError, UnicodeEncodeError, RecursionError):
+                        error = 'invalid-unicode-or-number'
+                if not error and input_format == 'swebench':
+                    try:
+                        record = adapt_record(record, input_format)
+                    except ValueError:
+                        error = 'invalid-swebench-record'
+                if not error:
                     if not isinstance(record, dict) or type(record.get('schema_version')) is not int or record['schema_version'] != 1:
                         error = 'unsupported-schema'
                     elif not isinstance(record.get('task_id'), str) or not record['task_id'] or len(record['task_id']) > 200:
@@ -58,8 +94,8 @@ def read_jsonl(path):
     return sha.hexdigest(), rows
 
 
-def import_jsonl(workbench, path, operation_key):
-    file_digest, rows = read_jsonl(path)
+def import_jsonl(workbench, path, operation_key, input_format='native'):
+    file_digest, rows = read_jsonl(path, input_format)
     store = workbench.store
     contexts = []
     for row in rows:
@@ -67,6 +103,9 @@ def import_jsonl(workbench, path, operation_key):
             item = workbench._record(row['record'])
             contexts.append({'line': row['ordinal'], 'submission_id': item['id'], 'trusted_tuple': item['trusted_tuple']})
     payload = {'file_digest': file_digest, 'context_digest': digest(canonical(contexts))}
+    # Native payload stays compatible with existing operation identities.
+    if input_format != 'native':
+        payload['input_format'] = input_format
     with store.transaction() as con:
         prior = store.operation(con, 'import', operation_key, payload)
         if prior is not None:
@@ -99,7 +138,7 @@ def import_jsonl(workbench, path, operation_key):
             con.execute('INSERT INTO memberships VALUES(?,?,?,?,?,?,?)',
                         (batch_id, row['ordinal'], item['id'] if item else None, error, duplicate_of, row['raw'], row['raw_digest']))
         response = workbench._batch(con, batch_id)
-        store.event(con, 'batch-imported', {'batch_id': batch_id, **payload,
+        store.event(con, 'batch-imported', {'batch_id': batch_id, **payload, 'input_format': input_format,
                                           'raw_lines': response['raw_lines'], 'invalid_lines': response['invalid_lines'],
                                           'duplicate_lines': response['duplicate_lines'], 'unique_items': response['unique_items']}, actor='operator')
         store.remember(con, 'import', operation_key, payload, {'id': batch_id})

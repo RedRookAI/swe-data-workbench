@@ -8,17 +8,22 @@ from .errors import WorkbenchError
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Process and review trusted synthetic coding fixtures.')
+    parser = argparse.ArgumentParser(description='Process and review owner-approved coding task bundles.')
     parser.add_argument('--root', type=Path, default=Path('.workbench'))
+    parser.add_argument('--bundle', help='Owner-selected built-in name or local bundle directory')
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('init')
     commands.add_parser('verify')
     commands.add_parser('batches')
+    commands.add_parser('bundle-info')
     sample = commands.add_parser('import-sample')
     sample.add_argument('--operation-key', required=True)
+    approved = commands.add_parser('import-approved')
+    approved.add_argument('--operation-key', required=True)
     intake = commands.add_parser('import')
     intake.add_argument('path', type=Path)
     intake.add_argument('--operation-key', required=True)
+    intake.add_argument('--format', choices=('native', 'swebench'), default='native', dest='input_format')
     process = commands.add_parser('process')
     process.add_argument('batch_id')
     process.add_argument('--workers', type=int, default=1)
@@ -34,7 +39,7 @@ def main(argv=None):
     export.add_argument('--operation-key', required=True)
     args = parser.parse_args(argv)
     try:
-        workbench = Workbench(args.root)
+        workbench = Workbench(args.root, fixture_dir=args.bundle)
         workbench.initialize()
         command = args.command
         if command == 'init':
@@ -43,10 +48,14 @@ def main(argv=None):
             result = workbench.verify()
         elif command == 'batches':
             result = workbench.list_batches()
+        elif command == 'bundle-info':
+            result = workbench.bundle_info()
+        elif command == 'import-approved':
+            result = workbench.import_approved(args.operation_key)
         elif command == 'import-sample':
             result = workbench.import_sample(args.operation_key)
         elif command == 'import':
-            result = workbench.import_jsonl(args.path, args.operation_key)
+            result = workbench.import_jsonl(args.path, args.operation_key, args.input_format)
         elif command == 'process':
             result = workbench.process(args.batch_id, args.workers, stop_after=args.stop_after)
         elif command == 'items':

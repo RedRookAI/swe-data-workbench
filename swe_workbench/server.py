@@ -10,11 +10,12 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root",type=Path,default=Path(".state/live"))
     parser.add_argument("--port",type=int,default=8097)
+    parser.add_argument("--bundle",help="Owner-selected task bundle name or local path (default: authored sample)")
     args=parser.parse_args()
     token=os.environ.get("SWE_WORKBENCH_OWNER_TOKEN")
     if not token or len(token)<32 or not token.isascii():
         parser.error("Set SWE_WORKBENCH_OWNER_TOKEN to at least 32 high-entropy ASCII characters.")
-    app=create_app(args.root,owner_token=token)
+    app=create_app(args.root,owner_token=token,bundle_dir=args.bundle)
     uvicorn.run(app,host="127.0.0.1",port=args.port,log_level="warning",proxy_headers=False)
 
 if __name__=="__main__":

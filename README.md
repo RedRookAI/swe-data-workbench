@@ -1,80 +1,84 @@
 # SWE Data Workbench
 
-**Process coding submissions into reviewed datasets with traceable evidence.**
+**Turn coding patches into a reviewed dataset with executable evidence.**
 
-A coding patch can pass its visible checks and still violate the task. SWE Data Workbench keeps execution evidence and rubric judgments together, so an operator can inspect that distinction before a submission enters an accepted dataset.
+A patch can pass its visible checks and still violate the task. SWE Data Workbench keeps the original input, actual execution results and version-bound judgments together, so an operator can inspect what should enter an accepted dataset.
 
-Open the recorded evidence explorer:
+Open the evidence explorer and silent recorded walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The public view is read-only. It includes synthetic tasks, actual executable-check results, scripted developer adjudications and downloadable evidence. The walkthrough records the real application. It makes no model requests.
+The current preview processes a real historical JavaScript defect and its human-authored upstream fix. Four input records become three unique patches: the reference fix is accepted, an authored negative control is rejected, and an unapproved variant stays pending. The public view is read-only. Decisions in the recording replay a Codex-assisted code assessment and are labeled scripted adjudication.
 
-![Recorded workbench with real synthetic-fixture evidence](docs/images/workbench.png)
+![Actual upstream-case workbench](docs/images/workbench.png)
 
-Release files and installable wheel:
+Installable wheel and selected evidence:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a1
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a2
 
-## What you can inspect
+## What is implemented
 
-- Eight input lines become six unique submissions, one duplicate occurrence and one invalid record.
-- Four trusted candidates run in disposable workspaces. Two incomplete or unsupported submissions remain pending.
-- A sorting patch passes the deliberately weak ascending-input checks but changes first-seen order. Its semantic defect is explained during adjudication.
-- A correct patch is accepted against exact evidence and rubric versions.
-- A controller can stop and a fresh process can recover committed progress. Separate focused checks cover an actual killed controller.
-- Export produces deterministic accepted JSONL, its manifest and a frozen evidence snapshot.
+- Bounded native and SWE-bench-compatible JSONL import, exact raw-byte lineage and per-occurrence source/model declarations. Repeated deliveries share execution while retaining their attribution.
+- Owner-selected local bundles. Only admitted source/check/patch tuples execute; a model name or imported claim grants no execution permission.
+- Separate baseline/candidate workspaces, ordinary Git patch application and executable checks. The original source remains intact.
+- Durable SQLite state, recorded launch intent, owned worker groups and generation fences. Committed results survive a fresh-process resume.
+- A private owner interface for evidence/rubric-bound review, including stale-revision conflicts and explicit reviewer attribution.
+- Deterministic accepted JSONL, a content-addressed manifest and an offline-verifiable evidence snapshot.
+- A measured two-stratum pilot with explicit wall/CPU/memory scope and honest missing measurements.
 
-Synthetic seeded reviewers illustrate disagreement. They are not independent human assessments. Demonstration adjudications are scripted through the real controls and labeled in the run notes.
+The real case is escape-string-regexp issue20. Its pinned baseline fails Unicode-hyphen handling; the complete upstream fix passes that check and two preservation checks. The genuine patch, source notice and exact reproduction are included. The original synthetic demonstration separately shows a sorting patch that passes weak tests and is rejected for changing first-seen order.
+
+Original synthetic explorer:
+
+https://swe-data-workbench.flyswatterghost.chatgpt.site/synthetic/
 
 ## Run the account-free example
 
-Requires Linux, Python 3.12 and Git. The processing core uses standard-library SQLite. Keep is not required.
+Requires Linux, Python3.12, Git and Node at /usr/bin/node. The demonstrated Node version is22.23.4. Keep is not required.
 
 ```sh
 git clone https://github.com/RedRookAI/swe-data-workbench.git
 cd swe-data-workbench
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock
-.venv/bin/python tools/run_demo.py --root .state/documented-example
+.venv/bin/python tools/run_real_demo.py --root .state/real-example
 ```
 
-The command imports the sample, runs a controller that stops after one committed result, resumes in a fresh process, records scripted exact-evidence decisions and verifies a repeated export. Its JSON receipt identifies observed counts and artifact hashes. It preserves existing state rather than resetting a workspace.
+This runs actual checks, stops a controller after one committed result, resumes in a fresh process, replays the labeled reference assessment against matching evidence, and verifies a repeated export. Its JSON receipt reports observed counts and hashes. Use a fresh owned root for a separate run; existing evidence is retained.
 
-Inspect the commands separately:
+The original synthetic example remains runnable:
 
 ```sh
-.venv/bin/python -m swe_workbench.cli --help
-.venv/bin/python -m swe_workbench.cli --root .state/documented-example verify
+.venv/bin/python tools/run_demo.py --root .state/synthetic-example
 ```
 
-The package also includes its fixture catalog and browser assets for an installed-wheel workflow.
+Import and process without replaying decisions:
+
+```sh
+.venv/bin/python -m swe_workbench.cli --root .state/my-review --bundle unicode-hyphen import-approved --operation-key my-import
+# Use the returned batch ID:
+.venv/bin/python -m swe_workbench.cli --root .state/my-review --bundle unicode-hyphen process BATCH_ID --workers 1
+.venv/bin/python -m swe_workbench.cli --root .state/my-review --bundle unicode-hyphen items BATCH_ID
+```
+
+For other local prediction files, use `import FILE --format swebench --operation-key KEY`. Unknown patches remain inspectable but cannot execute until the owner admits their exact tuple. The built-in case is a historical upstream example using compatible transport fields; it is not an official SWE-bench instance.
 
 ## Private live review
 
-The owner API and browser interface run separately from the public static explorer. Supply a high-entropy owner token through the local environment, then launch:
+Set a high-entropy `SWE_WORKBENCH_OWNER_TOKEN` in your local environment, then launch:
 
 ```sh
-.venv/bin/python -m swe_workbench.server --root .state/live --port 8097
+.venv/bin/python -m swe_workbench.server --root .state/live-real --bundle unicode-hyphen --port 8097
 ```
 
-The server requires `SWE_WORKBENCH_OWNER_TOKEN` with at least 32 ASCII characters and binds to loopback. Open its root path with `?mode=live` through your own trusted private connection. Enter the token in the owner form; it stays in browser memory and travels in an Authorization header. Mutation requests must have the exact same Origin. Do not expose this execution API publicly.
+The token must contain at least32 ASCII characters. The server binds to loopback; access its root with `?mode=live` through your own trusted private connection. The owner form keeps the token in browser memory. Public hosting serves only selected frozen data and browser assets.
 
-## Engineering choices
+## Engineering choices and limits
 
-SQLite is the sole authority for records, attempts, reviews and hash-linked audit events. State changes and audit append share one short transaction. Actual checks run outside that transaction, with recorded intent and bounded workers. Recovery uses process identity and attempt generation; elapsed time alone cannot establish that an old worker stopped.
+SQLite supplies one transactional authority for this local workload. Content identities bind the exact source, patch, checks, rubric and review. Filesystem publication and database completion reconcile after interruption. These choices keep the demonstration small and make its state inspectable.
 
-A review binds an exact submission, evidence digest and rubric. Missing required evidence cannot become an accepted result. Export freezes one consistent cut and reconciles filesystem publication with database ready state.
+Execution currently trusts carefully inspected exact bundles. Output is truncated after capture, so truncation does not bound process memory. The chosen recipe needs no network, installs or generated descendants. Arbitrary public code requires a stronger execution boundary. The pilot covers twelve deliveries across nine unique memberships and makes no production-scale or model-accuracy claim. Review time remains unmeasured.
 
-The public site contains selected static artifacts and has no execution or upload endpoint. Imported text is rendered as text. Trusted manifest-listed fixtures are the supported execution profile; this is not an arbitrary-code sandbox.
+Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. The upstream reference patch is human-authored; synthetic controls and replayed decisions are labeled. This project runs independently from Keep, whose recovery and audit design informed it.
 
-See the engineering decisions, export contract, metrics definitions and measured verification in `docs/`. The fixture catalog explains deliberately weak checks and known counterexamples.
-
-## Scope and attribution
-
-Version 0.1.0a1 is a standalone portfolio preview. The small curated corpus demonstrates workflow behavior; it does not establish model accuracy, independent reviewer reliability, production throughput or production readiness.
-
-Keep informed the durable execution and audit design. This application runs independently and does not import or copy Keep's runtime.
-
-Product direction and acceptance requirements are owner-led. Implementation, debugging, checks, documentation and recording preparation use substantial Codex assistance. Original application and authored fixtures use the MIT license; dependencies retain their own licenses.
-
+Engineering details: docs/engineering.md. Exact export contract: docs/data-contract.md. Current verification: docs/verification.md. Pilot observations: docs/pilot.md and docs/pilot-report.json. The v0.1.0a1 evidence and release remain available with their original identities.

@@ -1,0 +1,8 @@
+diff --git a/index.js b/index.js
+--- a/index.js
++++ b/index.js
+@@ -1,3 +1,4 @@
+ 'use strict';
++// Synthetic negative control: behavior intentionally unchanged.
+ 
+ const matchOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g;

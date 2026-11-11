@@ -1,0 +1,40 @@
+diff --git a/index.js b/index.js
+index 58217a4..e5bb9db 100644
+--- a/index.js
++++ b/index.js
+@@ -1,11 +1,13 @@
+ 'use strict';
+ 
+-const matchOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g;
+-
+ module.exports = string => {
+ 	if (typeof string !== 'string') {
+ 		throw new TypeError('Expected a string');
+ 	}
+ 
+-	return string.replace(matchOperatorsRegex, '\\$&');
++	// Escape characters with special meaning either inside or outside character sets.
++	// Use a simple backslash escape when it’s always valid, and a \unnnn escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
++	return string
++		.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
++		.replace(/-/g, '\\u002d');
+ };
+diff --git a/test.js b/test.js
+index 7fac094..fe5f549 100644
+--- a/test.js
++++ b/test.js
+@@ -11,6 +11,13 @@ test('main', t => {
+ test('escapes `-`', t => {
+ 	t.is(
+ 		escapeStringRegexp('foo - bar'),
+-		'foo \\- bar'
++		'foo \\u002d bar'
++	);
++});
++
++test('escapes `-` in a way compatible with the Unicode flag', t => {
++	t.regex(
++		'-',
++		new RegExp(escapeStringRegexp('-'), 'u')
+ 	);
+ });

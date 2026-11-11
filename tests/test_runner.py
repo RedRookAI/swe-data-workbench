@@ -1,4 +1,6 @@
 import json
+import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -64,6 +66,39 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(second['interrupted'])
         for sid,result in prior.items():self.assertEqual(restarted.submission(sid)['result'],result)
         self.assertEqual(len(restarted.snapshot(self.batch['id'])['timing_segments']),2)
+
+
+class WorkerGitDiscoveryTests(unittest.TestCase):
+    def test_full_upstream_patch_applies_inside_git_ancestor(self):
+        from swe_workbench.worker import evaluate
+        repo = Path(__file__).resolve().parents[1]
+        bundle = repo / 'bundles' / 'unicode-hyphen'
+        task = next(iter(json.loads((bundle / 'catalog.json').read_text())['tasks'].values()))
+        exact_patch = (bundle / 'upstream.patch').read_text()
+        self.assertIn(exact_patch, task['patches'])
+        with tempfile.TemporaryDirectory(dir=repo) as temporary:
+            ancestor = Path(temporary) / 'ancestor'
+            ancestor.mkdir()
+            clean_env = {'PATH': os.defpath, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': '/dev/null'}
+            subprocess.run(['git', 'init', '-q', str(ancestor)], env=clean_env, check=True)
+            sentinel = ancestor / 'index.js'
+            sentinel.write_bytes(b'ancestor source must stay untouched\n')
+            before = {str(path.relative_to(ancestor)): path.read_bytes()
+                      for path in ancestor.rglob('*') if path.is_file()}
+            work = ancestor / 'nested' / 'attempt' / 'workspace'
+            result = evaluate(task, exact_patch, work)
+            self.assertEqual(result['patch_application']['outcome'], 'passed')
+            self.assertEqual([check['outcome'] for check in result['baseline']['checks']], ['failed', 'passed', 'passed'])
+            self.assertEqual([check['outcome'] for check in result['candidate']['checks']], ['passed'] * 3)
+            self.assertNotEqual((work / 'candidate' / 'index.js').read_bytes(), task['source_files']['index.js'].encode())
+            self.assertIn(b".replace(/-/g, '\\\\u002d')", (work / 'candidate' / 'index.js').read_bytes())
+            self.assertIn('Unicode flag', (work / 'candidate' / 'test.js').read_text())
+            for relative, data in before.items():
+                self.assertEqual((ancestor / relative).read_bytes(), data)
+            for relative, text in task['source_files'].items():
+                self.assertEqual((work / 'baseline' / relative).read_bytes(), text.encode())
+            self.assertTrue(result['source_unchanged'])
+            self.assertEqual(result['runner'], 'trusted-task-worker-v2')
 
 
 if __name__=='__main__':unittest.main()

@@ -10,7 +10,7 @@ The demonstration uses a local rollback journal with FULL synchronization. This 
 
 ## Actual checks and human judgment
 
-The fixture runner works on disposable copies and applies exact patches with ordinary Git. The source fixture remains intact. Check outcomes retain their actual status and output. A candidate passing visible checks remains subject to rubric review: a weak test can miss a real defect.
+The trusted-task runner works on disposable copies and applies exact patches with ordinary Git. The pinned source remains intact. Check outcomes retain their actual status and output. A candidate passing visible checks remains subject to rubric review: a weak test can miss a real defect.
 
 An adjudication binds the submission revision, check evidence and rubric. A stale browser cannot silently replace a newer decision. Seeded reviewer labels are synthetic examples. A demonstration decision performed by the developer or an automation script is identified as such; it does not represent independent expert agreement.
 
@@ -28,5 +28,13 @@ The public view is a static explorer of a frozen recorded run. It has no executi
 
 ## Attribution
 
-Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation use substantial Codex assistance. Synthetic tasks and scripted decisions are labeled in the fixture/run evidence. No customer deployment or production-readiness claim is made.
+Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation use substantial Codex assistance. Public source/patch provenance, synthetic controls and scripted decisions are labeled in the bundle/run evidence. No customer deployment or production-readiness claim is made.
 
+
+## Real-case integration
+
+The owner selects a local bundle before serving/importing it. SWE-bench-style fields map into the same intake authority as native records. Exact raw bytes remain attached to every occurrence, including duplicates with distinct publisher/model declarations. Those declarations do not grant execution permission or prove authorship. The snapshot/export verifier checks the retained claims against the raw record.
+
+The complete upstream Git diff exposed an ancestor-discovery problem: Git can return success after skipping paths outside a nested directory prefix. Each disposable command now stops Git discovery at its workspace parent. A regression verifies actual changed candidate bytes under an enclosing repository and preserves both baseline and ancestor metadata. Existing ordinary path validation remains intact.
+
+Reviewer mode is an explicit recorded attribute. Owner, developer, AI-assisted and scripted decisions have the same exact-evidence acceptance requirements. This field records an operator declaration; it does not independently authenticate the named person or review quality. The shipped assessment plan documents the examined semantic reasons and refuses changed source/check/rubric identities or unexpected actual outcomes.
