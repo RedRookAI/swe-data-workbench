@@ -16,7 +16,7 @@
     <a class="brand" href="./"><span class="brand-icon" aria-hidden="true">W</span><span>SWE Data<br><strong>Workbench</strong></span></a>
     <p class="eyebrow">DATA OPERATIONS</p>
     <nav aria-label="Workbench"><a class="nav-link active" href="#workbench">Submission review</a><a class="nav-link" href="#audit-section">Audit trail</a><a class="nav-link" href="#export-section">Dataset export</a></nav>
-    <div class="sidebar-note"><span class="status">Independent demonstration</span><p>Small synthetic coding fixtures. Real executable checks. Version-bound adjudication.</p><p class="small">Human direction and acceptance; substantial AI implementation assistance.</p></div>
+    <div class="sidebar-note"><span class="status">Independent demonstration</span><p id="case-sidebar">Recorded coding submissions. Real executable checks. Version-bound adjudication.</p><p class="small">Human direction and acceptance; substantial AI implementation assistance.</p></div>
   </aside>
   <main class="main" id="main">
     <header class="topbar"><div><p class="eyebrow">EVIDENCE TO DATASET</p><h1>Submission review</h1><p class="muted">Inspect the patch. Read the evidence. Make the call.</p></div><span class="mode" id="mode">Recorded · read only</span></header>
@@ -26,6 +26,7 @@
       <form id="connect-form"><label for="token">Owner token</label><input type="password" id="token" autocomplete="off" spellcheck="false" required minlength="32"><div class="actions"><button class="primary" type="submit">Connect</button><button type="button" id="disconnect">Disconnect</button></div></form>
     </section>
     <section class="batchbar" aria-label="Batch selection"><div><label for="batch-select">Current batch</label><select id="batch-select" aria-label="Current batch"></select><p class="small muted" id="batch-meta">Loading recorded evidence…</p></div><div class="actions" id="owner-actions" hidden><button type="button" id="import">Import trusted sample</button><button type="button" id="process" class="primary">Run checks · 1 worker</button><button type="button" id="refresh">Refresh</button></div></section>
+    <section class="card case-summary" aria-labelledby="case-title"><p class="eyebrow" id="case-kind">RECORDED CASE</p><h2 id="case-title">Evidence and attribution</h2><p id="case-description">Inspect source attribution and actual check evidence for each submission.</p><a id="synthetic-link" href="./synthetic/" hidden>Open the original synthetic demonstration</a></section>
     <section class="metrics" id="metrics" aria-label="Batch accounting"></section>
     <p class="small muted" id="accounting-note">Input accounting counts invalid lines, duplicates and unique memberships separately. Execution and review states can overlap.</p>
     <details class="card" id="intake-details"><summary>Intake accounting and quarantined records</summary><div id="intake-records"></div></details>
@@ -36,7 +37,7 @@
     <section class="card" id="export-section"><div class="section-heading"><div><p class="eyebrow">FROZEN SNAPSHOT</p><h2>Dataset export</h2></div><button id="export" class="primary" type="button" hidden>Freeze accepted export</button></div><p id="export-description">Accepted data and its provenance are frozen at one recorded audit cut.</p><div class="actions" id="downloads" hidden><a class="button" href="./data/accepted.jsonl" download>Accepted JSONL</a><a class="button" href="./data/manifest.json" download>Manifest</a><a class="button" href="./data/evidence.json" download>Evidence snapshot</a></div><pre id="export-receipt" hidden></pre><div id="recorded-metrics"></div></section>
     <section class="card" id="audit-section"><div class="section-heading"><h2>Audit trail</h2><span class="small muted" id="audit-cut"></span></div><p class="small muted">Content-linked events record processing and review. Local hashes support integrity checks within this demonstration.</p><div id="audit-list"></div></section>
     <section class="card" id="recording-section" hidden><h2>Recorded walkthrough</h2><p class="muted">Silent recording with captions. Playback begins paused and muted with visible controls.</p><video id="walkthrough" controls muted playsinline preload="none" aria-label="Actual workbench walkthrough"></video></section>
-    <footer class="small muted">Synthetic fixtures describe this workflow. Their outcomes do not estimate model accuracy or independent reviewer performance.</footer>
+    <footer class="small muted" id="case-footer">These selected cases demonstrate workflow behavior. Outcomes do not estimate model accuracy or independent reviewer performance.</footer>
   </main>
 </div>
 <noscript>This evidence explorer requires JavaScript. The recorded data files remain available in the data directory.</noscript>

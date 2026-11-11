@@ -4,8 +4,10 @@ const $ = (id) => document.getElementById(id);
 const live = new URLSearchParams(location.search).get('mode') === 'live';
 const criteria = ['task_clarity', 'evidence_adequacy', 'requested_behavior', 'preserved_behavior', 'unsupported_claims'];
 const labels = {task_clarity: 'Task clarity', evidence_adequacy: 'Evidence adequacy', requested_behavior: 'Requested behavior', preserved_behavior: 'Preserved behavior', unsupported_claims: 'Unsupported claims'};
-const state = {token: '', batch: null, items: [], selected: null, audit: [], snapshot: null, busy: false};
+const state = {token: '', batch: null, items: [], selected: null, audit: [], snapshot: null, bundle: null, busy: false};
 const retries = new Map();
+const reviewerModes = {developer_adjudication: 'Developer adjudication', ai_assisted_adjudication: 'AI-assisted adjudication', owner_adjudication: 'Owner adjudication', scripted_adjudication: 'Scripted adjudication'};
+function reviewLabel(mode) { return reviewerModes[mode] || 'Unspecified adjudication'; }
 function node(tag, text, cls) {
   const n = document.createElement(tag);
   if (text !== undefined && text !== null) n.textContent = String(text);
@@ -18,6 +20,7 @@ function notify(text, failure = false) { $('message').textContent = text; $('mes
 function hideMessage() { $('message').hidden = true; }
 function appendField(parent, title, value) { const section = node('section'); section.append(node('h3', title), node('pre', display(value))); parent.append(section); }
 function short(value) { return value ? String(value).slice(0, 14) + '…' : 'unavailable'; }
+function approvedInput() { return Boolean(state.bundle?.prediction_format && state.bundle.name !== 'synthetic-fixtures'); }
 function current() { return state.items.find((item) => item.id === state.selected); }
 async function request(path, body) {
   if (!live || !state.token) throw new Error('Connect to the private owner instance first.');
@@ -85,9 +88,20 @@ async function selectItem(id) {
 function renderMetrics() {
   const batch = state.batch;
   const counts = batch?.counts || {};
-  const facts = [['Input lines', batch?.raw_lines, 'Raw records received'], ['Unique submissions', batch?.unique_items, (batch?.duplicate_lines ?? '—') + ' duplicate · ' + (batch?.invalid_lines ?? '—') + ' invalid'], ['Completed checks', counts.completed, 'Execution status'], ['Accepted', batch ? (counts.accepted ?? state.items.filter((x) => x.disposition === 'accepted').length) : undefined, 'Developer adjudication']];
+  const facts = [['Input lines', batch?.raw_lines, 'Raw records received'], ['Unique submissions', batch?.unique_items, (batch?.duplicate_lines ?? '—') + ' duplicate · ' + (batch?.invalid_lines ?? '—') + ' invalid'], ['Completed checks', counts.completed, 'Execution status'], ['Accepted', batch ? (counts.accepted ?? state.items.filter((x) => x.disposition === 'accepted').length) : undefined, 'Recorded adjudication']];
   $('metrics').replaceChildren(...facts.map(([label, value, note]) => { const block = node('div', null, 'metric'); block.append(node('span', label, 'small muted'), node('strong', value ?? '—'), node('span', note, 'small muted')); return block; }));
-  $('batch-meta').textContent = batch ? 'Recorded source: ' + (batch.created_at || 'time unavailable') + ' · ' + short(batch.id) : live ? 'Import the trusted sample to begin.' : 'No recorded snapshot available.';
+  $('batch-meta').textContent = batch ? 'Recorded source: ' + (batch.created_at || 'time unavailable') + ' · ' + short(batch.id) : live ? (approvedInput() ? 'Import the approved task to begin.' : 'Import the trusted sample to begin.') : 'No recorded snapshot available.';
+}
+function renderCase() {
+  const publicCase = state.bundle?.origin === 'public_upstream' || state.items.some((item) => item.origin === 'public_upstream');
+  const synthetic = !publicCase && (state.bundle?.origin === 'synthetic_fixture' || state.items.some((item) => item.origin === 'synthetic_fixture'));
+  $('case-kind').textContent = publicCase ? 'PUBLIC UPSTREAM CASE' : synthetic ? 'SYNTHETIC FIXTURE CASE' : 'CONFIGURED CASE';
+  $('case-title').textContent = state.bundle?.title || (publicCase ? 'Public upstream code with recorded check evidence' : synthetic ? 'Original synthetic workflow demonstration' : 'Evidence and attribution');
+  const description = publicCase ? 'Pinned upstream code and candidate provenance appear with each submission. Synthetic controls are labeled separately. Check output reflects the configured local recipe.' : synthetic ? 'Authored synthetic tasks and controls illustrate the workflow. Their executable checks and recorded decisions remain inspectable.' : 'Inspect each submitted patch, its occurrence-level source claims, approved provenance and actual check evidence.';
+  $('case-description').textContent = description;
+  $('case-sidebar').textContent = publicCase ? 'Public upstream case. Labeled synthetic controls. Real check observations.' : synthetic ? 'Synthetic coding fixtures. Real executable checks. Version-bound adjudication.' : 'Recorded coding submissions. Real executable checks. Version-bound adjudication.';
+  $('synthetic-link').hidden = live || !publicCase;
+  $('import').textContent = approvedInput() ? 'Import approved task' : 'Import trusted sample';
 }
 function renderIntake() {
   const root = $('intake-records'); root.replaceChildren();
@@ -134,6 +148,7 @@ function renderInspector() {
   const head = node('header', null, 'inspector-header');
   head.append(node('p', item.task_id || 'SUBMISSION', 'eyebrow'), node('h2', item.title || 'Untitled submission'));
   const statuses = node('div', null, 'actions'); statuses.append(badge(item.execution_status), badge(item.result?.overall || 'no machine evidence'), badge(item.disposition));
+  statuses.append(badge(item.origin || 'origin unavailable'));
   head.append(statuses, node('p', 'Revision ' + item.revision + ' · ' + (item.origin || 'origin unavailable'), 'small muted')); root.append(head);
   if (item.context_current === false) root.append(node('p', 'Context changed. This earlier evidence and adjudication are historical; import the current context and obtain new evidence before acceptance.', 'notice'));
   const tabs = node('div', null, 'tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Submission details');
@@ -155,6 +170,10 @@ function renderInspector() {
   renderReview(panels[2][1], item);
   const provenance = panels[3][1];
   appendField(provenance, 'Exact identities', {submission: item.id, revision: item.revision, source_digest: item.source_digest, patch_digest: item.patch_digest, check_digest: item.check_digest, evidence_digest: item.result?.evidence_digest, rubric_digest: item.rubric_digest, origin: item.origin});
+  appendField(provenance, 'Approved source and patch provenance', {origin: item.origin, trusted_tuple: item.trusted_tuple, provenance: item.provenance, patch_provenance: item.patch_provenance});
+  provenance.append(node('p', 'Source and model names below are claims from individual input occurrences. Approval of an exact execution tuple is recorded separately.', 'small muted'));
+  const occurrences = item.lineage || item.occurrences || state.batch?.occurrences?.filter((occurrence) => occurrence.submission_id === item.id);
+  appendField(provenance, 'Input occurrences and declared source/model claims', occurrences?.length ? occurrences.map(({raw_record_base64, ...claim}) => claim) : {availability: 'Occurrence-level claims are not present in this recorded view.', declared_origin: item.declared_origin});
   if (item.seeded_reviews?.length) { provenance.append(node('h3', 'Synthetic seeded reviewers'), node('p', 'These authored labels illustrate disagreement. They are separate from developer adjudication.', 'notice')); appendField(provenance, 'Seeded labels', item.seeded_reviews); }
   syncActions();
 }
@@ -172,8 +191,8 @@ function renderEvidence(panel, item) {
 }
 function renderReview(panel, item) {
   const review = item.review;
-  if (review) { panel.append(node('h3', item.context_current === false ? 'Historical developer adjudication' : 'Current developer adjudication'), badge(review.decision), node('p', review.reason || 'No reason recorded.')); appendField(panel, 'Criterion judgments and attribution', {criteria: review.criteria, actor: review.actor, origin: review.origin}); }
-  else panel.append(node('p', 'No developer adjudication recorded.', 'muted'));
+  if (review) { panel.append(node('h3', (item.context_current === false ? 'Historical ' : 'Current ') + reviewLabel(review.reviewer_mode || review.origin).toLowerCase()), badge(review.decision), node('p', review.reason || 'No reason recorded.')); appendField(panel, 'Criterion judgments and attribution', {criteria: review.criteria, actor: review.actor, origin: review.origin, reviewer_mode: review.reviewer_mode || review.origin}); }
+  else panel.append(node('p', 'No adjudication recorded.', 'muted'));
   if (!live) { panel.append(node('p', 'Recorded read-only evidence. Decisions cannot be changed in this view.', 'notice')); return; }
   if (item.context_current === false) { panel.append(node('p', 'Import the current task context to obtain a new evidence-bound revision. The historical decision is preserved.', 'notice')); return; }
   if (!item.result?.evidence_digest) { panel.append(node('p', 'Run the required checks before binding a review to machine evidence.', 'notice')); return; }
@@ -187,7 +206,11 @@ function renderReview(panel, item) {
     row.append(label, select); rubric.append(row);
   }
   form.append(rubric);
-  const decisionLabel = node('label', 'Disposition'); decisionLabel.htmlFor = 'decision'; const decision = node('select'); decision.id = 'decision';
+  const reviewerLabel = node('label', 'Reviewer mode'); reviewerLabel.htmlFor = 'reviewer-mode';
+  const reviewerMode = node('select'); reviewerMode.id = 'reviewer-mode'; reviewerMode.name = 'reviewer_mode';
+  for (const [value, title] of Object.entries(reviewerModes)) { const option = node('option', title); option.value = value; reviewerMode.append(option); }
+  form.append(reviewerLabel, reviewerMode, node('p', 'Record who directed this decision and the assistance used. Independent authorship requires separate evidence.', 'small muted'));
+  const decisionLabel = node('label', 'Disposition'); decisionLabel.htmlFor = 'decision'; const decision = node('select'); decision.id = 'decision'; decision.required = true; const choose = node('option', 'Choose a disposition'); choose.value = ''; choose.disabled = true; choose.selected = true; decision.append(choose);
   for (const [value, title] of [['needs-work', 'Send back · needs work'], ['rejected', 'Reject'], ['accepted', 'Accept']]) { const option = node('option', title); option.value = value; if (value === 'accepted') option.disabled = item.result.overall !== 'passed' || item.execution_status !== 'completed'; decision.append(option); }
   const reasonLabel = node('label', 'Reason and evidence'); reasonLabel.htmlFor = 'reason'; const reason = node('textarea'); reason.id = 'reason'; reason.rows = 4; reason.maxLength = 8000; reason.required = true; reason.placeholder = 'Explain the requested behavior, observed evidence and any remaining defect.';
   const submit = node('button', 'Save exact-version adjudication', 'primary'); submit.type = 'submit'; submit.id = 'submit-review';
@@ -196,7 +219,7 @@ function renderReview(panel, item) {
     event.preventDefault();
     const judgments = Object.fromEntries(criteria.map((name) => [name, $('criterion-' + name).value]));
     if (decision.value === 'accepted' && Object.values(judgments).some((value) => value !== 'pass')) { notify('Assess every criterion as pass before accepting.', true); return; }
-    await mutation('/api/submissions/' + encodeURIComponent(item.id) + '/review', {expected_revision: item.revision, evidence_digest: item.result.evidence_digest, rubric_digest: item.rubric_digest, decision: decision.value, reason: reason.value, criteria: judgments}, 'review:' + item.id, async () => { await loadLive(); notify('Developer adjudication saved against the exact evidence revision.'); });
+    await mutation('/api/submissions/' + encodeURIComponent(item.id) + '/review', {expected_revision: item.revision, evidence_digest: item.result.evidence_digest, rubric_digest: item.rubric_digest, decision: decision.value, reason: reason.value, criteria: judgments, reviewer_mode: reviewerMode.value}, 'review:' + item.id, async () => { await loadLive(); notify(reviewLabel(reviewerMode.value) + ' saved against the exact evidence revision.'); });
   });
   panel.append(form);
 }
@@ -207,12 +230,12 @@ function renderAudit() {
   if (!state.audit.length) $('audit-list').append(node('p', 'No audit events available.', 'muted'));
   for (const event of [...state.audit].reverse()) { const details = node('details', null, 'audit-row'); const summary = node('summary', '#' + event.seq + ' · ' + event.kind + ' · ' + event.actor); details.append(summary, node('p', event.created_at || 'Time unavailable', 'small muted'), node('pre', JSON.stringify(event, null, 2))); $('audit-list').append(details); }
 }
-function render() { renderMetrics(); renderIntake(); renderQueue(); renderInspector(); renderAudit(); syncActions(); }
+function render() { renderCase(); renderMetrics(); renderIntake(); renderQueue(); renderInspector(); renderAudit(); syncActions(); }
 $('filter').addEventListener('change', renderQueue);
 $('batch-select').addEventListener('change', () => { loadLive($('batch-select').value).catch((e) => notify(e.message, true)); });
-$('connect-form').addEventListener('submit', async (event) => { event.preventDefault(); state.token = $('token').value; $('token').value = ''; try { await loadLive(); $('owner-actions').hidden = false; $('export').hidden = false; notify('Connected to the private owner API.'); } catch (e) { state.token = ''; notify(e.message, true); } syncActions(); });
-$('disconnect').addEventListener('click', () => { state.token = ''; state.batch = null; state.items = []; state.audit = []; state.selected = null; retries.clear(); $('owner-actions').hidden = true; $('export').hidden = true; $('export-receipt').hidden = true; showBatchOptions([]); render(); notify('Disconnected. Owner token cleared from page memory.'); });
-$('import').addEventListener('click', () => mutation('/api/import-sample', {}, 'import', async (batch) => { await loadLive(batch.id); notify('Trusted sample imported with explicit duplicate and invalid-line accounting.'); }));
+$('connect-form').addEventListener('submit', async (event) => { event.preventDefault(); state.token = $('token').value; $('token').value = ''; try { state.bundle = await request('/api/bundle'); await loadLive(); $('owner-actions').hidden = false; $('export').hidden = false; notify('Connected to the private owner API.'); } catch (e) { state.token = ''; notify(e.message, true); } syncActions(); });
+$('disconnect').addEventListener('click', () => { state.token = ''; state.batch = null; state.items = []; state.audit = []; state.selected = null; state.bundle = null; retries.clear(); $('owner-actions').hidden = true; $('export').hidden = true; $('export-receipt').hidden = true; showBatchOptions([]); render(); notify('Disconnected. Owner token cleared from page memory.'); });
+$('import').addEventListener('click', () => mutation(approvedInput() ? '/api/import-approved' : '/api/import-sample', {}, 'import', async (batch) => { await loadLive(batch.id); notify('Configured input imported with duplicate accounting and occurrence-level source claims.'); }));
 $('process').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/process', {workers: 1}, null, async () => { await loadLive(); notify('Processing returned. Inspect each submission for its measured outcome.'); }); });
 $('refresh').addEventListener('click', () => loadLive().then(() => notify('Current evidence and revisions loaded.')).catch((e) => notify(e.message, true)));
 $('export').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/export', {}, 'export:' + state.batch.id, async (receipt) => { $('export-receipt').textContent = JSON.stringify(receipt, null, 2); $('export-receipt').hidden = false; if (receipt.metrics) renderExportMetrics(receipt.metrics); await loadLive(); notify('Export frozen. The receipt identifies its exact manifest and metrics.'); }); });
@@ -223,7 +246,7 @@ async function start() {
     if (!response.ok) throw new Error('The recorded evidence snapshot is unavailable.');
     const snapshot = await response.json();
     if (!snapshot.batch || !Array.isArray(snapshot.items) || !Array.isArray(snapshot.audit)) throw new Error('The recorded snapshot does not match the evidence schema.');
-    state.snapshot = snapshot; state.batch = snapshot.batch; state.items = snapshot.items; state.audit = snapshot.audit; state.selected = snapshot.items[0]?.id;
+    state.snapshot = snapshot; state.bundle = snapshot.runtime?.bundle || null; state.batch = snapshot.batch; state.items = snapshot.items; state.audit = snapshot.audit; state.selected = snapshot.items[0]?.id;
     showBatchOptions([snapshot.batch]); $('downloads').hidden = false; render();
     const manifestResponse = await fetch('./data/manifest.json', {credentials: 'omit'});
     if (manifestResponse.ok) { const manifest = await manifestResponse.json(); renderExportMetrics(manifest.metrics || {}); }
@@ -232,7 +255,7 @@ async function start() {
     if (recording.ok && (recording.headers.get('content-type') || '').startsWith('video/')) {
       const video = $('walkthrough'); video.muted = true; video.volume = 0.1; video.autoplay = false; video.src = './recording.webm';
       const track = node('track'); track.kind = 'captions'; track.label = 'Walkthrough captions'; track.srclang = 'en'; track.src = './recording.vtt'; track.default = true; video.append(track);
-      try { const volume = Number(sessionStorage.getItem('workbench-preview-volume')); if (volume > 0 && volume <= 1) video.volume = volume; } catch {}
+      try { const volume = Number(sessionStorage.getItem('workbench-preview-volume')); if (sessionStorage.getItem('workbench-preview-volume') !== null && Number.isFinite(volume) && volume >= 0 && volume <= 1) video.volume = volume; } catch {}
       video.addEventListener('volumechange', () => { try { sessionStorage.setItem('workbench-preview-volume', String(video.volume)); } catch {} });
       $('recording-section').hidden = false;
     }
