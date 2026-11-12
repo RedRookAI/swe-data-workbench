@@ -12,6 +12,8 @@ https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/
 2. **Inspect a candidate.** Open its patch and machine evidence to examine the actual checks, output and provenance.
 3. **Watch the silent walkthrough.** Use the visible playback controls; it starts paused and muted with captions.
 
+Candidate acceptance remains pending in this example. Passing checks supply evidence for a review decision; the evaluation downloads include every outcome, while the accepted-code export stays empty until acceptance.
+
 The browser shows frozen evidence. The account-free driver below executes the admitted examples and verifies their results. The demonstration uses one authored task, labeled controls and one recorded Codex attempt; its scores measure those named checks.
 
 ![SWE Data Workbench demonstration](docs/images/workbench.png)
@@ -32,7 +34,7 @@ The driver reconstructs the original source, prepares the bundles, runs the same
 
 Installable wheel, selected evidence and verification:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a12
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a13
 
 ## What is implemented
 

@@ -2,9 +2,9 @@ name: Daily workflow
 on:
   push:
     branches: [main]
-    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/ci_*', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/**', 'examples/**', 'fixtures/**', 'bundles/**', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
   pull_request:
-    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/ci_*', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/**', 'examples/**', 'fixtures/**', 'bundles/**', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
   workflow_dispatch:
     inputs:
       case:

@@ -56,6 +56,10 @@ def test_recorded_demo_discloses_details_after_the_main_story(tmp_path):
             browser=w.chromium.launch(headless=True);page=browser.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
             page.goto('http://127.0.0.1:'+str(server.server_port));expect(page.get_by_role('heading',name='When a passing check misses a bug')).to_be_visible();expect(page.locator('.false-pass')).to_have_count(1);expect(page.locator('#item-list button')).to_have_count(5)
             assert not page.locator('#checker-details').evaluate('d=>d.open');assert not page.locator('#historical-handoff').evaluate('d=>d.open');expect(page.locator('#recording-tour-link')).to_be_visible()
+            for label in ['Existing behavior control', 'Alternate valid design', 'Unapproved variant', 'Authored reference', 'Recorded Codex attempt']:
+                button=page.locator('#item-list').get_by_role('button',name=label,exact=False)
+                expect(button).to_have_count(1);button.click();expect(page.locator('#inspector h2')).to_have_text(label)
+            expect(page.locator('#acceptance-note')).to_be_visible();expect(page.locator('#acceptance-note')).to_contain_text('accepted-code export is empty')
             assert page.locator('#recording-section').bounding_box()['y']<page.locator('#workbench').bounding_box()['y']<page.locator('#historical-handoff').bounding_box()['y']
             video=page.locator('#walkthrough');assert video.evaluate('v=>v.paused&&v.muted&&v.controls&&!v.autoplay');video.evaluate('v=>{v.volume=0}');page.wait_for_function("sessionStorage.getItem('workbench-preview-volume')==='0'");page.reload();expect(page.locator('#recording-section')).to_be_visible();assert video.evaluate('v=>v.volume')==0
             page.locator('#checker-details > summary').focus();page.keyboard.press('Space');assert page.locator('#checker-details').evaluate('d=>d.open')

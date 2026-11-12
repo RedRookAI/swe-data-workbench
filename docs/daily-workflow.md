@@ -19,7 +19,7 @@ WORKBENCH_SOURCE="$PWD"
 RUN_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/workbench-review.XXXXXXXX")"
 python3 -m venv "$RUN_ROOT/venv"
 PYTHON="$RUN_ROOT/venv/bin/python"
-"$PYTHON" -m pip install 'https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/swe_data_workbench-0.1.0a12-py3-none-any.whl'
+"$PYTHON" -m pip install 'https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a13/swe_data_workbench-0.1.0a13-py3-none-any.whl'
 WB=("$PYTHON" -I -m swe_workbench.cli)
 
 "$PYTHON" -I "$WORKBENCH_SOURCE/tools/prepare_daily_example.py" --output "$RUN_ROOT/inputs"

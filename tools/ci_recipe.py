@@ -13,7 +13,10 @@ from swe_workbench.errors import WorkbenchError
 BASE='93ae366874bbd4f69d90495c45b2cd336387496c'
 CANDIDATE='7f4dcf83a07bb3d53f4e0e65ef1b43327b4cca90'
 MANUAL_BASE='4ed531cae30a8cd7c8a18ca2da5d675b0511cc7f'
-TESTS=['tests/test_ci_evidence.py','tests/test_ci_recipe.py','tests/test_project_scope.py','tests/test_report_containment.py','tests/test_exact_observations.py','tests/test_attention_cut.py','tests/test_review_package.py','tests/test_handoff_browser.py','tests/test_review_overview.py','tests/test_private_assets.py']
+TESTS=['tests/test_ci_evidence.py','tests/test_ci_recipe.py','tests/test_project_scope.py','tests/test_report_containment.py','tests/test_exact_observations.py','tests/test_attention_cut.py','tests/test_review_package.py','tests/test_handoff_browser.py','tests/test_review_overview.py','tests/test_private_assets.py',
+       'tests/test_core.py','tests/test_runner.py','tests/test_recovery.py',
+       'tests/test_worker_capture.py','tests/test_worker_verifier.py',
+       'tests/test_evaluation.py','tests/test_quality_demo.py']
 
 def select_base(env):
     if env.get('GITHUB_EVENT_NAME')=='pull_request':return env.get('WB_PR_BASE')

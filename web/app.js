@@ -136,6 +136,10 @@ function renderExportMetrics(metrics) {
   }
   const details = node('details'); details.append(node('summary', 'Complete metrics and denominators'), node('pre', JSON.stringify(metrics, null, 2))); root.append(blocks, details);
 }
+function candidateLabel(item) {
+  const match = state.qualityDemo?.comparison?.find((row) => row.patch_digest === item.patch_digest);
+  return match?.label || item.title || 'Untitled submission';
+}
 function renderQueue() {
   const list = $('item-list'); list.replaceChildren();
   const filter = $('filter').value;
@@ -145,7 +149,7 @@ function renderQueue() {
   for (const item of items) {
     const button = node('button', null, 'submission' + (item.id === state.selected ? ' selected' : ''));
     button.type = 'button'; button.setAttribute('aria-pressed', String(item.id === state.selected));
-    button.append(node('span', item.task_id || short(item.id), 'eyebrow'), node('strong', item.title || 'Untitled submission'));
+    button.append(node('span', item.task_id || short(item.id), 'eyebrow'), node('strong', candidateLabel(item)));
     button.append(node('span', short(item.id), 'small muted'));
     const statuses = node('span', null, 'submission-status'); statuses.append(badge(item.execution_status), badge(item.disposition)); button.append(statuses);
     button.addEventListener('click', () => selectItem(item.id)); list.append(button);
@@ -156,7 +160,7 @@ function renderInspector() {
   const item = current();
   if (!item) { root.append(node('p', 'Select a submission to inspect its evidence.', 'empty')); return; }
   const head = node('header', null, 'inspector-header');
-  head.append(node('p', item.task_id || 'SUBMISSION', 'eyebrow'), node('h2', item.title || 'Untitled submission'));
+  head.append(node('p', item.task_id || 'SUBMISSION', 'eyebrow'), node('h2', candidateLabel(item)));
   const statuses = node('div', null, 'actions'); statuses.append(badge(item.execution_status), badge(item.result?.overall || 'no machine evidence'), badge(item.disposition));
   statuses.append(badge(item.origin || 'origin unavailable'));
   head.append(statuses, node('p', 'Revision ' + item.revision + ' · ' + (item.origin || 'origin unavailable'), 'small muted')); root.append(head);
@@ -400,7 +404,9 @@ async function loadRecordedQuality() {
     if (!response.ok) throw new Error('The optional evaluation-quality record is unavailable.');
     const data = await response.json();
     if (data.schema !== 'swe-workbench-quality-demo/v1' || !Array.isArray(data.versions) || !data.versions.every((version) => version.context && Array.isArray(version.items))) throw new Error('The evaluation-quality record does not match its schema.');
-    state.qualityDemo = data; renderQuality();
+    state.qualityDemo = data; renderQuality(); renderQueue(); renderInspector();
+    const pending = state.items.length > 0 && state.items.every((item) => item.disposition === 'pending');
+    $('acceptance-note').hidden = !pending;
   } catch (error) { notify(error.message, true); }
 }
 
