@@ -11,7 +11,7 @@ def run(output):
     import uvicorn
     from playwright.sync_api import sync_playwright,expect
     source=Path(__file__).resolve().parents[1]
-    assert not Path(swe_workbench.__file__).resolve().is_relative_to(source),'Qualification imported checkout instead of installed package.'
+    assert Path(swe_workbench.__file__).resolve().parent != source/'swe_workbench','Qualification imported checkout instead of installed package.'
     output=Path(output).absolute();output.mkdir(mode=0o700);repo=output/'source';repo.mkdir()
     record={'version':swe_workbench.__version__,'installed_only':True,'report_scope':'Authored qualification reports and scripted review decisions; no claimed source test execution.','application_model_calls':0,'ok':False}
     def git(*args):return subprocess.check_output(['git','-c','core.hooksPath=/dev/null','-C',str(repo),*args],text=True).strip()

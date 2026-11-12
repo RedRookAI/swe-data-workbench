@@ -10,3 +10,13 @@ SQLite is supplied by Python/the operating system rather than replaced by this p
 
 Public browser assets use local fonts/assets and have no CDN or model API dependency. Playwright and FFmpeg are development tools for the actual recording; they are not required to inspect the public evidence or use the processing core.
 
+
+Focused contributor checks use the existing requirements-dev.lock and Playwright Chromium. The daily-workflow CI uses one Linux/Python3.12 job, read-only repository permissions, immutable action revisions and the same selected tests/installed rehearsal. It requires no model account, owner token or deployment secret. Its browser installation runs in the isolated CI runner, not on the shared fleet host.
+
+A local focused invocation is:
+
+```sh
+.venv/bin/python -m pytest tests/test_project_scope.py tests/test_report_containment.py tests/test_exact_observations.py tests/test_attention_cut.py tests/test_review_package.py tests/test_handoff_browser.py tests/test_review_overview.py tests/test_private_assets.py -q -p no:cacheprovider
+```
+
+Provision Chromium with the pinned Playwright tool in your own environment. Existing explicit PLAYWRIGHT_BROWSERS_PATH or SWE_WORKBENCH_CHROMIUM settings can select an installed browser where supported. The handoff browser tests generate owned temporary views and use tracked exports; they require no dist or private coordination directory. After installing the selected wheel, use tools/qualify_daily.py from Python isolated mode outside the checkout to exercise the composed CLI, actual private UI, verified overview and private restore. Its reports and decisions are explicitly authored/scripted fixtures.

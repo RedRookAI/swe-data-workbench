@@ -8,9 +8,9 @@ Explore the recorded change reviews and earlier silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The current view shows two actual workbench changes and their next actions: a repaired private-server module route and an importer for existing test reports. Open either change to inspect its committed source, reported checks, exact evidence and review history. Reviews are AI-assisted operator judgments.
+The current view shows two actual workbench changes and a clearly labeled authored example with a failed report and unknown run context. The actual changes are: a repaired private-server module route and an importer for existing test reports. Open either change to inspect its committed source, reported checks, exact evidence and review history. Reviews are AI-assisted operator judgments.
 
-Configure a project once, reuse an existing pytest/JUnit report and capture later changes without editing field maps. The selected view works independently of the task dataset. Compact handoffs share unchanged source across revisions and make metadata-only coverage explicit. Setup and commands are in docs/daily-workflow.md.
+Configure a project once, then use prepare-review to turn an existing pytest/JUnit report and selected change into a review view, summary and saved decision selection. No field-map editing is needed for the supported pytest profile. The overview checks each card against its linked package before showing its status. Project associations keep local state separate, and v4 observations preserve numeric source text through Python capture and browser display. Shared source artifacts retain history with explicit metadata-only coverage. Setup and commands are in docs/daily-workflow.md.
 
 The earlier task-quality example remains linked from the current view: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
 
@@ -18,7 +18,7 @@ The earlier task-quality example remains linked from the current view: a weak re
 
 Installable wheel, two daily-change exports, regression recipe and verification:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a8
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a9
 
 ## Try a complete handoff
 
