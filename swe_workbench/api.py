@@ -236,6 +236,10 @@ def create_app(root: Path | str, *, owner_token: str | None = None, bundle_dir: 
     def javascript():
         return FileResponse(WEB_DIR / "app.js", media_type="text/javascript")
 
+    @app.get("/handoff-verify.js")
+    def handoff_verifier():
+        return FileResponse(WEB_DIR / "handoff-verify.js", media_type="text/javascript")
+
     @app.get("/style.css")
     def stylesheet():
         return FileResponse(WEB_DIR / "style.css", media_type="text/css")
