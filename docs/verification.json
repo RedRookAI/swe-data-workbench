@@ -1,25 +1,254 @@
 {
-  "version": "0.1.0a11",
+  "version": "0.1.0a12",
   "checked": "2026-11-12",
-  "baseline": "c3866a6a28b1c13f1d5cd6d77aa5700c1af43027",
-  "changes": [
-    "CI-null report containment with visible snapshot problem entries",
-    "Fresh CI profile product label from validated receipt",
-    "Complete operator guide with fresh post-decision shares",
-    "Bounded retained-real-report operator trial"
-  ],
-  "focused_checks": {
-    "passed": 10,
+  "baseline": "641e86f36b143519b8301eb009e8852f48a661a5",
+  "formatting": {
+    "python": "Python 3.12.3",
+    "formatter": "Black26.10.1 safe",
     "files": [
-      "tests/test_report_containment.py",
-      "tests/test_ci_evidence.py",
-      "tests/test_ci_recipe.py"
+      {
+        "file": "swe_workbench/attention.py",
+        "ast_equal": true,
+        "before_max_columns": 903,
+        "after_max_columns": 135,
+        "before_lines": 88,
+        "after_lines": 291
+      },
+      {
+        "file": "swe_workbench/review_package.py",
+        "ast_equal": true,
+        "before_max_columns": 363,
+        "after_max_columns": 155,
+        "before_lines": 84,
+        "after_lines": 272
+      },
+      {
+        "file": "swe_workbench/ci_evidence.py",
+        "ast_equal": true,
+        "before_max_columns": 536,
+        "after_max_columns": 146,
+        "before_lines": 143,
+        "after_lines": 472
+      },
+      {
+        "file": "swe_workbench/reported_checks.py",
+        "ast_equal": true,
+        "before_max_columns": 296,
+        "after_max_columns": 117,
+        "before_lines": 47,
+        "after_lines": 142
+      },
+      {
+        "file": "swe_workbench/junit_report.py",
+        "ast_equal": true,
+        "before_max_columns": 476,
+        "after_max_columns": 88,
+        "before_lines": 89,
+        "after_lines": 260
+      },
+      {
+        "file": "swe_workbench/project_context.py",
+        "ast_equal": true,
+        "before_max_columns": 208,
+        "after_max_columns": 136,
+        "before_lines": 64,
+        "after_lines": 197
+      },
+      {
+        "file": "swe_workbench/handoff_view.py",
+        "ast_equal": true,
+        "before_max_columns": 283,
+        "after_max_columns": 165,
+        "before_lines": 60,
+        "after_lines": 181
+      },
+      {
+        "file": "swe_workbench/cli.py",
+        "ast_equal": true,
+        "before_max_columns": 372,
+        "after_max_columns": 119,
+        "before_lines": 229,
+        "after_lines": 597
+      },
+      {
+        "file": "swe_workbench/handoff.py",
+        "ast_equal": true,
+        "before_max_columns": 397,
+        "after_max_columns": 141,
+        "before_lines": 372,
+        "after_lines": 1028
+      }
     ],
-    "scope": "Null context direct/legacy/current capture, healthy sibling view, report-only null, global audit loud failure, CI source/profile/hash/status/recipe behavior"
+    "all_ast_equal": true,
+    "scope": "Nine explicit product modules; no fixture/data/patch/lock/enforcement changes."
   },
-  "installed_compatibility": {
-    "version": "0.1.0a11",
-    "wheel_sha256": "55bb62f1e7b003224f1aaa597c1a3b20dba5cbb8f3eb8e5a60c63607ecc378e0",
+  "local_focused_checks": {
+    "unique_passed": 14,
+    "scope": "Report containment, CI projection, assembly/resume, v1/v2/v3 browser integrity/refusals, generic overview and new recorded disclosure/media layout, private assets",
+    "provisional_results": "Initial two browser checks used the wrong browser-cache path; rerun with the existing project browser. Moving the historical section initially hid standalone integrity warnings; corrected and its focused refusal test passed. No test result was counted as passing before correction."
+  },
+  "showcase": {
+    "profile": "local",
+    "ok": true,
+    "first_screen_demo_action": true,
+    "false_pass_comparison": true,
+    "candidate_count": 5,
+    "sections": {
+      "quality-section": 497,
+      "recording-section": 1358,
+      "workbench": 1932,
+      "historical-handoff": 5896
+    },
+    "keyboard_details": true,
+    "historical_handoff_preserved": true,
+    "initial_media": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "failed_requests": []
+  },
+  "preserved_browser": {
+    "profile": "local",
+    "http": 200,
+    "attention_to_detail": true,
+    "verified_overview": true,
+    "authored_failed_unknown_case": true,
+    "original_numeric_duration_text": true,
+    "real_cases": [
+      {
+        "reported_passed": 3,
+        "source": "swe_workbench/junit_report.py",
+        "history": true,
+        "downloads": 3
+      },
+      {
+        "reported_passed": 1,
+        "source": "swe_workbench/api.py",
+        "history": true,
+        "downloads": 3
+      }
+    ],
+    "historical_needs_work_preserved": true,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "private_inputs_uploaded": false,
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "original_bytes": {
+    "protected_files": 87,
+    "all_equal": true,
+    "files": [
+      "attention.json",
+      "change-833fc94c43fa30e26989/handoff/artifacts.json",
+      "change-833fc94c43fa30e26989/handoff/handoff.json",
+      "change-833fc94c43fa30e26989/handoff/manifest.json",
+      "change-b39b3e0c4fb83f37c2b2/handoff/artifacts.json",
+      "change-b39b3e0c4fb83f37c2b2/handoff/handoff.json",
+      "change-b39b3e0c4fb83f37c2b2/handoff/manifest.json",
+      "change-dc37e01d4feea64b3134/handoff/artifacts.json",
+      "change-dc37e01d4feea64b3134/handoff/handoff.json",
+      "change-dc37e01d4feea64b3134/handoff/manifest.json",
+      "ci/external/UPSTREAM-LICENSE.txt",
+      "ci/external/UPSTREAM.json",
+      "ci/external/check-definition.json",
+      "ci/external/ci-receipt.json",
+      "ci/external/export/artifacts.json",
+      "ci/external/export/handoff.json",
+      "ci/external/export/manifest.json",
+      "ci/external/original.xml",
+      "ci/external/package-status.json",
+      "ci/external/run-context.json",
+      "ci/external/summary.json",
+      "ci/external/view/handoff/artifacts.json",
+      "ci/external/view/handoff/handoff.json",
+      "ci/external/view/handoff/manifest.json",
+      "ci/intentional-failure/check-definition.json",
+      "ci/intentional-failure/ci-receipt.json",
+      "ci/intentional-failure/export/artifacts.json",
+      "ci/intentional-failure/export/handoff.json",
+      "ci/intentional-failure/export/manifest.json",
+      "ci/intentional-failure/original.xml",
+      "ci/intentional-failure/package-status.json",
+      "ci/intentional-failure/run-context.json",
+      "ci/intentional-failure/summary.json",
+      "ci/intentional-failure/view/handoff/artifacts.json",
+      "ci/intentional-failure/view/handoff/handoff.json",
+      "ci/intentional-failure/view/handoff/manifest.json",
+      "ci/normal/check-definition.json",
+      "ci/normal/ci-receipt.json",
+      "ci/normal/export/artifacts.json",
+      "ci/normal/export/handoff.json",
+      "ci/normal/export/manifest.json",
+      "ci/normal/original.xml",
+      "ci/normal/package-status.json",
+      "ci/normal/run-context.json",
+      "ci/normal/summary.json",
+      "ci/normal/view/handoff/artifacts.json",
+      "ci/normal/view/handoff/handoff.json",
+      "ci/normal/view/handoff/manifest.json",
+      "evaluation-demo/captions.vtt",
+      "evaluation-demo/data/accepted.jsonl",
+      "evaluation-demo/data/evidence.json",
+      "evaluation-demo/data/manifest.json",
+      "evaluation-demo/evaluation/after/evaluation.json",
+      "evaluation-demo/evaluation/after/evidence.json",
+      "evaluation-demo/evaluation/after/manifest.json",
+      "evaluation-demo/evaluation/before/evaluation.json",
+      "evaluation-demo/evaluation/before/evidence.json",
+      "evaluation-demo/evaluation/before/manifest.json",
+      "evaluation-demo/handoff/artifacts.json",
+      "evaluation-demo/handoff/handoff.json",
+      "evaluation-demo/handoff/manifest.json",
+      "evaluation-demo/prepared/data/accepted.jsonl",
+      "evaluation-demo/prepared/data/evidence.json",
+      "evaluation-demo/prepared/data/manifest.json",
+      "evaluation-demo/prepared/recording.webm",
+      "evaluation-demo/quality.json",
+      "evaluation-demo/recording.webm",
+      "evaluation-demo/synthetic/data/accepted.jsonl",
+      "evaluation-demo/synthetic/data/evidence.json",
+      "evaluation-demo/synthetic/data/manifest.json",
+      "evaluation-demo/synthetic/recording.webm",
+      "evaluation-demo/unicode-hyphen/data/accepted.jsonl",
+      "evaluation-demo/unicode-hyphen/data/evidence.json",
+      "evaluation-demo/unicode-hyphen/data/manifest.json",
+      "evaluation-demo/unicode-hyphen/recording.webm",
+      "prepared/data/accepted.jsonl",
+      "prepared/data/evidence.json",
+      "prepared/data/manifest.json",
+      "prepared/recording.webm",
+      "synthetic/data/accepted.jsonl",
+      "synthetic/data/evidence.json",
+      "synthetic/data/manifest.json",
+      "synthetic/recording.webm",
+      "unicode-hyphen/data/accepted.jsonl",
+      "unicode-hyphen/data/evidence.json",
+      "unicode-hyphen/data/manifest.json",
+      "unicode-hyphen/recording.webm"
+    ],
+    "build_markers_are_generated_not_execution_evidence": true
+  },
+  "installed": {
+    "version": "0.1.0a12",
+    "wheel_sha256": "5a039199aea2a6a8ff857d0c886bb01715dd7ad085e5286cbf92847fec345f13",
     "checks": [
       {
         "name": "installed-wheel-parity",
@@ -51,177 +280,11 @@
     "input_project_execution": 0,
     "ok": true
   },
-  "external_retained_import": {
-    "installed_version": "0.1.0a11",
-    "generated_product": "pallets/itsdangerous",
-    "workflow_repository": "RedRookAI/swe-data-workbench",
-    "manual_profile_edits": 0,
-    "configured_and_prepared": true,
-    "source_tests_executed": 0,
-    "original_evidence_unchanged": true,
-    "v0a10_anchor_manifests": {
-      "normal": "ae67a1804851159c241b29bd430b3243817f6bb5190dffeec5afe12ce8e5218d",
-      "external": "67ac4aabe1f8005f689e6cd0947952760207532f9eb152523cfc6e0a719e4962",
-      "intentional-failure": "8ed5807f857f9187eab0746ab3e64bfe75bd1c782ebcfa3cf651343dc38f8050"
-    }
-  },
-  "operator_trial": {
-    "version": "0.1.0a11",
-    "scope": "Assisted/scripted traversal of the exact guide CLI blocks using the documented existing isolated installation option. Original tests were not rerun.",
-    "cases": [
-      {
-        "change": "startup",
-        "base": "5d5e70cc1c00e28b31c11112ad8e9c148222b52a",
-        "candidate": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94",
-        "historical_passed_checks": 1,
-        "xml_sha256": "37485fd26d6e453d652764b797ab47c549fabb3ab83bed774d05071d5015fdfa",
-        "original_manifest": "b9806460b1d17f944f561b5a0d847fbf241dc2bcf5aad1c27f2d19f72bc1eb4e",
-        "frozen_decision": "unreviewed",
-        "reviewed_decision": "needs-work",
-        "reviewed_revision": 1,
-        "reviewer_mode": "scripted_adjudication",
-        "source_tests_executed": 0,
-        "original_history_unchanged": true
-      },
-      {
-        "change": "importer",
-        "base": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94",
-        "candidate": "217064e5637e4fa493af23cef3dc2f95c9d19a7c",
-        "historical_passed_checks": 3,
-        "xml_sha256": "51d7ddb90a039abd80b55c56608989bcbfb7e8a3431fb0c32256c56c9fed6b8e",
-        "original_manifest": "12a2c4dd8dcfd92f07f9b20bb4490f7af92aa24abc7e0a1fdc8da07e2aa981f9",
-        "frozen_decision": "unreviewed",
-        "reviewed_decision": "handoff-ready",
-        "reviewed_revision": 1,
-        "reviewer_mode": "scripted_adjudication",
-        "source_tests_executed": 0,
-        "original_history_unchanged": true
-      }
-    ],
-    "cli_invocations": {
-      "first": 4,
-      "first-review": 5,
-      "repeat": 9
-    },
-    "first_total": 9,
-    "repeat_total": 9,
-    "one_time_acquisition_invocations": 1,
-    "one_time_configure_invocations": 1,
-    "manual_json_or_mapping_edits": 0,
-    "guide_cli_corrections": 0,
-    "fresh_export_needed_after_each_decision": true,
-    "source_tests_executed": 0,
-    "application_model_calls": 0,
-    "independent_human_usability": "unmeasured",
-    "wall_time_productivity_claim": false,
-    "conclusion": "Retain for durable, inspectable selected handoffs. Repeat operation still requires9 CLI invocations with the chosen inspection steps; ordinary PR review is simpler when durable export/history is unnecessary. No broad productivity gain measured."
-  },
-  "browser": {
-    "ok": true,
-    "installed_candidate_views": true,
-    "frozen_unreviewed_and_fresh_decision_distinct": true,
-    "original_counts": [
-      1,
-      3
-    ],
-    "mobile_fit": true,
-    "errors": []
-  },
-  "wheel_sha256": "55bb62f1e7b003224f1aaa597c1a3b20dba5cbb8f3eb8e5a60c63607ecc378e0",
+  "wheel_sha256": "5a039199aea2a6a8ff857d0c886bb01715dd7ad085e5286cbf92847fec345f13",
+  "grading_evidence": "Reused original recorded output and the successful fresh-source audit run today; no new source/model run to reposition content.",
   "application_model_calls": 0,
   "historical_source_tests_rerun": 0,
   "private_state_tickets_published": false,
   "old_release_bytes_preserved": true,
-  "site": "Existing public version10 retained as a historical selection; no hosted asset change or redeploy required.",
-  "publication": {
-    "release": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a11",
-    "source_and_tag": "9f36b05e13148ad619847007d1460aad7a7f8237",
-    "assets_verified_downloaded": 7,
-    "assets": [
-      {
-        "name": "actual-ci-normal.zip",
-        "size": 697416,
-        "digest": "sha256:03d8abd8bc4b3b30c6c8a5c5ebe95ec787409dd031478ce3cbcfba7208a60d88",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/actual-ci-normal.zip"
-      },
-      {
-        "name": "guided-scripted-reviews.zip",
-        "size": 216094,
-        "digest": "sha256:2880d5f87a85429ea75304f6dd2c3104f65a4194f1cce8ca569229f61efa1876",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/guided-scripted-reviews.zip"
-      },
-      {
-        "name": "installed-compatibility.json",
-        "size": 860,
-        "digest": "sha256:e4f47e51b86a00eaf7a76f4b18a9e154dbd572923673edfdec4bb3ff797fde2a",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/installed-compatibility.json"
-      },
-      {
-        "name": "operator-trial.json",
-        "size": 2176,
-        "digest": "sha256:e8920fdc90b02b6b230bf858f7e032fd8aed7a4464c2ea96dd15cc214784fc23",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/operator-trial.json"
-      },
-      {
-        "name": "SHA256SUMS",
-        "size": 557,
-        "digest": "sha256:f2941a5e096862d1fd787934dbc1ddc88580ee029d8c5d9234b3c0ac4faa3b82",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/SHA256SUMS"
-      },
-      {
-        "name": "swe_data_workbench-0.1.0a11-py3-none-any.whl",
-        "size": 149502,
-        "digest": "sha256:55bb62f1e7b003224f1aaa597c1a3b20dba5cbb8f3eb8e5a60c63607ecc378e0",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/swe_data_workbench-0.1.0a11-py3-none-any.whl"
-      },
-      {
-        "name": "verification.json",
-        "size": 6736,
-        "digest": "sha256:ea9a804d9c51dc5126d22c1f5913b20783824b84adc3dcc154f0dfc7568cede8",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/verification.json"
-      }
-    ],
-    "public_wheel_http": 200,
-    "site": "Historical version10 retained, unchanged; no new hosted assets claimed.",
-    "release_verification_asset": "Original pre-publication snapshot retained; later docs receipt appends observed publication.",
-    "remaining_blocker": null
-  },
-  "actual_hosted_ci": {
-    "run_id": 43233793093,
-    "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43233793093",
-    "source": "9f36b05e13148ad619847007d1460aad7a7f8237",
-    "status": "completed",
-    "conclusion": "success",
-    "counts": {
-      "error": 0,
-      "failed": 0,
-      "passed": 20,
-      "skipped": 0,
-      "unavailable": 0
-    },
-    "process_exit": 0,
-    "source_state": "clean",
-    "review": "unreviewed",
-    "manifest_digest": "cfbd7293a332a23be0f96565002dd3b523e1528c28bd06bb7f4ab9b56ae66237",
-    "provider": {
-      "id": 13951168139,
-      "name": "selected-review-43233793093-1-focused-normal",
-      "size_in_bytes": 697416,
-      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13951168139",
-      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13951168139/zip",
-      "expired": false,
-      "created_at": "2026-11-12T14:07:48Z",
-      "expires_at": "2027-02-10T14:06:33Z",
-      "updated_at": "2026-11-12T14:07:48Z",
-      "digest": "sha256:03d8abd8bc4b3b30c6c8a5c5ebe95ec787409dd031478ce3cbcfba7208a60d88",
-      "workflow_run": {
-        "id": 43233793093,
-        "repository_id": 1454462067,
-        "head_repository_id": 1454462067,
-        "head_branch": "main",
-        "head_sha": "9f36b05e13148ad619847007d1460aad7a7f8237"
-      }
-    },
-    "private_inputs_excluded": true
-  }
+  "publication": "Private qualified source/layout; new CI, release and actual hosted observations follow audited publication."
 }

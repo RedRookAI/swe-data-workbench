@@ -42,5 +42,5 @@ try {
   }
   document.getElementById('attention-filter').addEventListener('change',render);render();
   const prior=await fetch('./evaluation-demo/index.html',{method:'HEAD',credentials:'omit'});
-  if(prior.ok)document.getElementById('evaluation-link').hidden=false;
+  if(prior.ok){document.getElementById('evaluation-entry').hidden=false;document.getElementById('evaluation-link').hidden=false;}
 } catch(error) {const element=document.getElementById('attention-error');element.hidden=false;element.textContent=error.message;}

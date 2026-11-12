@@ -1,8 +1,8 @@
 # Observed daily operator trial
 
-Checked2026-11-12 with the installed0.1.0a11 candidate. This was an assisted, scripted traversal of the primary guide using two genuine historical workbench changes. It measured operator steps and retained outputs. It did not measure independent human review speed or repeat the original test execution.
+Checked 2026-11-12 with the installed 0.1.0a11 candidate. This was an assisted, scripted traversal of the primary guide using two genuine historical workbench changes. It measured operator steps and retained outputs. It did not measure independent human review speed or repeat the original test execution.
 
-The first change repairs the private verifier-module route at2e7f1d4 and retains its original one-check report. The second adds JUnit import at217064e and retains its original three-check report. Both came from the published handoffs with original XML/context digests verified. Their original histories remain unchanged in the input copies. New scripted decisions have their own explicitly labeled histories.
+The first change repairs the private verifier-module route at 2e7f1d4 and retains its original one-check report. The second adds JUnit import at 217064e and retains its original three-check report. Both came from the published handoffs with original XML/context digests verified. Their original histories remain unchanged in the input copies. New scripted decisions have their own explicitly labeled histories.
 
 ## What completed
 
@@ -15,9 +15,9 @@ The exact configure/prepare/inspect/review/export command blocks in daily-workfl
 
 Both include deliberate inspection and verification commands, so these counts are not a minimum required workflow or a timing comparison. Public input acquisition was one additional setup invocation; source acquisition and environment installation are setup costs. The second change required no new project configuration. The trial executed zero source-project tests and zero application model requests.
 
-The helper initially encountered an HTTP403 with urllib's default User-Agent. An explicitly identified tool request returned200, and the helper was corrected before the final acquisition. A maintainer scratch-directory preflight also refused a missing parent before writing; the guide's fresh-root setup already creates that parent. These setup issues are retained in the private execution record rather than counted as successful attempts. The guide's review command blocks required no corrections.
+The complete setup and verification history is retained in docs/verification-v0.1.0a11.md and the private execution record.
 
-After each decision, the original package stayed unreviewed at revision0. The newly exported view contained the decision at revision1 and verified semantically. This distinction prevents an old package from being mistaken for the current reviewed state. Existing reports retain their actual scope; package readiness is separate from correctness or execution authority.
+After each decision, the original package stayed unreviewed at revision 0. The newly exported view contained the decision at revision 1 and verified semantically. This distinction prevents an old package from being mistaken for the current reviewed state. Existing reports retain their actual scope; package readiness is separate from correctness or execution authority.
 
 ## What the package added
 

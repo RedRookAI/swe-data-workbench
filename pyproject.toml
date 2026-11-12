@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swe-data-workbench"
-version = "0.1.0a11"
+version = "0.1.0a12"
 description = "Inspect coding submissions from real checks through adjudication to traceable dataset export."
 requires-python = ">=3.12"
 license = {text = "MIT"}

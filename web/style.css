@@ -262,3 +262,9 @@ summary .badge { margin-left: 10px; }
 .handoff-overview li { margin:.35rem 0; }
 .handoff-comparison { padding:1rem; margin:1rem 0; background:var(--surface-alt, #f3f6f4); border-radius:8px; }
 #handoff-content > details { margin-top:.8rem; }
+
+.demo-entry { border-left: 4px solid var(--accent); margin-bottom: 24px; }
+.demo-entry h2 { font-size: clamp(1.25rem, 2.5vw, 1.7rem); }
+.demo-tour { margin-bottom: 24px; }
+#checker-details, #historical-handoff { margin-top: 20px; }
+#historical-handoff > section { margin-top: 20px; }

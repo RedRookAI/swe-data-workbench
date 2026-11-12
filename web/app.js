@@ -279,7 +279,7 @@ function renderCalibration(parent, records) {
   parent.append(node('h4', 'Review calibration and author feedback'));
   if (!records?.length) { parent.append(node('p', 'No calibration recorded.', 'muted')); return; }
   for (const record of records) {
-    const details = node('details'); details.open = true;
+    const details = node('details');
     details.append(node('summary', 'Recorded calibration · ' + (record.actor || 'actor unavailable')), node('p', record.reason), node('h4', 'Author feedback'), node('p', record.author_feedback), node('h4', 'Guideline update'), node('p', record.guideline_update));
     for (const review of record.reviews || []) appendField(details, (review.actor || 'Reviewer') + ' · ' + reviewLabel(review.reviewer_mode), review);
     if (record.agreement) appendField(details, 'Declared paired judgments', record.agreement);
@@ -370,11 +370,14 @@ function renderQuality() {
     }
     table.append(body); wrapper.append(table); comparison.append(wrapper); root.append(comparison);
   }
-  for (const [index, scores] of versions.entries()) renderScoreVersion(root, scores, live ? 'Current task context' : index === 0 ? 'Before · original checker' : 'After · revised checker');
+  const versionDetails=live?root:node('details');
+  if(!live){versionDetails.id='checker-details';versionDetails.append(node('summary','Detailed checker outcomes, findings and recorded reviews'));}
+  for (const [index, scores] of versions.entries()) renderScoreVersion(versionDetails, scores, live ? 'Current task context' : index === 0 ? 'Before · original checker' : 'After · revised checker');
+  if(!live)root.append(versionDetails);
   if (live) renderQualityForms(root, state.evaluation);
   else {
-    if (state.qualityDemo.author_feedback) appendField(root, 'Recorded author feedback', state.qualityDemo.author_feedback);
-    if (state.qualityDemo.guideline_update) appendField(root, 'Recorded guideline update', state.qualityDemo.guideline_update);
+    if (state.qualityDemo.author_feedback) appendField(versionDetails, 'Recorded author feedback', state.qualityDemo.author_feedback);
+    if (state.qualityDemo.guideline_update) appendField(versionDetails, 'Recorded guideline update', state.qualityDemo.guideline_update);
     const exports = node('nav', null, 'actions'); exports.setAttribute('aria-label', 'Evaluation evidence downloads');
     for (const [version, label] of [['before', 'Before repair'], ['after', 'After repair']]) {
       for (const [file, kind] of [['evaluation.json', 'all outcomes'], ['evidence.json', 'bound evidence'], ['manifest.json', 'manifest']]) {
@@ -495,7 +498,10 @@ async function loadHandoff() {
   let record;
   try { record = await loadVerifiedHandoff(); } catch (error) {
     const warning=node('p','Handoff content could not be verified: '+error.message);warning.setAttribute('role','alert');
-    $('handoff-content').replaceChildren(warning);$('handoff-section').hidden=false;return;
+    $('handoff-content').replaceChildren(warning);$('handoff-section').hidden=false;
+    if(document.body.dataset.handoffOnly==='true'||!state.qualityDemo)document.querySelector('.topbar').after($('handoff-section'));
+    else {$('historical-handoff').hidden=false;$('historical-handoff').open=true;}
+    return;
   }
   if (record === null) { $('handoff-section').hidden=true;return; }
   if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2','swe-workbench-handoff/v3','swe-workbench-handoff/v4'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
@@ -549,11 +555,14 @@ async function loadHandoff() {
   for (const [file, label] of [['handoff.json', 'Change and review'], ['artifacts.json', 'Retained evidence'], ['manifest.json', 'Manifest']]) { const link = node('a', label, 'button'); link.href = './handoff/' + file; link.download = ''; downloads.append(link); }
   root.append(downloads, node('p', 'Unsigned reports remain external evidence. Content hashes establish consistency. Source-project mutations: ' + record.keep_mutations + '.', 'small muted'));
   $('handoff-section').hidden = false;
-  $('recording-section').querySelector('h2').textContent = 'Earlier task-quality walkthrough · 0.1.0a4';
+  if(document.body.dataset.handoffOnly==='true'||!state.qualityDemo){document.querySelector('.topbar').after($('handoff-section'));}
+  else $('historical-handoff').hidden=false;
+  $('recording-section').querySelector('h2').textContent = 'Recorded checker-repair walkthrough · 0.1.0a4';
 }
 async function start() {
   if (document.body.dataset.handoffOnly === 'true') {
-    for (const id of ['connection','owner-actions','case-kind','quality-section','metrics','accounting-note','intake-details','workbench','export-section','audit-section','recording-section']) { const e=$(id);if(e)e.hidden=true; }
+    document.querySelector('.topbar').after($('handoff-section'));
+    for (const id of ['quality-tour','connection','owner-actions','case-kind','quality-section','metrics','accounting-note','intake-details','workbench','export-section','audit-section','recording-section']) { const e=$(id);if(e)e.hidden=true; }
     document.querySelector('h1').textContent='Change review';$('mode').textContent='Selected handoff · read only';
     document.querySelector('.topbar .eyebrow').textContent='SOFTWARE CHANGE REVIEW';
     document.querySelector('.sidebar nav').replaceChildren(node('a','Selected change'));$('case-kind').closest('section').hidden=true;document.querySelector('.batchbar').hidden=true;
@@ -572,6 +581,7 @@ async function start() {
     const manifestResponse = await fetch('./data/manifest.json', {credentials: 'omit'});
     if (manifestResponse.ok) { const manifest = await manifestResponse.json(); renderExportMetrics(manifest.metrics || {}); }
     await loadRecordedQuality();
+    if(state.qualityDemo){$('quality-tour').hidden=false;document.querySelector('h1').textContent='When a passing check misses a bug';document.querySelector('.topbar p.muted').textContent='Compare the same patches before and after the recovery checker is repaired.';}
     await loadHandoff();
     // Only this fixed local recording path is eligible; imported URLs are inert.
     const recording = await fetch('./recording.webm', {method: 'HEAD', credentials: 'omit'});
@@ -581,6 +591,7 @@ async function start() {
       try { const volume = Number(sessionStorage.getItem('workbench-preview-volume')); if (sessionStorage.getItem('workbench-preview-volume') !== null && Number.isFinite(volume) && volume >= 0 && volume <= 1) video.volume = volume; } catch {}
       video.addEventListener('volumechange', () => { try { sessionStorage.setItem('workbench-preview-volume', String(video.volume)); } catch {} });
       $('recording-section').hidden = false;
+      if(state.qualityDemo)$('recording-tour-link').hidden=false;
     }
   } catch (e) { render(); notify(e.message, true); }
 }

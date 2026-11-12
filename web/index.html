@@ -20,8 +20,8 @@
   </aside>
   <main class="main" id="main">
     <header class="topbar"><div><p class="eyebrow">EVIDENCE TO DATASET</p><h1>Submission review</h1><p class="muted">Inspect the patch. Read the evidence. Make the call.</p></div><span class="mode" id="mode">Recorded · read only</span></header>
+    <nav class="actions demo-tour" id="quality-tour" aria-label="Recorded demo tour" hidden><a href="#quality-section">1. Compare the checkers</a><a href="#workbench">2. Inspect a candidate</a><a href="#recording-section" id="recording-tour-link" hidden>3. Watch the silent walkthrough</a></nav>
     <div id="message" role="status" aria-live="polite" class="notice" hidden></div>
-    <section class="card" id="handoff-section" aria-labelledby="handoff-heading" hidden><p class="eyebrow">REAL CHANGE HANDOFF</p><h2 id="handoff-heading">What changed, and what is ready?</h2><div id="handoff-content"></div></section>
     <section class="card" id="connection" hidden aria-labelledby="connection-title">
       <h2 id="connection-title">Connect as owner</h2><p>Enter the owner token for this private instance. It stays in memory until this page closes or you disconnect.</p>
       <form id="connect-form"><label for="token">Owner token</label><input type="password" id="token" autocomplete="off" spellcheck="false" required minlength="32"><div class="actions"><button class="primary" type="submit">Connect</button><button type="button" id="disconnect">Disconnect</button></div></form>
@@ -29,6 +29,7 @@
     <section class="batchbar" aria-label="Batch selection"><div><label for="batch-select">Current batch</label><select id="batch-select" aria-label="Current batch"></select><p class="small muted" id="batch-meta">Loading recorded evidence…</p></div><div class="actions" id="owner-actions" hidden><button type="button" id="import">Import trusted sample</button><button type="button" id="process" class="primary">Run checks · 1 worker</button><button type="button" id="refresh">Refresh</button></div></section>
     <section class="card case-summary" aria-labelledby="case-title"><p class="eyebrow" id="case-kind">RECORDED CASE</p><h2 id="case-title">Evidence and attribution</h2><p id="case-description">Inspect source attribution and actual check evidence for each submission.</p><a id="synthetic-link" href="./synthetic/" hidden>Open the original synthetic demonstration</a> <a id="first-upstream-link" href="./unicode-hyphen/" hidden>Open the first upstream example</a></section>
     <section class="card" id="quality-section" aria-labelledby="quality-heading" hidden><p class="eyebrow">TASK AUDIT AND REPAIR</p><h2 id="quality-heading">Evaluation quality</h2><p id="quality-intro">Inspect task findings, criterion evidence and the critical behavior gate.</p><div id="quality-content"></div></section>
+    <section class="card" id="recording-section" hidden><h2>Recorded walkthrough</h2><p class="muted">Silent recording with captions. Playback begins paused and muted with visible controls.</p><video id="walkthrough" controls muted playsinline preload="none" aria-label="Actual workbench walkthrough"></video></section>
     <section class="metrics" id="metrics" aria-label="Batch accounting"></section>
     <p class="small muted" id="accounting-note">Input accounting counts invalid lines, duplicates and unique memberships separately. Execution and review states can overlap.</p>
     <details class="card" id="intake-details"><summary>Intake accounting and quarantined records</summary><div id="intake-records"></div></details>
@@ -38,7 +39,9 @@
     </section>
     <section class="card" id="export-section"><div class="section-heading"><div><p class="eyebrow">FROZEN SNAPSHOT</p><h2>Dataset export</h2></div><button id="export" class="primary" type="button" hidden>Freeze accepted export</button></div><p id="export-description">Accepted data and its provenance are frozen at one recorded audit cut.</p><div class="actions" id="downloads" hidden><a class="button" href="./data/accepted.jsonl" download>Accepted JSONL</a><a class="button" href="./data/manifest.json" download>Manifest</a><a class="button" href="./data/evidence.json" download>Evidence snapshot</a></div><pre id="export-receipt" hidden></pre><div id="recorded-metrics"></div></section>
     <section class="card" id="audit-section"><div class="section-heading"><h2>Audit trail</h2><span class="small muted" id="audit-cut"></span></div><p class="small muted">Content-linked events record processing and review. Local hashes support integrity checks within this demonstration.</p><div id="audit-list"></div></section>
-    <section class="card" id="recording-section" hidden><h2>Recorded walkthrough</h2><p class="muted">Silent recording with captions. Playback begins paused and muted with visible controls.</p><video id="walkthrough" controls muted playsinline preload="none" aria-label="Actual workbench walkthrough"></video></section>
+    <details class="card" id="historical-handoff" hidden><summary>Historical change handoff and its original review</summary>
+    <section class="card" id="handoff-section" aria-labelledby="handoff-heading" hidden><p class="eyebrow">REAL CHANGE HANDOFF</p><h2 id="handoff-heading">What changed, and what is ready?</h2><div id="handoff-content"></div></section>
+    </details>
     <footer class="small muted" id="case-footer">These selected cases demonstrate workflow behavior. Outcomes do not estimate model accuracy or independent reviewer performance.</footer>
   </main>
 </div>
