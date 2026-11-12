@@ -1,0 +1,213 @@
+{
+  "schema": "swe-workbench-handoff-profile/v1",
+  "id": "keep-preparation",
+  "version": "1",
+  "repository": "https://github.com/RedRookAI/keep-research-preview",
+  "attachments": [
+    "reported-evidence.json",
+    "KEEP-LICENSE",
+    "source-preparation.mjs",
+    "preparation-workflow.yml"
+  ],
+  "observations": [
+    {
+      "label": "Candidate source version",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourcePositive",
+        "receipt",
+        "keepVersion"
+      ],
+      "scope": "Source profile, not a new download",
+      "required": true,
+      "context_path": [
+        "source"
+      ],
+      "subject": "product"
+    },
+    {
+      "label": "Source checks",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceCI"
+      ],
+      "scope": "Partial unprivileged source checks; not full-suite qualification",
+      "required": true,
+      "context_path": [
+        "source"
+      ],
+      "subject": "product"
+    },
+    {
+      "label": "Ubuntu22 preparation",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourcePositive",
+        "receipt",
+        "status"
+      ],
+      "scope": "Constructed offline-preparation fixture on a capable host",
+      "required": true,
+      "context_path": [
+        "sourcePositive",
+        "receipt",
+        "sourceRevision"
+      ],
+      "subject": "fixture"
+    },
+    {
+      "label": "Ubuntu24 preflight refusal",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceRestrictedHost",
+        "receipt",
+        "status"
+      ],
+      "scope": "Correct refusal on a restricted host",
+      "required": true,
+      "context_path": [
+        "source"
+      ],
+      "subject": "product"
+    },
+    {
+      "label": "npm started on restricted host",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceRestrictedHost",
+        "receipt",
+        "npmStarted"
+      ],
+      "scope": "Expected false: sandbox preflight stops installation",
+      "required": true,
+      "context_path": [
+        "source"
+      ],
+      "subject": "product"
+    },
+    {
+      "label": "Download version in the frozen report",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "publishedArchive",
+        "version"
+      ],
+      "scope": "Previously published archive; no assertion that candidate fix is included",
+      "required": false,
+      "subject": "download",
+      "context_path": [
+        "publishedArchive",
+        "sha256"
+      ]
+    },
+    {
+      "label": "Earlier restricted-host error",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "historicalRestrictedHost",
+        "error"
+      ],
+      "scope": "Historical diagnostic, retained rather than presented as a current candidate failure",
+      "required": false,
+      "subject": "product"
+    }
+  ],
+  "subjects": [
+    {
+      "id": "product",
+      "role": "product_source",
+      "selector": {
+        "source": "candidate"
+      }
+    },
+    {
+      "id": "workflow",
+      "role": "qualification_workflow",
+      "selector": {
+        "attachment": "reported-evidence.json",
+        "field_path": [
+          "sourcePositive",
+          "workflowCommit"
+        ]
+      }
+    },
+    {
+      "id": "fixture",
+      "role": "consumer_fixture",
+      "selector": {
+        "attachment": "reported-evidence.json",
+        "field_path": [
+          "sourcePositive",
+          "receipt",
+          "sourceRevision"
+        ]
+      }
+    },
+    {
+      "id": "download",
+      "role": "released_artifact",
+      "selector": {
+        "attachment": "reported-evidence.json",
+        "field_path": [
+          "publishedArchive",
+          "sha256"
+        ]
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "workflow-product",
+      "kind": "checks_source",
+      "from": "workflow",
+      "to": "product",
+      "reason": "Retained report declares this relationship; reference identities and fixture assignment remain inspectable.",
+      "evidence": [
+        {
+          "attachment": "reported-evidence.json",
+          "field_path": [
+            "source"
+          ],
+          "matches_subject": "product"
+        },
+        {
+          "attachment": "reported-evidence.json",
+          "field_path": [
+            "sourcePositive",
+            "workflowCommit"
+          ],
+          "matches_subject": "workflow"
+        }
+      ]
+    },
+    {
+      "id": "fixture-product",
+      "kind": "fixture_for",
+      "from": "fixture",
+      "to": "product",
+      "reason": "Retained report declares this relationship; reference identities and fixture assignment remain inspectable.",
+      "evidence": [
+        {
+          "attachment": "reported-evidence.json",
+          "field_path": [
+            "source"
+          ],
+          "matches_subject": "product"
+        },
+        {
+          "attachment": "reported-evidence.json",
+          "field_path": [
+            "sourcePositive",
+            "receipt",
+            "sourceRevision"
+          ],
+          "matches_subject": "fixture"
+        },
+        {
+          "attachment": "source-preparation.mjs",
+          "quote": "sourceRevision: revision"
+        }
+      ]
+    }
+  ]
+}

@@ -16,6 +16,7 @@ from .intake import MAX_FILE_BYTES, MAX_RECORDS, reject_constant
 from .store import Store, canonical, digest
 
 SCHEMA='swe-workbench-handoff/v1'
+V2='swe-workbench-handoff/v2'
 FILES=('handoff.json','artifacts.json','manifest.json')
 
 
@@ -47,7 +48,8 @@ def observations(material):
     attachments={a['name']:a for a in material['attachments']}
     output=[]
     for request in material['observation_requests']:
-        require(isinstance(request,dict) and set(request)<= {'label','attachment','field_path','context_path','required','scope'},'Unsupported observation fields.')
+        allowed={'label','attachment','field_path','context_path','required','scope'} | ({'subject'} if material['schema']==V2 else set())
+        require(isinstance(request,dict) and set(request)<=allowed,'Unsupported observation fields.')
         require(all(isinstance(request.get(k),str) and request[k].strip() for k in ('label','attachment','scope')) and type(request.get('required')) is bool,'Observation needs label, attachment, scope and required flag.')
         require(request['attachment'] in attachments,'Observation attachment is missing.')
         attachment=attachments[request['attachment']]
@@ -55,13 +57,21 @@ def observations(material):
         observed=field(value,request.get('field_path'))
         revision=field(value,request['context_path']) if 'context_path' in request else None
         binding='declared-same-source' if revision==material['candidate_revision'] else ('declared-other-source' if revision is not None else 'unbound')
-        output.append({**request,'value':observed,'declared_revision':revision,'binding':binding,'origin':'externally-reported',
-                       'attachment_sha256':attachment['sha256'],'execution_by_workbench':False})
+        item={**request,'value':observed,'declared_revision':revision,'binding':binding,'origin':'externally-reported',
+              'attachment_sha256':attachment['sha256'],'execution_by_workbench':False}
+        if material['schema']==V2:
+            from .handoff_context import observation_binding
+            item.update(observation_binding(material,request,revision))
+        output.append(item)
+    if material['schema']==V2:
+        require(len({o['label'] for o in output})==len(output),'Observation labels must be unique.')
     return output
 
 
 def validate_material(material):
-    require(material.get('schema')==SCHEMA and digest(material['patch'].encode())==material['patch_sha256'],'Patch identity mismatch.','handoff-integrity',409)
+    require(material.get('schema') in (SCHEMA,V2) and digest(material['patch'].encode())==material['patch_sha256'],'Patch identity mismatch.','handoff-integrity',409)
+    if material['schema']==SCHEMA:
+        require(not ({'subjects','subject_requests','relationships','relationship_requests','profile'} & set(material)), 'Role/profile fields require a v2 material version.','handoff-integrity',409)
     for f in material['files']:
         _source_path(f['path'])
         for phase in ('before','after'):
@@ -75,7 +85,17 @@ def validate_material(material):
     require(len({a['name'] for a in material['attachments']})==len(material['attachments']),'Duplicate evidence names.','handoff-integrity',409)
     for a in material['attachments']:
         require(digest(a['text'].encode())==a['sha256'],'Attached evidence identity mismatch.','handoff-integrity',409)
-    require(material['observations']==observations(material),'Observation differs from retained evidence.','handoff-integrity',409)
+    if material['schema']==V2:
+        from .handoff_context import subjects,relationships
+        require(canonical(material['subjects'])==canonical(subjects(material)) and canonical(material['relationships'])==canonical(relationships(material)), 'Revision roles differ from retained evidence.','handoff-integrity',409)
+        if material.get('profile'):
+            from .handoff_profile import expand
+            profile=material['profile'];definition=profile['definition']
+            require(digest(canonical(definition))==profile['sha256'],'Profile identity mismatch.','handoff-integrity',409)
+            effective=expand(definition,change_id='validation',title=material['title'],goal=material['goal'])
+            require(effective['repository']==material['repository'] and canonical(effective['observations'])==canonical(material['observation_requests']) and canonical(effective['subjects'])==canonical(material['subject_requests']) and canonical(effective['relationships'])==canonical(material['relationship_requests']), 'Effective profile differs from captured material.','handoff-integrity',409)
+            require(set(definition.get('attachments',[]))<={a['name'] for a in material['attachments']},'Required profile attachment missing.')
+    require(canonical(material['observations'])==canonical(observations(material)),'Observation differs from retained evidence.','handoff-integrity',409)
 
 
 def _load(store,con,change_id):
@@ -95,15 +115,18 @@ def _save(store,con,state,kind,actor):
     return state
 
 
-def capture(root,*,repo,base,candidate,request,evidence,operation_key):
+def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
     """Capture explicit committed Git objects and local evidence files; execute nothing."""
-    require(isinstance(request,dict) and set(request)=={'change_id','title','goal','repository','observations'},'Capture needs exactly change_id,title,goal,repository,observations.')
+    required={'change_id','title','goal','repository','observations'}
+    version=request.get('schema',SCHEMA) if isinstance(request,dict) else None
+    allowed=required if version==SCHEMA else required|{'schema','profile','subjects','relationships'}
+    require(version in (SCHEMA,V2) and isinstance(request,dict) and required<=set(request)<=allowed,'Capture has missing or unsupported fields/version.')
     require(isinstance(request['change_id'],str) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,159}',request['change_id']),'Invalid change ID.')
     require(all(isinstance(request[k],str) and request[k].strip() for k in ('title','goal','repository')),'Title, goal and repository are required.')
     require(isinstance(request['observations'],list) and len(request['observations'])<=MAX_RECORDS,'Invalid observations.')
     repo=Path(repo).resolve()
     state_root=Path(root).resolve()
-    require(not state_root.is_relative_to(repo) and not repo.is_relative_to(state_root),'Keep source and handoff state must be separate.')
+    require(not state_root.is_relative_to(repo) and not repo.is_relative_to(state_root),'Source repository and handoff state must be separate.')
     for revision in (base,candidate):require(isinstance(revision,str) and re.fullmatch(r'[a-f0-9]{40}|[a-f0-9]{64}',revision),'Use explicit full commit IDs.')
     base=_git(repo,'rev-parse','--verify',base+'^{commit}').decode().strip();candidate=_git(repo,'rev-parse','--verify',candidate+'^{commit}').decode().strip()
     paths=[p.decode('utf-8') for p in _git(repo,'diff','--no-ext-diff','--no-textconv','--no-renames','--name-only','-z',base,candidate).split(b'\0') if p]
@@ -126,51 +149,67 @@ def capture(root,*,repo,base,candidate,request,evidence,operation_key):
         require(isinstance(name,str) and re.fullmatch(r'[A-Za-z0-9_.-]+',name),'Evidence names must be simple labels.')
         raw=_read(path);total+=len(raw);require(total+len(patch)<=MAX_FILE_BYTES,'Handoff exceeds the existing input byte limit.')
         attachments.append({'name':name,'sha256':digest(raw),'text':_text(raw,'Evidence attachment')})
-    material={'schema':SCHEMA,'title':request['title'],'goal':request['goal'],'repository':request['repository'],'base_revision':base,'candidate_revision':candidate,
+    material={'schema':version,'title':request['title'],'goal':request['goal'],'repository':request['repository'],'base_revision':base,'candidate_revision':candidate,
               'files':files,'patch':_text(patch,'Patch'),'patch_sha256':digest(patch),'attachments':attachments,'observation_requests':request['observations'],
               'assurance':'Captured Git/evidence content consistency; unsigned external reports, no independent execution or delivery authority.'}
+    if version==V2:
+        from .handoff_context import subjects,relationships
+        material.update(profile=request.get('profile'),subject_requests=request.get('subjects',[{'id':'product','role':'product_source','selector':{'source':'candidate'}}]),relationship_requests=request.get('relationships',[]))
+        material['subjects']=subjects(material);material['relationships']=relationships(material)
     material['observations']=observations(material);validate_material(material)
     require(len(canonical(material))<=MAX_FILE_BYTES,'Canonical handoff exceeds the existing input byte limit.')
     store=Store(root);store.initialize();material_digest=store.artifact_write(canonical(material))
     payload={'change_id':request['change_id'],'material_digest':material_digest}
     with store.transaction() as con:
-        prior=store.operation(con,'capture-handoff',operation_key,payload)
+        prior=store.operation(con,'capture-handoff',operation_key,payload) if operation_key is not None else None
         if prior is not None:return prior
         current=con.execute('SELECT value FROM meta WHERE key=?',('handoff:'+request['change_id'],)).fetchone()
         state=_load(store,con,request['change_id'])[0] if current else None
         if state is None or state['material_digest']!=material_digest:
-            state={'schema':SCHEMA,'change_id':request['change_id'],'revision':0 if state is None else state['revision']+1,'material_digest':material_digest,
+            state={'schema':version,'change_id':request['change_id'],'revision':0 if state is None else state['revision']+1,'material_digest':material_digest,
                    'decision':'unreviewed','reason':'','findings':[],'next_action':'Inspect the exact change and evidence scope.','reviewer_mode':None,'actor':None}
+            if version==V2:state['responsible_party']=None
             _save(store,con,state,'handoff-captured','operator')
-        store.remember(con,'capture-handoff',operation_key,payload,state)
+        if operation_key is not None:store.remember(con,'capture-handoff',operation_key,payload,state)
         return state
 
 
-def read(root,change_id):
+def read(root,change_id,baseline_revision=None):
     store=Store(root);store.initialize()
     with store.transaction(write=False) as con:
         state,material,events=_load(store,con,change_id)
-        return {'schema':SCHEMA,'state':state,'material':material,'events':events}
+        result={'schema':V2 if any(parse(store.artifact_bytes(e['payload']['state_digest']))['schema']==V2 for e in events) else SCHEMA,'state':state,'material':material,'events':events}
+        if result['schema']==V2:
+            from .handoff_context import compare
+            artifacts={e['payload'][k]:store.artifact_bytes(e['payload'][k]) for e in events for k in ('state_digest','material_digest')}
+            result['comparison']=compare(state,material,events,artifacts,baseline_revision)
+        return result
 
 
-def review(root,change_id,*,expected_revision,material_digest,decision,reason,findings,next_action,operation_key,reviewer_mode='ai_assisted_adjudication'):
+def review(root,change_id,*,expected_revision,material_digest,decision,reason,findings,next_action,operation_key,reviewer_mode='ai_assisted_adjudication',responsible_party=None):
     require(decision in ('handoff-ready','needs-work') and reviewer_mode in ('owner_adjudication','ai_assisted_adjudication','scripted_adjudication'),'Invalid handoff review mode/decision.')
     require(all(isinstance(v,str) and v.strip() for v in (reason,next_action)) and isinstance(findings,list) and all(isinstance(v,str) and v.strip() for v in findings),'Reason, findings and next action must be explicit.')
+    require(responsible_party is None or isinstance(responsible_party,str) and bool(responsible_party.strip()),'Responsible party must be a supplied label or unassigned.')
     store=Store(root);store.initialize();payload={k:v for k,v in locals().copy().items() if k not in ('store','root','operation_key')}
+    if responsible_party is None:payload.pop('responsible_party')
     with store.transaction() as con:
         prior=store.operation(con,'review-handoff',operation_key,payload)
         if prior is not None:return prior
         state,material,_=_load(store,con,change_id)
         require(type(expected_revision) is int and expected_revision==state['revision'] and material_digest==state['material_digest'],'Handoff context changed; review the current material.','stale-handoff',409)
         if decision=='handoff-ready':
-            require(all(not o['required'] or (o['value'] is not None and o['binding']=='declared-same-source') for o in material['observations']),'Required external evidence is missing or declares a different source.','handoff-unresolved',422)
+            from .handoff_context import eligible
+            require(eligible(material),'Required external evidence is missing or its candidate relationship is unresolved.','handoff-unresolved',422)
+        require(state['schema']==V2 or responsible_party is None,'Responsible-party labels require a v2 capture; old review semantics remain unchanged.')
         state=state|{'revision':state['revision']+1,'decision':decision,'reason':reason,'findings':findings,'next_action':next_action,'reviewer_mode':reviewer_mode,'actor':'operator'}
+        if state['schema']==V2:state['responsible_party']=responsible_party
         _save(store,con,state,'handoff-reviewed','operator');store.remember(con,'review-handoff',operation_key,payload,state);return state
 
 
 def _validate_package(handoff,encoded):
-    require(handoff.get('schema')==SCHEMA,'Unknown handoff schema.')
-    require(set(handoff)=={'schema','state','material','events','audit_scope','workbench_executions','keep_mutations'}
+    require(handoff.get('schema') in (SCHEMA,V2),'Unknown handoff schema.')
+    allowed={'schema','state','material','events','audit_scope','workbench_executions','keep_mutations'}|({'comparison'} if handoff['schema']==V2 else set())
+    require(set(handoff)==allowed
             and all(type(handoff[k]) is int and handoff[k]==0 for k in ('workbench_executions','keep_mutations')),
             'A read-only external-evidence handoff cannot claim execution or source mutation.','handoff-integrity',409)
     artifacts={}
@@ -181,25 +220,39 @@ def _validate_package(handoff,encoded):
     for e in events:
         item=dict(e);actual=item.pop('hash');require(digest(canonical(item))==actual,'Handoff event mismatch.','handoff-integrity',409)
         p=e['payload'];s=parse(artifacts[p['state_digest']]);m=parse(artifacts[p['material_digest']]);validate_material(m)
-        require(s['schema']==SCHEMA and s['decision'] in ('unreviewed','handoff-ready','needs-work'), 'Invalid historical handoff decision.','handoff-integrity',409)
+        require(s['schema'] in (SCHEMA,V2) and s['schema']==m['schema'] and s['decision'] in ('unreviewed','handoff-ready','needs-work'), 'Invalid historical handoff decision.','handoff-integrity',409)
+        require(s['schema']==V2 or 'responsible_party' not in s,'Responsible-party metadata requires a v2 state.','handoff-integrity',409)
+        require(s['schema']==SCHEMA or handoff['schema']==V2,'A role-bearing history requires a v2 envelope.','handoff-integrity',409)
+        if s['schema']==V2:
+            require(s.get('responsible_party') is None or isinstance(s['responsible_party'],str) and bool(s['responsible_party'].strip()),'Invalid responsible-party label.')
         require(e['kind'] in ('handoff-captured','handoff-reviewed') and p['change_id']==s['change_id']==handoff['state']['change_id'] and p['revision']==s['revision']==previous+1 and s['material_digest']==p['material_digest'],'Handoff history mismatch.','handoff-integrity',409)
         previous=s['revision'];expected.update((p['state_digest'],p['material_digest']))
     require(set(artifacts)==expected,'Missing or extra handoff artifacts.','handoff-integrity',409)
     last=events[-1]['payload'];require(canonical(handoff['state'])==artifacts[last['state_digest']] and canonical(handoff['material'])==artifacts[last['material_digest']],'Current handoff differs from history.','handoff-integrity',409)
-    if handoff['state']['decision']=='handoff-ready':require(all(not o['required'] or (o['value'] is not None and o['binding']=='declared-same-source') for o in handoff['material']['observations']),'Unresolved handoff claims.','handoff-integrity',409)
+    if handoff['state']['decision']=='handoff-ready':
+        from .handoff_context import eligible
+        require(eligible(handoff['material']),'Unresolved handoff claims.','handoff-integrity',409)
+    if handoff['schema']==V2:
+        from .handoff_context import compare
+        expected_comparison=compare(handoff['state'],handoff['material'],events,artifacts,handoff['comparison'].get('baseline_revision'))
+        require(canonical(expected_comparison)==canonical(handoff['comparison']),'Comparison differs from retained old/new material.','handoff-integrity',409)
 
 
-def export(root,change_id,output):
+def export(root,change_id,output,baseline_revision=None):
     store=Store(root);store.initialize()
     with store.transaction(write=False) as con:
         state,material,events=_load(store,con,change_id)
         keys={e['payload'][k] for e in events for k in ('state_digest','material_digest')}
         encoded={key:base64.b64encode(store.artifact_bytes(key)).decode() for key in sorted(keys)}
-        handoff={'schema':SCHEMA,'state':state,'material':material,'events':events,
+        version=V2 if any(parse(store.artifact_bytes(e['payload']['state_digest']))['schema']==V2 for e in events) else SCHEMA
+        handoff={'schema':version,'state':state,'material':material,'events':events,
                  'audit_scope':'Selected change events with original audit hashes; not a complete global audit chain.','workbench_executions':0,'keep_mutations':0}
+        if version==V2:
+            from .handoff_context import compare
+            handoff['comparison']=compare(state,material,events,{k:base64.b64decode(v) for k,v in encoded.items()},baseline_revision)
     _validate_package(handoff,encoded)
     data={'handoff.json':canonical(handoff)+b'\n','artifacts.json':canonical(encoded)+b'\n'}
-    manifest={'schema':SCHEMA,'change_id':change_id,'revision':state['revision'],'files':{n:{'sha256':digest(raw),'bytes':len(raw)} for n,raw in data.items()}}
+    manifest={'schema':version,'change_id':change_id,'revision':state['revision'],'files':{n:{'sha256':digest(raw),'bytes':len(raw)} for n,raw in data.items()}}
     data['manifest.json']=canonical(manifest)+b'\n';destination=Path(output).absolute()
     require(all(len(raw)<=MAX_FILE_BYTES for raw in data.values()),'Handoff history exceeds the existing file byte limit; preserve it privately and select a smaller change.')
     require(destination.parent.is_dir() and not destination.exists() and not destination.is_symlink(),'Choose a fresh output under an existing owned parent.')
@@ -220,9 +273,9 @@ def verify(path):
         folder=Path(path);require(not folder.is_symlink() and folder.is_dir() and {p.name for p in folder.iterdir()}==set(FILES),'Exact handoff file set required.')
         for name in FILES:require((folder/name).is_file() and not(folder/name).is_symlink(),'Regular handoff files required.')
         raw={name:_read(folder/name) for name in FILES};manifest=parse(raw['manifest.json'])
-        require(manifest['schema']==SCHEMA and set(manifest['files'])==set(FILES)-{'manifest.json'},'Invalid manifest.')
+        require(manifest['schema'] in (SCHEMA,V2) and set(manifest['files'])==set(FILES)-{'manifest.json'},'Invalid manifest.')
         for name,expected in manifest['files'].items():require(expected=={'sha256':digest(raw[name]),'bytes':len(raw[name])},'Manifest content mismatch.','handoff-integrity',409)
         handoff=parse(raw['handoff.json']);_validate_package(handoff,parse(raw['artifacts.json']))
-        require(manifest['change_id']==handoff['state']['change_id'] and manifest['revision']==handoff['state']['revision'],'Manifest state mismatch.')
+        require(manifest['schema']==handoff['schema'] and manifest['change_id']==handoff['state']['change_id'] and manifest['revision']==handoff['state']['revision'],'Manifest state mismatch.')
         return {'ok':True,'errors':[],'manifest_digest':digest(raw['manifest.json']),'change_id':manifest['change_id'],'revision':manifest['revision']}
     except (WorkbenchError,OSError,ValueError,KeyError,TypeError) as exc:return {'ok':False,'errors':[str(exc)]}

@@ -10,3 +10,5 @@ Use an isolated task directory. Do not point the application at another project'
 
 
 The optional change-handoff path is read-only toward its source project. Evidence attachments and field references are data; capture executes no supplied checks or commands. Unsigned external reports remain external even when they declare the selected source revision. Handoff readiness authorizes no source-project effects and cannot bypass native accepted-code gates. The public page renders selected snapshots as inert text.
+
+Reusable profiles are explicitly selected data. Directory binding reads only declared names, refuses symlink slots and does not execute profile contents or scan a source project for configuration. Revision-role relationships are evidence-referenced declarations, not execution authentication. Unknown or mismatched candidate applicability blocks required readiness; comparison never reuses an approval automatically. Old v1 formats remain distinct from v2 metadata, and private inputs must stay out of public builds.

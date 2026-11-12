@@ -1,41 +1,50 @@
 {
-  "version": "0.1.0a5",
+  "version": "0.1.0a6",
   "checked": "2026-11-12",
-  "baseline": "9d70da2ced3b72ef2fbc3568b60879eb6df7172a",
+  "baseline": "fd1360bdbf831fcc95e4251a2dea283cdc8de622",
   "source_sha256": {
-    "swe_workbench/__init__.py": "ebecf4af9144670d689ced1b45b8abea9f00ed8f8bf425bca05472bc9c3ec253",
+    "swe_workbench/__init__.py": "f2902801726d0b27d43298b58c886ebfaf9cf82c5d3f87ad8bf62020a48b3338",
     "swe_workbench/api.py": "ecd3da3c95129ffc76a91ddb6436b099a2310fd18ce5c270ff02a1d1b3be4cc2",
     "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
     "swe_workbench/bundle.py": "767716053079a01f3137b746730758dc39558ed21441b26a204f8d7062beb333",
-    "swe_workbench/cli.py": "a49ea8cd7e9b605dfce9436e82e6fb09bed9453f566ea21a14120fd610bc555b",
+    "swe_workbench/cli.py": "461e97f888800f6e9b399d9d1c56311124aff924db4cfe95bf510ad3c607d4df",
     "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
     "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
     "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
     "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
     "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
-    "swe_workbench/handoff.py": "479fb60a881eb6a7411c9e918067be91e55f7f6c98c235984be8a79408eaa4be",
+    "swe_workbench/handoff.py": "65575ea433c48b03380e66f1172c775aa334332b44e2446fdcd85385328eeae1",
+    "swe_workbench/handoff_context.py": "15987b36616832b01f0040e13dc477b3c3e6a4602e4d209b2272b8a6abf7e37b",
+    "swe_workbench/handoff_profile.py": "d397ea1acdf51381ce03b5b7bfc0a4e4702d8c8423ba3bb02eb31d238f0416e9",
     "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
     "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
     "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
     "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
     "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
-    "web/app.js": "0e6ccebcb7d009d3b876a445f41871fc7bd56fe37698f76a04fa6bdba2bea6d4",
+    "web/app.js": "5605626b74c605da1638ea4f06e7cda13bab4d725b0db4e4937c2d96cf5fec01",
     "web/index.html": "12e82fadd827e6dacb0decf62ed27001ab27dc664dda93b326b0d24e9729bc08",
-    "web/style.css": "52b3859f4b6e7dcbb1f6a1cfb8215b94c542884105ea586812a386d6d7381769"
+    "web/style.css": "b7c136f33cd9d2fcc9dd5a1e10c2126ed0cbc6af6a35436cf61314b901840306"
   },
-  "wheel_sha256": "7d1db9f2364183c86739c1aa8641f25941897ae6154ae8e521a31f2ab48ed65e",
-  "focused_tests": {
-    "cases": 6,
-    "scope": "Exact read-only capture and raw bytes; idempotence/history; stale and missing/mismatched source; fresh-process export verification and tamper refusal; source overlap, duplicate JSON keys and unsupported mode. Four initial cases passed; idempotency assertion in the fifth was corrected and that case passed. Application behavior was unchanged by that correction. A final export-policy check refuses relabeling external evidence as native execution or source mutation; the guard was added and the final wheel requalified after that specific inspection finding."
+  "wheel_sha256": "c3637439db59beccac252e43201a8caf62ac583108bd00ea2ff55ee23e0ef18d",
+  "focused_checks": {
+    "new_context_cases": 6,
+    "affected_legacy_cases": 6,
+    "scope": "Profiles, exact effective mappings, unknown/mismatched roles, fixture/source separation, v1/v2 history, current/prior comparison, zero/false/missing, CLI profile/directory/inline review, legacy raw-byte/idempotence/export/privacy behavior. Targeted follow-ups covered current-status repeat capture, legacy explicit operation retries, profile slot validation and comparison after review-only changes.",
+    "additional_observed_checks": [
+      "Actual retained v1 operation retry returns its original response without replacing current v2 state.",
+      "Original frozen v1 export verifies; v1 role-field injection refuses.",
+      "Malformed profile file names refuse before state changes."
+    ]
   },
   "installed_artifact": {
-    "version": "0.1.0a5",
-    "installed_imports": true,
+    "version": "0.1.0a6",
+    "isolated_installed_imports": true,
     "matched_source_files": [
       "swe_workbench/evaluation.py",
       "swe_workbench/worker.py",
       "swe_workbench/errors.py",
       "swe_workbench/__init__.py",
+      "swe_workbench/handoff_context.py",
       "swe_workbench/evaluation_export.py",
       "swe_workbench/core.py",
       "swe_workbench/handoff.py",
@@ -46,6 +55,7 @@
       "swe_workbench/store.py",
       "swe_workbench/exporter.py",
       "swe_workbench/runner.py",
+      "swe_workbench/handoff_profile.py",
       "swe_workbench/intake.py",
       "swe_workbench/cli.py",
       "web/style.css",
@@ -66,24 +76,72 @@
     "verification": {
       "ok": true,
       "errors": [],
-      "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b",
+      "manifest_digest": "700e46594fd20d68bbd24064d816913ed3c1df2a9a586666106884dec301982c",
       "change_id": "keep-sandbox-preflight",
-      "revision": 1
+      "revision": 3
     },
+    "relocated_profile_same_material_and_current_review": true,
+    "v1_operation_retry_and_frozen_export": true,
     "same_cut_repeat": true,
-    "keep_application_commands": 0,
-    "keep_mutations": 0,
+    "roles": 4,
+    "comparison_baseline": 1,
+    "steps": [
+      {
+        "operation": "fresh-current-read",
+        "elapsed_seconds": 0.03905731486156583
+      },
+      {
+        "operation": "ordinary-profile-capture",
+        "elapsed_seconds": 0.07325866306200624
+      },
+      {
+        "operation": "explicit-baseline-read",
+        "elapsed_seconds": 0.037921237759292126
+      },
+      {
+        "operation": "export",
+        "elapsed_seconds": 0.06451329169794917
+      },
+      {
+        "operation": "repeat-export",
+        "elapsed_seconds": 0.0629523852840066
+      },
+      {
+        "operation": "fresh-process-verification",
+        "elapsed_seconds": 0.04010347183793783
+      },
+      {
+        "operation": "private-fresh-read",
+        "elapsed_seconds": 0.036198940128088
+      }
+    ],
+    "private_trial": {
+      "actual_application": true,
+      "adapter_added": false,
+      "export_verified": true,
+      "decision": "needs-work",
+      "execution_revision": "unknown",
+      "responsible_party": "unassigned",
+      "inputs_published": false
+    },
+    "source_project_execution": 0,
+    "source_project_mutations": 0,
     "application_model_calls": 0,
-    "scope": "Installed capture/review/export plus fresh-process read and offline verification; existing Keep reports are not rerun."
+    "recurring_mapping_edits": 0,
+    "human_speedup": "unmeasured"
   },
   "static_browser": {
     "profile": "local",
     "http": 200,
-    "real_handoff_visible": true,
-    "reported_and_native_separated": true,
+    "summary_first": true,
+    "typed_roles": true,
+    "real_prior_comparison": true,
+    "historical_material_hash_checked": true,
     "downloads": 3,
-    "historical_views": 3,
+    "old_views_preserved": 3,
     "quality_demo_preserved": true,
+    "private_unknowns_and_unassigned": "local check passed",
+    "legacy_handoff": "local check passed",
     "initial_player": {
       "paused": true,
       "muted": true,
@@ -92,103 +150,27 @@
       "autoplay": false
     },
     "captions_http": 200,
-    "captions_vtt": true,
     "zero_volume_retained": true,
     "mobile_fit": true,
-    "inert_import_check": "passed",
     "errors": [],
     "api_requests": [],
     "external_requests": []
   },
-  "real_keep_input": {
-    "base": "acb84e9be37a681790a4943718c675a0ee1566a0",
-    "candidate": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
-    "report_commit": "e119a413aec42715ac35c98f40c51f8f1cd335f2",
-    "report_path": "docs/qualification/preparation-portability-2026-11-12.json",
-    "report_sha256": "0fa47840f7721c951a87875b5936ac7ab0e23f7ed385f93205e3c57cdde6a222",
-    "origin": "Actual public Keep source and unsigned published qualification evidence, implemented by another instance. Workbench made no Keep changes.",
-    "revision_roles": {
-      "product_source": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
-      "qualification_workflow": "c40674a94bce057ed879e9e754c43ca9f169609c",
-      "receipt_sourceRevision": "The constructed consumer fixture repository created by source-preparation.mjs, not the Keep product commit. The script assigns revision from the fixture git rev-parse HEAD and writes that into sourceRevision.",
-      "mapping_evidence": "The frozen workflow explicitly checks out product source e53867c and asserts git HEAD; the frozen fixture harness separately initializes/commits the consumer repository."
-    },
-    "provenance_sources": {
-      "source-preparation.mjs": {
-        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
-        "path": "docs/qualification/source-preparation.mjs",
-        "git_blob": "3ccc8ae51fdd1eabc09854931d6f771b920bf8a6"
-      },
-      "preparation-workflow.yml": {
-        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
-        "path": ".github/workflows/source-checks.yml",
-        "git_blob": "0c8b25f895b4dacb40df364a6114dea04376612f"
-      }
-    }
+  "public_example": "Existing public Keep source/report only. Actual prior v1 review retained; new profile/role annotation leaves source and requested goal unchanged. No source-project execution or delivery.",
+  "second_project": {
+    "actual_application": true,
+    "adapter_added": false,
+    "export_verified": true,
+    "decision": "needs-work",
+    "execution_revision": "unknown",
+    "responsible_party": "unassigned",
+    "inputs_published": false
   },
-  "fresh_context_review": "One actual AI-assisted review of the first frozen handoff, given only its three files; it recovered the change and raised the subsequently clarified revision roles. Original input hashes and finding preserved.",
-  "workbench_native_executions_for_keep": 0,
-  "keep_mutations": 0,
-  "application_model_calls": 0,
-  "effort": {
-    "command_steps": [
-      {
-        "operation": "capture",
-        "elapsed_seconds": 0.07300808699801564
-      },
-      {
-        "operation": "review",
-        "elapsed_seconds": 0.035970575641840696
-      },
-      {
-        "operation": "export",
-        "elapsed_seconds": 0.044863014947623014
-      },
-      {
-        "operation": "fresh-process-verify",
-        "elapsed_seconds": 0.03728645388036966
-      },
-      {
-        "operation": "fresh-process-read",
-        "elapsed_seconds": 0.036060862708836794
-      }
-    ],
-    "total_command_seconds": 0.2271889941766858,
-    "interpretation": "Tool execution only; human baseline and review speed unavailable. Per-change evidence mapping and feature construction remain separate overhead."
-  },
-  "decision": "Retain optional portable handoff; avoid broader orchestration or mandatory use. No measured human productivity claim.",
-  "caption_correction": "The earlier video requested recording.vtt while the published file was captions.vtt. Current assets now request captions.vtt, and actual HTTP200 plus WEBVTT content were checked; original media/release bytes preserved.",
-  "public_status": "Public workbench source/tag/release and hosted version5 verified. Main-branch documentation adds hosted results after immutable release cut; runtime/media/release bytes unchanged.",
-  "hosted_publication": {
-    "site_version": 5,
-    "source_commit": "ab19fc4e5575399f7f31f253474d93369d83e6bf",
-    "deployment_id": "appgdep_6af50afff71c8191bc629f88f0107dd8",
-    "status": "succeeded",
-    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
-    "browser": {
-      "profile": "hosted",
-      "http": 200,
-      "real_handoff_visible": true,
-      "reported_and_native_separated": true,
-      "downloads": 3,
-      "historical_views": 3,
-      "quality_demo_preserved": true,
-      "initial_player": {
-        "paused": true,
-        "muted": true,
-        "controls": true,
-        "volume": 0.1,
-        "autoplay": false
-      },
-      "captions_http": 200,
-      "captions_vtt": true,
-      "zero_volume_retained": true,
-      "mobile_fit": true,
-      "inert_import_check": "prior local check",
-      "errors": [],
-      "api_requests": [],
-      "external_requests": []
-    },
-    "release_assets_verified": 7
-  }
+  "private_publication": "No private project code, reports, profile, paths or identifiers are included in public source, build or assets.",
+  "usefulness": "Repeated profile use required zero copied field-map edits. Setup and human review time remain unmeasured; command times alone do not establish productivity. Retain this optional workflow.",
+  "qualification_notes": [
+    "Normal key-free recapture returns current review state. Explicit operation-key retries retain their original response; None responsible-party metadata is omitted from legacy operation payloads for compatibility.",
+    "Role-bearing fields require v2 and are not silently interpreted as v1. A comparison is recomputed from retained old/new material and does not grant evidence reuse or approval."
+  ],
+  "public_status": "Local artifact/browser audit complete; public checkpoint pending at this evidence cut."
 }

@@ -8,19 +8,25 @@ Explore the recorded audit and silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The current real-change example reviews a Keep correction made by another instance: checking sandbox readiness before attempting dependency installation. It separates the corrected .22 source from the .21 download, preserves the reported check scope and explains the different product, workflow and fixture revisions. Keep remains read-only throughout this workflow.
+The current view puts the operational answers first: what changed, what evidence applies, what remains unresolved, who acts next and the next action. A comparison highlights changes since the previous review, with exact historical inputs available for inspection.
 
-A fresh AI-assisted review recovered the change without the original chat and identified the missing revision-role explanation. The later package includes the frozen workflow and harness that resolve it. Reported checks stay labeled as external evidence; the workbench performs no Keep execution, merge or release.
+Reusable project profiles remove repeated field-map editing. The public example distinguishes product code, qualification workflow, consumer fixture and a reported download for an actual Keep change. A second private application trial used the same generic capture path; its missing execution revision remained unresolved. Its inputs are kept private.
 
-The task-quality example remains available below: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
+The original task-quality example remains available: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
 
 ![Actual workbench evidence view](docs/images/workbench.png)
 
 Installable wheel, original example inputs, recording and verified evaluation exports:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a5
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a6
 
-## Review a real change
+## Reuse a project profile
+
+Select a saved profile, exact source commits, the requested goal and the existing evidence directory. Capture reads the committed files and only the profile-declared evidence names. Normal repeated capture retains the latest review state. It performs no source-project execution or delivery.
+
+The generic command and version-bound review/export flow are documented in docs/everyday-handoffs.md. A complete public profile is in examples/keep-handoff/profile.json. Existing explicit-request capture remains supported.
+
+## Review the original real-change example
 
 Requires Linux, Python3.12 and Git. Install requirements.lock in a project-local virtual environment. Select a local repository containing the example commits, then run:
 
@@ -56,6 +62,7 @@ Use the server through your own trusted private connection with `?mode=live`. Th
 
 ## What is implemented
 
+- Reuse a project profile, inspect typed revision roles and compare current/prior reviews with unknown evidence applicability left explicit.
 - Capture a real committed change and selected external evidence without executing its project. Preserve version-bound review history and export an offline-verifiable handoff.
 - Read committed source and selected patches into an inspectable task bundle without checkout or execution during preparation.
 - Import native or SWE-bench-style JSONL with exact raw bytes, per-occurrence attribution and duplicate accounting. Imported claims do not grant execution permission.
@@ -97,4 +104,4 @@ Execution admits inspected exact source/check/patch tuples. Verifier integrity c
 
 Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. Keep supplied prior art for recovery and auditable decisions; this application runs independently.
 
-Details: docs/change-handoff.md, examples/keep-handoff/README.md, examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.
+Details: docs/everyday-handoffs.md, docs/change-handoff.md, examples/keep-handoff/README.md, examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.

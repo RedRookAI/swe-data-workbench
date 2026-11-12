@@ -257,3 +257,8 @@ summary .badge { margin-left: 10px; }
 .handoff-identity dd { margin:0; overflow-wrap:anywhere; }
 #handoff-content pre { white-space:pre-wrap; overflow-wrap:anywhere; }
 @media (max-width:600px) { .handoff-identity { grid-template-columns:1fr; gap:.25rem; } .handoff-identity dd { margin-bottom:.6rem; } }
+.handoff-overview { border-left:3px solid var(--accent); padding-left:1.1rem; margin-bottom:1.5rem; }
+.handoff-overview h4 { margin:1rem 0 .35rem; }
+.handoff-overview li { margin:.35rem 0; }
+.handoff-comparison { padding:1rem; margin:1rem 0; background:var(--surface-alt, #f3f6f4); border-radius:8px; }
+#handoff-content > details { margin-top:.8rem; }

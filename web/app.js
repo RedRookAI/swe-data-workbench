@@ -409,45 +409,97 @@ $('import').addEventListener('click', () => mutation(approvedInput() ? '/api/imp
 $('process').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/process', {workers: 1}, null, async () => { await loadLive(); notify('Processing returned. Inspect each submission for its measured outcome.'); }); });
 $('refresh').addEventListener('click', () => loadLive().then(() => notify('Current evidence and revisions loaded.')).catch((e) => notify(e.message, true)));
 $('export').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/export', {}, 'export:' + state.batch.id, async (receipt) => { $('export-receipt').textContent = JSON.stringify(receipt, null, 2); $('export-receipt').hidden = false; if (receipt.metrics) renderExportMetrics(receipt.metrics); await loadLive(); notify('Export frozen. The receipt identifies its exact manifest and metrics.'); }); });
+function renderHandoffComparison(root, comparison) {
+  if (!comparison) { root.append(node('p', 'Comparison is unavailable in this legacy handoff.', 'small muted')); return; }
+  const section = node('section', null, 'handoff-comparison'); section.id = 'handoff-comparison';
+  if (comparison.status === 'no-prior-reviewed-state') {
+    section.append(node('h3', 'First handoff'), node('p', 'There is no earlier reviewed state to compare.')); root.append(section); return;
+  }
+  section.append(node('h3', 'Since reviewed revision ' + comparison.baseline_revision),
+    node('p', comparison.source_context_changed ? 'Source or requested-goal context changed; inspect the affected evidence.' : 'Source and requested goal are unchanged.'));
+  const list = node('ul');
+  for (const [key, title] of [['files', 'Source files'], ['evidence', 'Evidence attachments'], ['observations', 'Reported observations'], ['subjects', 'Revision roles'], ['relationships', 'Relationships']]) {
+    const delta = comparison[key]; const names = [...delta.added.map(n => 'added ' + n), ...delta.removed.map(n => 'removed ' + n), ...delta.changed.map(n => 'changed ' + n)];
+    list.append(node('li', title + ': ' + (names.length ? names.join('; ') : 'unchanged')));
+  }
+  for (const key of Object.keys(comparison.request_changes || {})) list.append(node('li', 'Requested ' + key + ' changed.'));
+  for (const key of Object.keys(comparison.review_changes || {})) list.append(node('li', 'Review field changed: ' + key.replaceAll('_', ' ')));
+  section.append(list);
+  const details = node('details'); details.append(node('summary', 'Evidence applicability and exact comparison'));
+  for (const item of comparison.applicability) details.append(node('p', item.label + ': ' + item.status.replaceAll('-', ' ')));
+  appendField(details, 'Comparison identities and values', comparison); section.append(details,
+    node('p', 'These are reported bindings. Comparison does not rerun checks or carry an earlier decision forward.', 'small muted'));
+  root.append(section);
+}
+async function loadHandoffHistory(container, record) {
+  if (container.dataset.loaded) return;
+  const response = await fetch('./handoff/artifacts.json', {credentials: 'omit', cache: 'no-store'});
+  if (!response.ok) throw new Error('Retained handoff history is unavailable.');
+  const encoded = await response.json(); const cache = new Map();
+  async function artifact(key) {
+    if (!/^[a-f0-9]{64}$/.test(key) || typeof encoded[key] !== 'string') throw new Error('A historical artifact is missing.');
+    if (cache.has(key)) return cache.get(key);
+    const raw = Uint8Array.from(atob(encoded[key]), c => c.charCodeAt(0));
+    const actual = [...new Uint8Array(await crypto.subtle.digest('SHA-256', raw))].map(v => v.toString(16).padStart(2, '0')).join('');
+    if (actual !== key) throw new Error('Historical artifact identity mismatch.');
+    const result = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(raw)); cache.set(key, result); return result;
+  }
+  const fragment = document.createDocumentFragment();
+  for (const event of record.events) {
+    const review = await artifact(event.payload.state_digest); const material = await artifact(event.payload.material_digest);
+    const item = node('details'); item.append(node('summary', 'Revision ' + review.revision + ' · ' + review.decision));
+    appendField(item, 'Recorded review', review); appendField(item, 'Retained exact material', material); fragment.append(item);
+  }
+  container.append(fragment); container.dataset.loaded = 'true';
+}
 async function loadHandoff() {
   const response = await fetch('./handoff/handoff.json', {credentials: 'omit', cache: 'no-store'});
   if (response.status === 404) return;
   if (!response.ok) throw new Error('The change handoff is unavailable.');
   const record = await response.json();
-  if (record.schema !== 'swe-workbench-handoff/v1' || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
+  if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
   const {state: review, material} = record; const root = $('handoff-content'); root.replaceChildren();
-  root.append(node('h3', material.title), node('p', material.goal), badge(review.decision),
-    node('p', 'Handoff readiness records a review package. Code acceptance and delivery remain with the source project.', 'small muted'),
-    node('p', 'External check reports · ' + record.workbench_executions + ' checks executed by this handoff · ' + record.keep_mutations + ' source-project mutations', 'notice'));
+  const unresolved = material.observations.filter(o => o.required && (o.value === null || (record.material.schema === 'swe-workbench-handoff/v2' ? o.candidate_applicability !== 'declared' : o.binding !== 'declared-same-source')));
+  const overview = node('section', null, 'handoff-overview'); overview.id = 'handoff-overview';
+  overview.append(node('h3', material.title), node('p', material.goal), badge(review.decision),
+    node('p', material.observations.length + ' externally reported observations · ' + unresolved.length + ' required bindings unresolved · ' + record.workbench_executions + ' checks executed by this handoff', 'small muted'),
+    node('h4', 'What remains unresolved'));
+  const findings = node('ul');
+  for (const finding of review.findings) findings.append(node('li', finding));
+  for (const observation of unresolved) findings.append(node('li', observation.label + ': missing evidence or an unresolved candidate relationship.'));
+  if (!findings.childNodes.length) findings.append(node('li', 'No unresolved findings recorded; evidence scope remains visible below.'));
+  overview.append(findings, node('h4', 'Who acts next'), node('p', review.responsible_party || 'Unassigned'), node('h4', 'Next action'), node('p', review.next_action),
+    node('p', 'This is review-package readiness. Source-project acceptance and delivery remain separate.', 'small muted'));
+  root.append(overview); renderHandoffComparison(root, record.schema === 'swe-workbench-handoff/v2' ? record.comparison : null);
+  const recorded = node('details'); recorded.append(node('summary', 'Recorded review and attribution')); appendField(recorded, 'Reason', review.reason); appendField(recorded, 'Reviewer declaration', {actor: review.actor, mode: review.reviewer_mode}); root.append(recorded);
+  const versions = node('details'); versions.append(node('summary', 'Exact versions, roles and hashes'));
   const identity = node('dl', null, 'handoff-identity');
-  for (const [label, value] of [['Base', material.base_revision], ['Candidate', material.candidate_revision], ['Patch SHA-256', material.patch_sha256], ['Review revision', review.revision]]) {
-    identity.append(node('dt', label), node('dd', value, 'digest'));
-  }
-  root.append(identity);
+  for (const [label, value] of [['Base', material.base_revision], ['Candidate', material.candidate_revision], ['Patch SHA-256', material.patch_sha256], ['Review revision', review.revision]]) identity.append(node('dt', label), node('dd', value, 'digest'));
+  versions.append(identity);
+  if (material.schema === 'swe-workbench-handoff/v2' && Array.isArray(material.subjects)) {
+    for (const subject of material.subjects) versions.append(node('p', subject.role.replaceAll('_', ' ') + ': ' + (subject.value || 'Unknown') + ' · ' + subject.origin));
+    for (const relationship of material.relationships) versions.append(node('p', relationship.from + ' → ' + relationship.to + ': ' + relationship.kind + ' · ' + relationship.status));
+    versions.append(node('p', 'Relationships are declarations with retained references; they do not authenticate execution.', 'small muted'));
+  } else versions.append(node('p', 'Typed roles were not recorded in this legacy handoff. Unassigned roles remain unknown.', 'small muted'));
+  root.append(versions);
+  const observations = node('details'); observations.append(node('summary', 'Reported evidence and scope (' + material.observations.length + ')'));
   const wrapper = node('div', null, 'table-scroll'); const table = node('table'); const header = node('tr');
-  for (const text of ['Observation', 'Reported result', 'Source binding', 'Scope and origin']) header.append(node('th', text));
+  for (const text of ['Observation', 'Reported result', 'Binding / subject', 'Scope and origin']) header.append(node('th', text));
   const head = node('thead'); head.append(header); table.append(head); const body = node('tbody');
   for (const observation of material.observations) {
     const value = observation.value;
     const result = value && typeof value === 'object' && Number.isInteger(value.passed) && Number.isInteger(value.tests) ? value.passed + ' / ' + value.tests + ' passed · ' + (value.profile || 'profile unspecified') : display(value);
-    const row = node('tr'); row.append(node('th', observation.label), node('td', result), node('td', observation.binding), node('td', observation.scope + ' · externally reported'));
-    body.append(row);
+    const row = node('tr'); row.append(node('th', observation.label), node('td', result), node('td', observation.binding + (observation.subject_role ? ' · ' + observation.subject_role : '')), node('td', observation.scope + ' · externally reported')); body.append(row);
   }
-  table.append(body); wrapper.append(table); root.append(wrapper);
-  appendField(root, 'Recorded review', review.reason);
-  const findings = node('ul'); for (const finding of review.findings) findings.append(node('li', finding));
-  root.append(node('h3', 'What remains unresolved'), findings); appendField(root, 'Next action', review.next_action);
-  const details = node('details'); details.append(node('summary', 'Exact diff and reported evidence'));
-  appendField(details, 'Patch', material.patch);
+  table.append(body); wrapper.append(table); observations.append(wrapper); root.append(observations);
+  const details = node('details'); details.append(node('summary', 'Exact diff and reported values')); appendField(details, 'Patch', material.patch);
   for (const observation of material.observations) appendField(details, observation.label, observation.value);
   details.append(node('p', material.assurance, 'small muted')); root.append(details);
-  const history = node('details'); history.append(node('summary', 'Version-bound review history'));
-  for (const event of record.events) history.append(node('p', event.kind + ' · revision ' + event.payload.revision + ' · ' + event.created_at));
+  const history = node('details'); history.append(node('summary', 'Version-bound review history and original inputs'));
+  history.addEventListener('toggle', async () => { if (history.open) { try { await loadHandoffHistory(history, record); } catch (error) { history.append(node('p', error.message, 'notice error')); } } });
   root.append(history); const downloads = node('nav', null, 'actions'); downloads.setAttribute('aria-label', 'Change handoff downloads');
-  for (const [file, label] of [['handoff.json', 'Change and review'], ['artifacts.json', 'Retained evidence'], ['manifest.json', 'Manifest']]) {
-    const link = node('a', label, 'button'); link.href = './handoff/' + file; link.download = ''; downloads.append(link);
-  }
-  root.append(downloads, node('p', 'Reported checks remain unsigned external evidence. Content hashes establish consistency. This view performs no source-project action.', 'small muted'));
+  for (const [file, label] of [['handoff.json', 'Change and review'], ['artifacts.json', 'Retained evidence'], ['manifest.json', 'Manifest']]) { const link = node('a', label, 'button'); link.href = './handoff/' + file; link.download = ''; downloads.append(link); }
+  root.append(downloads, node('p', 'Unsigned reports remain external evidence. Content hashes establish consistency. Source-project mutations: ' + record.keep_mutations + '.', 'small muted'));
   $('handoff-section').hidden = false;
   $('recording-section').querySelector('h2').textContent = 'Earlier task-quality walkthrough · 0.1.0a4';
 }
