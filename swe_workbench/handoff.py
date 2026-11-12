@@ -14,6 +14,7 @@ from .bundle import _git, _read, _source_path, _text, _publish, _fsync_directory
 from .errors import WorkbenchError
 from .intake import MAX_FILE_BYTES, MAX_RECORDS, reject_constant
 from .store import Store, canonical, digest
+from . import handoff_validation as shape
 
 SCHEMA='swe-workbench-handoff/v1'
 V2='swe-workbench-handoff/v2'
@@ -31,7 +32,12 @@ def parse(raw):
             if key in result: raise ValueError('duplicate key')
             result[key]=value
         return result
-    try: return json.loads(raw,object_pairs_hook=pairs,parse_constant=reject_constant)
+    try:
+        if isinstance(raw, bytes): raw = raw.decode("utf-8")
+        shape.check(isinstance(raw, str), "json", "expected UTF-8 JSON text")
+        result=json.loads(raw,object_pairs_hook=pairs,parse_constant=reject_constant)
+        canonical(result)  # Validate Unicode and overflowed/nonfinite numbers without replacing bytes.
+        return result
     except (ValueError,UnicodeError,RecursionError) as exc:
         raise WorkbenchError('handoff-json','Expected unambiguous UTF-8 JSON.') from exc
 
@@ -45,6 +51,7 @@ def field(value, path):
 
 
 def observations(material):
+    shape.observation_requests(material["observation_requests"], material["schema"])
     attachments={a['name']:a for a in material['attachments']}
     output=[]
     for request in material['observation_requests']:
@@ -69,6 +76,7 @@ def observations(material):
 
 
 def validate_material(material):
+    shape.material(material)
     require(material.get('schema') in (SCHEMA,V2) and digest(material['patch'].encode())==material['patch_sha256'],'Patch identity mismatch.','handoff-integrity',409)
     if material['schema']==SCHEMA:
         require(not ({'subjects','subject_requests','relationships','relationship_requests','profile'} & set(material)), 'Role/profile fields require a v2 material version.','handoff-integrity',409)
@@ -101,7 +109,7 @@ def validate_material(material):
 def _load(store,con,change_id):
     row=con.execute('SELECT value FROM meta WHERE key=?',('handoff:'+change_id,)).fetchone()
     if not row:raise WorkbenchError('handoff-not-found','Change handoff does not exist.',404)
-    state=parse(store.artifact_bytes(row['value']));material=parse(store.artifact_bytes(state['material_digest']))
+    state=parse(store.artifact_bytes(row['value']));shape.state(state);material=parse(store.artifact_bytes(state['material_digest']))
     validate_material(material)
     events=[e for e in store.events(con) if e['kind'].startswith('handoff-') and e['payload'].get('change_id')==change_id]
     require(events and events[-1]['payload']['state_digest']==row['value'],'Handoff state/audit mismatch.','handoff-integrity',409)
@@ -115,21 +123,24 @@ def _save(store,con,state,kind,actor):
     return state
 
 
-def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
-    """Capture explicit committed Git objects and local evidence files; execute nothing."""
+def inspect(root,*,repo,base,candidate,request,evidence):
+    """Resolve/validate exact selected material without creating runtime state."""
     required={'change_id','title','goal','repository','observations'}
     version=request.get('schema',SCHEMA) if isinstance(request,dict) else None
     allowed=required if version==SCHEMA else required|{'schema','profile','subjects','relationships'}
-    require(version in (SCHEMA,V2) and isinstance(request,dict) and required<=set(request)<=allowed,'Capture has missing or unsupported fields/version.')
+    shape.obj(request,'capture',required,allowed-required)
+    require(version in (SCHEMA,V2),'capture.schema: unsupported version')
     require(isinstance(request['change_id'],str) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,159}',request['change_id']),'Invalid change ID.')
     require(all(isinstance(request[k],str) and request[k].strip() for k in ('title','goal','repository')),'Title, goal and repository are required.')
     require(isinstance(request['observations'],list) and len(request['observations'])<=MAX_RECORDS,'Invalid observations.')
+    shape.observation_requests(request['observations'],version)
+    shape.check(isinstance(evidence,dict),'evidence','expected named file bindings')
     repo=Path(repo).resolve()
     state_root=Path(root).resolve()
     require(not state_root.is_relative_to(repo) and not repo.is_relative_to(state_root),'Source repository and handoff state must be separate.')
     for revision in (base,candidate):require(isinstance(revision,str) and re.fullmatch(r'[a-f0-9]{40}|[a-f0-9]{64}',revision),'Use explicit full commit IDs.')
     base=_git(repo,'rev-parse','--verify',base+'^{commit}').decode().strip();candidate=_git(repo,'rev-parse','--verify',candidate+'^{commit}').decode().strip()
-    paths=[p.decode('utf-8') for p in _git(repo,'diff','--no-ext-diff','--no-textconv','--no-renames','--name-only','-z',base,candidate).split(b'\0') if p]
+    paths=[_text(p,'Source path') for p in _git(repo,'diff','--no-ext-diff','--no-textconv','--no-renames','--name-only','-z',base,candidate).split(b'\0') if p]
     require(paths and len(paths)<=MAX_RECORDS,'Select a nonempty supported committed change.')
     files=[];total=0
     for path in paths:
@@ -144,6 +155,7 @@ def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
             values[phase]={'git_blob':oid,'sha256':digest(raw),'text':_text(raw,'Source blob')}
         files.append(values)
     patch=_git(repo,'diff','--no-ext-diff','--no-textconv','--no-renames','--full-index',base,candidate)
+    require(total+len(patch)<=MAX_FILE_BYTES,'Source and patch exceed the existing input byte limit.')
     attachments=[]
     for name,path in evidence.items():
         require(isinstance(name,str) and re.fullmatch(r'[A-Za-z0-9_.-]+',name),'Evidence names must be simple labels.')
@@ -158,6 +170,12 @@ def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
         material['subjects']=subjects(material);material['relationships']=relationships(material)
     material['observations']=observations(material);validate_material(material)
     require(len(canonical(material))<=MAX_FILE_BYTES,'Canonical handoff exceeds the existing input byte limit.')
+    return material
+
+
+def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
+    material=inspect(root,repo=repo,base=base,candidate=candidate,request=request,evidence=evidence)
+    version=material["schema"]
     store=Store(root);store.initialize();material_digest=store.artifact_write(canonical(material))
     payload={'change_id':request['change_id'],'material_digest':material_digest}
     with store.transaction() as con:
@@ -207,19 +225,36 @@ def review(root,change_id,*,expected_revision,material_digest,decision,reason,fi
 
 
 def _validate_package(handoff,encoded):
-    require(handoff.get('schema') in (SCHEMA,V2),'Unknown handoff schema.')
+    shape.check(isinstance(handoff,dict),'handoff','expected an object')
+    require(handoff.get('schema') in (SCHEMA,V2),'handoff.schema: Unknown handoff schema.')
     allowed={'schema','state','material','events','audit_scope','workbench_executions','keep_mutations'}|({'comparison'} if handoff['schema']==V2 else set())
     require(set(handoff)==allowed
             and all(type(handoff[k]) is int and handoff[k]==0 for k in ('workbench_executions','keep_mutations')),
             'A read-only external-evidence handoff cannot claim execution or source mutation.','handoff-integrity',409)
+    shape.state(handoff['state'])
+    shape.check(isinstance(encoded,dict),'artifacts','expected a digest-to-base64 object')
+    shape.array(handoff['events'],'events')
+    if handoff['schema']==V2:shape.check(isinstance(handoff['comparison'],dict),'comparison','expected an object')
     artifacts={}
     for key,value in encoded.items():
+        shape.sha(key,'artifacts.key');shape.text(value,'artifacts.'+key)
         raw=base64.b64decode(value,validate=True);require(digest(raw)==key,'Historical artifact mismatch.','handoff-integrity',409);artifacts[key]=raw
     events=handoff['events'];require(bool(events),'Missing handoff history.')
     expected=set();previous=-1
-    for e in events:
+    for i,e in enumerate(events):
+        path=f'events[{i}]'
+        shape.obj(e,path,('seq','kind','actor','payload','prev_hash','hash','created_at'))
+        for k in ('kind','actor','created_at'):shape.text(e[k],path+'.'+k)
+        shape.integer(e['seq'],path+'.seq')
+        for k in ('hash','prev_hash'):shape.sha(e[k],path+'.'+k)
+        shape.obj(e['payload'],path+'.payload',('change_id','revision','material_digest','state_digest'))
+        shape.text(e['payload']['change_id'],path+'.payload.change_id')
+        shape.integer(e['payload']['revision'],path+'.payload.revision')
+        for k in ('material_digest','state_digest'):
+            shape.sha(e['payload'][k],path+'.payload.'+k)
+            require(e['payload'][k] in artifacts,path+'.payload.'+k+': missing artifact')
         item=dict(e);actual=item.pop('hash');require(digest(canonical(item))==actual,'Handoff event mismatch.','handoff-integrity',409)
-        p=e['payload'];s=parse(artifacts[p['state_digest']]);m=parse(artifacts[p['material_digest']]);validate_material(m)
+        p=e['payload'];s=parse(artifacts[p['state_digest']]);shape.state(s,path+'.state');m=parse(artifacts[p['material_digest']]);validate_material(m)
         require(s['schema'] in (SCHEMA,V2) and s['schema']==m['schema'] and s['decision'] in ('unreviewed','handoff-ready','needs-work'), 'Invalid historical handoff decision.','handoff-integrity',409)
         require(s['schema']==V2 or 'responsible_party' not in s,'Responsible-party metadata requires a v2 state.','handoff-integrity',409)
         require(s['schema']==SCHEMA or handoff['schema']==V2,'A role-bearing history requires a v2 envelope.','handoff-integrity',409)
@@ -272,7 +307,7 @@ def verify(path):
     try:
         folder=Path(path);require(not folder.is_symlink() and folder.is_dir() and {p.name for p in folder.iterdir()}==set(FILES),'Exact handoff file set required.')
         for name in FILES:require((folder/name).is_file() and not(folder/name).is_symlink(),'Regular handoff files required.')
-        raw={name:_read(folder/name) for name in FILES};manifest=parse(raw['manifest.json'])
+        raw={name:_read(folder/name) for name in FILES};manifest=parse(raw['manifest.json']);shape.manifest(manifest,FILES)
         require(manifest['schema'] in (SCHEMA,V2) and set(manifest['files'])==set(FILES)-{'manifest.json'},'Invalid manifest.')
         for name,expected in manifest['files'].items():require(expected=={'sha256':digest(raw[name]),'bytes':len(raw[name])},'Manifest content mismatch.','handoff-integrity',409)
         handoff=parse(raw['handoff.json']);_validate_package(handoff,parse(raw['artifacts.json']))

@@ -1,3 +1,4 @@
+import {loadVerifiedHandoff} from './handoff-verify.js';
 /* Static is the default. Live mode is an explicit owner action on the private API.
    Imported strings enter the DOM only through textContent, never HTML or URLs. */
 const $ = (id) => document.getElementById(id);
@@ -433,9 +434,7 @@ function renderHandoffComparison(root, comparison) {
 }
 async function loadHandoffHistory(container, record) {
   if (container.dataset.loaded) return;
-  const response = await fetch('./handoff/artifacts.json', {credentials: 'omit', cache: 'no-store'});
-  if (!response.ok) throw new Error('Retained handoff history is unavailable.');
-  const encoded = await response.json(); const cache = new Map();
+  const encoded = record._verifiedArtifacts; const cache = new Map();
   async function artifact(key) {
     if (!/^[a-f0-9]{64}$/.test(key) || typeof encoded[key] !== 'string') throw new Error('A historical artifact is missing.');
     if (cache.has(key)) return cache.get(key);
@@ -453,15 +452,18 @@ async function loadHandoffHistory(container, record) {
   container.append(fragment); container.dataset.loaded = 'true';
 }
 async function loadHandoff() {
-  const response = await fetch('./handoff/handoff.json', {credentials: 'omit', cache: 'no-store'});
-  if (response.status === 404) return;
-  if (!response.ok) throw new Error('The change handoff is unavailable.');
-  const record = await response.json();
+  $('handoff-content').replaceChildren(node('p','Checking handoff content…'));
+  let record;
+  try { record = await loadVerifiedHandoff(); } catch (error) {
+    const warning=node('p','Handoff content could not be verified: '+error.message);warning.setAttribute('role','alert');
+    $('handoff-content').replaceChildren(warning);$('handoff-section').hidden=false;return;
+  }
+  if (record === null) { $('handoff-section').hidden=true;return; }
   if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
   const {state: review, material} = record; const root = $('handoff-content'); root.replaceChildren();
   const unresolved = material.observations.filter(o => o.required && (o.value === null || (record.material.schema === 'swe-workbench-handoff/v2' ? o.candidate_applicability !== 'declared' : o.binding !== 'declared-same-source')));
   const overview = node('section', null, 'handoff-overview'); overview.id = 'handoff-overview';
-  overview.append(node('h3', material.title), node('p', material.goal), badge(review.decision),
+  overview.append(node('p', 'Content matches the selected manifest · unsigned external evidence', 'small muted'), node('h3', material.title), node('p', material.goal), badge(review.decision),
     node('p', material.observations.length + ' externally reported observations · ' + unresolved.length + ' required bindings unresolved · ' + record.workbench_executions + ' checks executed by this handoff', 'small muted'),
     node('h4', 'What remains unresolved'));
   const findings = node('ul');

@@ -12,15 +12,20 @@ def main(argv=None):
     parser.add_argument('--root', type=Path, default=Path('.workbench'))
     parser.add_argument('--bundle', help='Owner-selected built-in name or local bundle directory')
     commands = parser.add_subparsers(dest='command', required=True)
-    capture = commands.add_parser('capture-handoff', help='Capture a committed change and external evidence without executing checks')
-    for name in ('repo', 'base', 'candidate'):
-        capture.add_argument('--' + name, required=True)
-    capture_input = capture.add_mutually_exclusive_group(required=True)
-    capture_input.add_argument('--request'); capture_input.add_argument('--profile', help='Explicit owner-selected reusable JSON profile')
-    for name in ('operation-key', 'change-id', 'title', 'goal'):
-        capture.add_argument('--' + name)
-    capture.add_argument('--evidence', action='append', default=[], help='Owner-selected NAME=FILE attachment; never executed')
-    capture.add_argument('--evidence-dir', help='Bind only profile-declared attachment names from this selected directory')
+    for capture_command in ('capture-handoff','preview-handoff'):
+        capture = commands.add_parser(capture_command, help='Inspect selected committed source/evidence; preview writes no state')
+        for name in ('repo', 'base', 'candidate'):
+            capture.add_argument('--' + name, required=True)
+        capture_input = capture.add_mutually_exclusive_group(required=True)
+        capture_input.add_argument('--request'); capture_input.add_argument('--profile', help='Explicit owner-selected reusable JSON profile')
+        for name in ('operation-key', 'change-id', 'title', 'goal'):
+            capture.add_argument('--' + name)
+        capture.add_argument('--evidence', action='append', default=[], help='Owner-selected NAME=FILE attachment; never executed')
+        capture.add_argument('--evidence-dir', help='Bind only profile-declared attachment names from this selected directory')
+    receipt = commands.add_parser('write-receipt',help='Write explicitly supplied check facts; executes nothing')
+    receipt.add_argument('--request',type=Path,required=True);receipt.add_argument('--output',type=Path,required=True)
+    backup=commands.add_parser('backup-state',help='Private quiescent SQLite/artifact snapshot');backup.add_argument('--output',type=Path,required=True)
+    restore=commands.add_parser('restore-state',help='Restore a private snapshot to a fresh root');restore.add_argument('path',type=Path);restore.add_argument('--output',type=Path,required=True)
     show_handoff = commands.add_parser('handoff'); show_handoff.add_argument('change_id'); show_handoff.add_argument('--baseline-revision', type=int)
     change_review = commands.add_parser('review-handoff')
     change_review.add_argument('change_id'); change_review.add_argument('--request', type=Path)
@@ -77,10 +82,10 @@ def main(argv=None):
     export.add_argument('--operation-key', required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command in ('capture-handoff', 'handoff', 'review-handoff', 'export-handoff', 'verify-handoff'):
+        if args.command in ('capture-handoff', 'preview-handoff', 'write-receipt', 'backup-state', 'restore-state', 'handoff', 'review-handoff', 'export-handoff', 'verify-handoff'):
             from . import handoff
             from .bundle import _read
-            if args.command == 'capture-handoff':
+            if args.command in ('capture-handoff','preview-handoff'):
                 evidence = {}
                 for item in args.evidence:
                     if '=' not in item or item.split('=', 1)[0] in evidence:
@@ -96,14 +101,31 @@ def main(argv=None):
                     if any(v is not None for v in (args.change_id,args.title,args.goal)):
                         raise WorkbenchError('invalid-handoff','Change metadata belongs in --request or is supplied with --profile, never both.')
                     effective=handoff.parse(_read(args.request))
-                result = handoff.capture(args.root, repo=args.repo, base=args.base, candidate=args.candidate,
-                    request=effective, evidence=evidence, operation_key=args.operation_key)
+                if args.command=='preview-handoff':
+                    if args.operation_key:raise WorkbenchError('invalid-handoff','Preview does not record operation keys.')
+                    from .store import canonical,digest
+                    material=handoff.inspect(args.root,repo=args.repo,base=args.base,candidate=args.candidate,request=effective,evidence=evidence)
+                    from .handoff_context import eligible
+                    result={'operation':'preview','runtime_writes':0,'material_digest':digest(canonical(material)),
+                            'evidence_bindings':{k:str(v) for k,v in evidence.items()},'required_bindings_complete':eligible(material),
+                            'notice':'Inspection only; capture rereads selected bytes. Reported checks are not executed.', 'material':material}
+                else:
+                    result = handoff.capture(args.root, repo=args.repo, base=args.base, candidate=args.candidate,
+                        request=effective, evidence=evidence, operation_key=args.operation_key)
+            elif args.command in ('backup-state','restore-state'):
+                from .state_backup import backup,restore
+                result=backup(args.root,args.output) if args.command=='backup-state' else restore(args.path,args.output)
+            elif args.command=='write-receipt':
+                from .check_receipt import write
+                result=write(handoff.parse(_read(args.request)),args.output)
             elif args.command == 'handoff': result = handoff.read(args.root, args.change_id, args.baseline_revision)
             elif args.command == 'review-handoff':
                 if args.request:
                     if any(v is not None for v in (args.expected_revision,args.material_digest,args.decision,args.reason,args.next_action,args.operation_key,args.responsible_party)) or args.finding:
                         raise WorkbenchError('invalid-handoff','Use a review request or explicit review fields, never both.')
                     fields=handoff.parse(_read(args.request))
+                    from .handoff_validation import obj
+                    obj(fields,'review',('expected_revision','material_digest','decision','reason','findings','next_action','operation_key'),('reviewer_mode','responsible_party'))
                 else:
                     fields=dict(expected_revision=args.expected_revision, material_digest=args.material_digest, decision=args.decision,
                         reason=args.reason, findings=args.finding, next_action=args.next_action, operation_key=args.operation_key,

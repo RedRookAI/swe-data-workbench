@@ -14,7 +14,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 from swe_workbench.exporter import FILES, ExportError, verify_export
 
-TOP_LEVEL = {"index.html", "app.js", "styles.css", "style.css"}
+TOP_LEVEL = {"index.html", "app.js", "handoff-verify.js", "styles.css", "style.css"}
 ASSET_SUFFIXES = {".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".woff2"}
 
 

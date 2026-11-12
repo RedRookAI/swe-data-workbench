@@ -1,6 +1,7 @@
 """Small typed provenance and deterministic review comparisons, without execution."""
 from .store import canonical, digest
 from .errors import WorkbenchError
+from . import handoff_validation as shape
 
 V2 = 'swe-workbench-handoff/v2'
 PROFILE = 'swe-workbench-handoff-profile/v1'
@@ -30,7 +31,8 @@ def subjects(material):
     requests = material.get('subject_requests', [{'id': 'product', 'role': 'product_source', 'selector': {'source': 'candidate'}}])
     require(isinstance(requests, list) and requests, 'At least the product-source subject is required.')
     result = []
-    for request in requests:
+    for i, request in enumerate(requests):
+        shape.selector(request.get("selector") if isinstance(request,dict) else None, f"subjects[{i}].selector")
         require(isinstance(request, dict) and set(request) == {'id', 'role', 'selector'}, 'Subject needs id, role and selector.')
         require(isinstance(request['id'], str) and request['id'].strip() and isinstance(request['role'], str) and request['role'] in ROLES, 'Unsupported subject ID or role.')
         if request['role'] == 'product_source':
@@ -61,6 +63,8 @@ def relationships(material):
         support = []
         for ref in request['evidence']:
             require(isinstance(ref, dict) and set(ref) in ({'attachment', 'field_path'}, {'attachment', 'field_path', 'matches_subject'}, {'attachment', 'quote'}), 'Unsupported relationship evidence reference.')
+            shape.text(ref['attachment'], 'relationship.evidence.attachment')
+            if 'matches_subject' in ref:shape.text(ref['matches_subject'],'relationship.evidence.matches_subject')
             require(ref['attachment'] in attachments, 'Relationship evidence attachment is missing.')
             attachment = attachments[ref['attachment']]
             if 'quote' in ref:
@@ -85,6 +89,7 @@ def relationships(material):
 def observation_binding(material, request, revision):
     lookup = {s['id']: s for s in material['subjects']}
     subject_id = request.get('subject', next(s['id'] for s in material['subjects'] if s['role'] == 'product_source'))
+    shape.text(subject_id,'observation.subject')
     require(subject_id in lookup, 'Observation refers to an unknown subject.')
     subject = lookup[subject_id]
     if revision is None or subject['value'] is None:

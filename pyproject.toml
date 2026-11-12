@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swe-data-workbench"
-version = "0.1.0a6"
+version = "0.1.0a7"
 description = "Inspect coding submissions from real checks through adjudication to traceable dataset export."
 requires-python = ">=3.12"
 license = {text = "MIT"}
@@ -20,7 +20,7 @@ include = ["swe_workbench*"]
 
 [tool.setuptools.data-files]
 "share/swe-data-workbench/fixtures" = ["fixtures/catalog.json", "fixtures/sample.jsonl", "fixtures/README.md"]
-"share/swe-data-workbench/web" = ["web/index.html", "web/app.js", "web/style.css"]
+"share/swe-data-workbench/web" = ["web/index.html", "web/app.js", "web/handoff-verify.js", "web/style.css"]
 
 
 "share/swe-data-workbench/bundles/unicode-hyphen" = ["bundles/unicode-hyphen/catalog.json", "bundles/unicode-hyphen/predictions.jsonl", "bundles/unicode-hyphen/sample.jsonl", "bundles/unicode-hyphen/upstream.patch", "bundles/unicode-hyphen/negative-control.patch", "bundles/unicode-hyphen/review-plan.json", "bundles/unicode-hyphen/license", "bundles/unicode-hyphen/README.md"]

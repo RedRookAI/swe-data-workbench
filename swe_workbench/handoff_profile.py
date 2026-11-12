@@ -2,10 +2,14 @@
 from .handoff_context import PROFILE, V2
 from .store import canonical, digest
 from .handoff import require
+from . import handoff_validation as shape
 
 
 def expand(profile, *, change_id, title, goal):
     required = {'schema', 'id', 'version', 'repository', 'observations'}
+    shape.obj(profile,'profile',required,('subjects','relationships','attachments'))
+    for k in ('schema','id','version','repository'):shape.text(profile[k],'profile.'+k)
+    shape.observation_requests(profile['observations'],V2)
     require(isinstance(profile, dict) and required <= set(profile) <= required | {'subjects', 'relationships', 'attachments'}, 'Profile has missing or unsupported fields.')
     require(profile['schema'] == PROFILE, 'Unsupported project profile version.')
     require(all(isinstance(profile[k], str) and profile[k].strip() for k in ('id', 'version', 'repository')), 'Profile identity/version/repository are required.')

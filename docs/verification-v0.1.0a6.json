@@ -1,0 +1,213 @@
+{
+  "version": "0.1.0a6",
+  "checked": "2026-11-12",
+  "baseline": "fd1360bdbf831fcc95e4251a2dea283cdc8de622",
+  "source_sha256": {
+    "swe_workbench/__init__.py": "f2902801726d0b27d43298b58c886ebfaf9cf82c5d3f87ad8bf62020a48b3338",
+    "swe_workbench/api.py": "ecd3da3c95129ffc76a91ddb6436b099a2310fd18ce5c270ff02a1d1b3be4cc2",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/bundle.py": "767716053079a01f3137b746730758dc39558ed21441b26a204f8d7062beb333",
+    "swe_workbench/cli.py": "461e97f888800f6e9b399d9d1c56311124aff924db4cfe95bf510ad3c607d4df",
+    "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
+    "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/handoff.py": "65575ea433c48b03380e66f1172c775aa334332b44e2446fdcd85385328eeae1",
+    "swe_workbench/handoff_context.py": "15987b36616832b01f0040e13dc477b3c3e6a4602e4d209b2272b8a6abf7e37b",
+    "swe_workbench/handoff_profile.py": "d397ea1acdf51381ce03b5b7bfc0a4e4702d8c8423ba3bb02eb31d238f0416e9",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
+    "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
+    "web/app.js": "5605626b74c605da1638ea4f06e7cda13bab4d725b0db4e4937c2d96cf5fec01",
+    "web/index.html": "12e82fadd827e6dacb0decf62ed27001ab27dc664dda93b326b0d24e9729bc08",
+    "web/style.css": "b7c136f33cd9d2fcc9dd5a1e10c2126ed0cbc6af6a35436cf61314b901840306"
+  },
+  "wheel_sha256": "c3637439db59beccac252e43201a8caf62ac583108bd00ea2ff55ee23e0ef18d",
+  "focused_checks": {
+    "new_context_cases": 6,
+    "affected_legacy_cases": 6,
+    "scope": "Profiles, exact effective mappings, unknown/mismatched roles, fixture/source separation, v1/v2 history, current/prior comparison, zero/false/missing, CLI profile/directory/inline review, legacy raw-byte/idempotence/export/privacy behavior. Targeted follow-ups covered current-status repeat capture, legacy explicit operation retries, profile slot validation and comparison after review-only changes.",
+    "additional_observed_checks": [
+      "Actual retained v1 operation retry returns its original response without replacing current v2 state.",
+      "Original frozen v1 export verifies; v1 role-field injection refuses.",
+      "Malformed profile file names refuse before state changes."
+    ]
+  },
+  "installed_artifact": {
+    "version": "0.1.0a6",
+    "isolated_installed_imports": true,
+    "matched_source_files": [
+      "swe_workbench/evaluation.py",
+      "swe_workbench/worker.py",
+      "swe_workbench/errors.py",
+      "swe_workbench/__init__.py",
+      "swe_workbench/handoff_context.py",
+      "swe_workbench/evaluation_export.py",
+      "swe_workbench/core.py",
+      "swe_workbench/handoff.py",
+      "swe_workbench/assets.py",
+      "swe_workbench/api.py",
+      "swe_workbench/server.py",
+      "swe_workbench/bundle.py",
+      "swe_workbench/store.py",
+      "swe_workbench/exporter.py",
+      "swe_workbench/runner.py",
+      "swe_workbench/handoff_profile.py",
+      "swe_workbench/intake.py",
+      "swe_workbench/cli.py",
+      "web/style.css",
+      "web/app.js",
+      "web/index.html",
+      "fixtures/sample.jsonl",
+      "fixtures/README.md",
+      "fixtures/catalog.json",
+      "bundles/unicode-hyphen/predictions.jsonl",
+      "bundles/unicode-hyphen/sample.jsonl",
+      "bundles/unicode-hyphen/negative-control.patch",
+      "bundles/unicode-hyphen/license",
+      "bundles/unicode-hyphen/review-plan.json",
+      "bundles/unicode-hyphen/README.md",
+      "bundles/unicode-hyphen/catalog.json",
+      "bundles/unicode-hyphen/upstream.patch"
+    ],
+    "verification": {
+      "ok": true,
+      "errors": [],
+      "manifest_digest": "700e46594fd20d68bbd24064d816913ed3c1df2a9a586666106884dec301982c",
+      "change_id": "keep-sandbox-preflight",
+      "revision": 3
+    },
+    "relocated_profile_same_material_and_current_review": true,
+    "v1_operation_retry_and_frozen_export": true,
+    "same_cut_repeat": true,
+    "roles": 4,
+    "comparison_baseline": 1,
+    "steps": [
+      {
+        "operation": "fresh-current-read",
+        "elapsed_seconds": 0.03905731486156583
+      },
+      {
+        "operation": "ordinary-profile-capture",
+        "elapsed_seconds": 0.07325866306200624
+      },
+      {
+        "operation": "explicit-baseline-read",
+        "elapsed_seconds": 0.037921237759292126
+      },
+      {
+        "operation": "export",
+        "elapsed_seconds": 0.06451329169794917
+      },
+      {
+        "operation": "repeat-export",
+        "elapsed_seconds": 0.0629523852840066
+      },
+      {
+        "operation": "fresh-process-verification",
+        "elapsed_seconds": 0.04010347183793783
+      },
+      {
+        "operation": "private-fresh-read",
+        "elapsed_seconds": 0.036198940128088
+      }
+    ],
+    "private_trial": {
+      "actual_application": true,
+      "adapter_added": false,
+      "export_verified": true,
+      "decision": "needs-work",
+      "execution_revision": "unknown",
+      "responsible_party": "unassigned",
+      "inputs_published": false
+    },
+    "source_project_execution": 0,
+    "source_project_mutations": 0,
+    "application_model_calls": 0,
+    "recurring_mapping_edits": 0,
+    "human_speedup": "unmeasured"
+  },
+  "static_browser": {
+    "profile": "local",
+    "http": 200,
+    "summary_first": true,
+    "typed_roles": true,
+    "real_prior_comparison": true,
+    "historical_material_hash_checked": true,
+    "downloads": 3,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "private_unknowns_and_unassigned": "local check passed",
+    "legacy_handoff": "local check passed",
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "public_example": "Existing public Keep source/report only. Actual prior v1 review retained; new profile/role annotation leaves source and requested goal unchanged. No source-project execution or delivery.",
+  "second_project": {
+    "actual_application": true,
+    "adapter_added": false,
+    "export_verified": true,
+    "decision": "needs-work",
+    "execution_revision": "unknown",
+    "responsible_party": "unassigned",
+    "inputs_published": false
+  },
+  "private_publication": "No private project code, reports, profile, paths or identifiers are included in public source, build or assets.",
+  "usefulness": "Repeated profile use required zero copied field-map edits. Setup and human review time remain unmeasured; command times alone do not establish productivity. Retain this optional workflow.",
+  "qualification_notes": [
+    "Normal key-free recapture returns current review state. Explicit operation-key retries retain their original response; None responsible-party metadata is omitted from legacy operation payloads for compatibility.",
+    "Role-bearing fields require v2 and are not silently interpreted as v1. A comparison is recomputed from retained old/new material and does not grant evidence reuse or approval."
+  ],
+  "public_status": "Published source/release and hosted version6 verified2026-11-12; release verification asset remains the original prepublication evidence cut.",
+  "publication": {
+    "code_commit": "ff50ffcb89ec67ef244f28da14b656c158e546f8",
+    "tag": "v0.1.0a6",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a6",
+    "release_asset_digests_match_local": true,
+    "site_version": 6,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "site_source_commit": "ff50ffcb89ec67ef244f28da14b656c158e546f8",
+    "deployment_status": "succeeded",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "summary_first": true,
+      "typed_roles": true,
+      "real_prior_comparison": true,
+      "historical_material_hash_checked": true,
+      "downloads": 3,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_unknowns_and_unassigned": "previous local check reused; no private inputs uploaded",
+      "legacy_handoff": "previous local check reused",
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "release_bytes_preserved": true
+  }
+}

@@ -8,7 +8,7 @@ Explore the recorded audit and silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The current view puts the operational answers first: what changed, what evidence applies, what remains unresolved, who acts next and the next action. A comparison highlights changes since the previous review, with exact historical inputs available for inspection.
+The browser verifies the selected handoff files and retained current content before showing its review. The current view puts the operational answers first: what changed, what evidence applies, what remains unresolved, who acts next and the next action. A comparison highlights changes since the previous review, with exact historical inputs available for inspection.
 
 Reusable project profiles remove repeated field-map editing. The public example distinguishes product code, qualification workflow, consumer fixture and a reported download for an actual Keep change. A second private application trial used the same generic capture path; its missing execution revision remained unresolved. Its inputs are kept private.
 
@@ -18,7 +18,11 @@ The original task-quality example remains available: a weak recovery checker giv
 
 Installable wheel, original example inputs, recording and verified evaluation exports:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a6
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a7
+
+## Try a complete handoff
+
+Preview a profile, capture a change, record your review, export the evidence and restore your saved work. The small synthetic example runs one fixed Python check and needs no account or model call. Follow docs/reliable-handoffs.md for the installed-package commands.
 
 ## Reuse a project profile
 
@@ -62,6 +66,7 @@ Use the server through your own trusted private connection with `?mode=live`. Th
 
 ## What is implemented
 
+- Preview selected profile mappings without creating runtime state; write reusable source-bound check receipts and back up/restore quiescent review state.
 - Reuse a project profile, inspect typed revision roles and compare current/prior reviews with unknown evidence applicability left explicit.
 - Capture a real committed change and selected external evidence without executing its project. Preserve version-bound review history and export an offline-verifiable handoff.
 - Read committed source and selected patches into an inspectable task bundle without checkout or execution during preparation.

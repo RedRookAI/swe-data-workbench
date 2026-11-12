@@ -72,15 +72,11 @@ def _git(repo, *args, missing_ok=False):
     env = {'PATH': os.defpath, 'LC_ALL': 'C.UTF-8', 'GIT_CONFIG_NOSYSTEM': '1',
            'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_NO_REPLACE_OBJECTS': '1',
            'GIT_TERMINAL_PROMPT': '0', 'GIT_OPTIONAL_LOCKS': '0', 'GIT_NO_LAZY_FETCH': '1'}
-    try:
-        process = subprocess.run(['git', '--no-pager', '--literal-pathspecs', '-C', str(repo),
-                                  *args], env=env, stdin=subprocess.DEVNULL,
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-    except OSError as exc:
-        raise WorkbenchError('bundle-git', 'Local Git plumbing is unavailable.') from exc
-    if process.returncode and not (missing_ok and process.returncode == 1):
+    from .git_capture import capture
+    code, output, _ = capture(['git', '--no-pager', '--literal-pathspecs', '-C', str(repo), *args], env)
+    if code and not (missing_ok and code == 1):
         _fail('bundle-git', 'Git could not read the selected repository, commit or tracked object.')
-    return process.stdout
+    return output
 
 
 def _checks(value):
