@@ -19,7 +19,7 @@ ASSET_SUFFIXES = {".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico
 
 
 def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prior_upstream_export=None,
-                 prepared_export=None, quality_record=None, evaluation_exports=None):
+                 prepared_export=None, quality_record=None, evaluation_exports=None, handoff_export=None):
     web, exported = Path(web_dir).resolve(), Path(export_path).resolve()
     output = Path(output_dir or REPO / "dist").absolute()
     if output.name != "dist" or output.is_symlink():
@@ -58,6 +58,15 @@ def build_public(web_dir, export_path, output_dir=None, legacy_export=None, prio
         copied = verify_export(data)
         if not copied["ok"]:
             raise ExportError("Copied public evidence failed verification.")
+        if handoff_export is not None:
+            from swe_workbench.handoff import verify as verify_handoff, FILES as HANDOFF_FILES
+            if not verify_handoff(handoff_export)['ok']:
+                raise ExportError('Change handoff failed verification.')
+            target = stage / 'handoff'; target.mkdir()
+            for name in HANDOFF_FILES:
+                shutil.copyfile(Path(handoff_export) / name, target / name)
+            if not verify_handoff(target)['ok']:
+                raise ExportError('Copied change handoff failed verification.')
         if quality_record is not None:
             from swe_workbench.evaluation_export import verify_evaluation, FILES as EVALUATION_FILES
             quality = json.loads(Path(quality_record).read_text())
@@ -122,12 +131,13 @@ def main():
     parser.add_argument('--prior-upstream-export', type=Path, help='Preserved first upstream frozen export')
     parser.add_argument('--prepared-export', type=Path, help='Preserved prepared repository frozen export')
     parser.add_argument('--quality-record', type=Path, help='Actual paired quality record, matched against both exports')
+    parser.add_argument('--handoff-export', type=Path, help='Verified read-only real-change handoff')
     parser.add_argument('--evaluation-before', type=Path)
     parser.add_argument('--evaluation-after', type=Path)
     args = parser.parse_args()
     paired = [args.evaluation_before, args.evaluation_after] if args.evaluation_before and args.evaluation_after else None
     print(json.dumps(build_public(args.web, args.export, args.output, args.legacy_export, args.prior_upstream_export,
-                                  args.prepared_export, args.quality_record, paired), indent=2))
+                                  args.prepared_export, args.quality_record, paired, args.handoff_export), indent=2))
 
 
 if __name__ == "__main__":

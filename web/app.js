@@ -409,6 +409,48 @@ $('import').addEventListener('click', () => mutation(approvedInput() ? '/api/imp
 $('process').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/process', {workers: 1}, null, async () => { await loadLive(); notify('Processing returned. Inspect each submission for its measured outcome.'); }); });
 $('refresh').addEventListener('click', () => loadLive().then(() => notify('Current evidence and revisions loaded.')).catch((e) => notify(e.message, true)));
 $('export').addEventListener('click', () => { if (state.batch) mutation('/api/batches/' + encodeURIComponent(state.batch.id) + '/export', {}, 'export:' + state.batch.id, async (receipt) => { $('export-receipt').textContent = JSON.stringify(receipt, null, 2); $('export-receipt').hidden = false; if (receipt.metrics) renderExportMetrics(receipt.metrics); await loadLive(); notify('Export frozen. The receipt identifies its exact manifest and metrics.'); }); });
+async function loadHandoff() {
+  const response = await fetch('./handoff/handoff.json', {credentials: 'omit', cache: 'no-store'});
+  if (response.status === 404) return;
+  if (!response.ok) throw new Error('The change handoff is unavailable.');
+  const record = await response.json();
+  if (record.schema !== 'swe-workbench-handoff/v1' || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
+  const {state: review, material} = record; const root = $('handoff-content'); root.replaceChildren();
+  root.append(node('h3', material.title), node('p', material.goal), badge(review.decision),
+    node('p', 'Handoff readiness records a review package. Code acceptance and delivery remain with the source project.', 'small muted'),
+    node('p', 'External check reports · ' + record.workbench_executions + ' checks executed by this handoff · ' + record.keep_mutations + ' source-project mutations', 'notice'));
+  const identity = node('dl', null, 'handoff-identity');
+  for (const [label, value] of [['Base', material.base_revision], ['Candidate', material.candidate_revision], ['Patch SHA-256', material.patch_sha256], ['Review revision', review.revision]]) {
+    identity.append(node('dt', label), node('dd', value, 'digest'));
+  }
+  root.append(identity);
+  const wrapper = node('div', null, 'table-scroll'); const table = node('table'); const header = node('tr');
+  for (const text of ['Observation', 'Reported result', 'Source binding', 'Scope and origin']) header.append(node('th', text));
+  const head = node('thead'); head.append(header); table.append(head); const body = node('tbody');
+  for (const observation of material.observations) {
+    const value = observation.value;
+    const result = value && typeof value === 'object' && Number.isInteger(value.passed) && Number.isInteger(value.tests) ? value.passed + ' / ' + value.tests + ' passed · ' + (value.profile || 'profile unspecified') : display(value);
+    const row = node('tr'); row.append(node('th', observation.label), node('td', result), node('td', observation.binding), node('td', observation.scope + ' · externally reported'));
+    body.append(row);
+  }
+  table.append(body); wrapper.append(table); root.append(wrapper);
+  appendField(root, 'Recorded review', review.reason);
+  const findings = node('ul'); for (const finding of review.findings) findings.append(node('li', finding));
+  root.append(node('h3', 'What remains unresolved'), findings); appendField(root, 'Next action', review.next_action);
+  const details = node('details'); details.append(node('summary', 'Exact diff and reported evidence'));
+  appendField(details, 'Patch', material.patch);
+  for (const observation of material.observations) appendField(details, observation.label, observation.value);
+  details.append(node('p', material.assurance, 'small muted')); root.append(details);
+  const history = node('details'); history.append(node('summary', 'Version-bound review history'));
+  for (const event of record.events) history.append(node('p', event.kind + ' · revision ' + event.payload.revision + ' · ' + event.created_at));
+  root.append(history); const downloads = node('nav', null, 'actions'); downloads.setAttribute('aria-label', 'Change handoff downloads');
+  for (const [file, label] of [['handoff.json', 'Change and review'], ['artifacts.json', 'Retained evidence'], ['manifest.json', 'Manifest']]) {
+    const link = node('a', label, 'button'); link.href = './handoff/' + file; link.download = ''; downloads.append(link);
+  }
+  root.append(downloads, node('p', 'Reported checks remain unsigned external evidence. Content hashes establish consistency. This view performs no source-project action.', 'small muted'));
+  $('handoff-section').hidden = false;
+  $('recording-section').querySelector('h2').textContent = 'Earlier task-quality walkthrough · 0.1.0a4';
+}
 async function start() {
   if (live) { $('mode').textContent = 'Live · owner access'; $('connection').hidden = false; $('batch-meta').textContent = 'Connect to load private evidence.'; render(); return; }
   try {
@@ -421,11 +463,12 @@ async function start() {
     const manifestResponse = await fetch('./data/manifest.json', {credentials: 'omit'});
     if (manifestResponse.ok) { const manifest = await manifestResponse.json(); renderExportMetrics(manifest.metrics || {}); }
     await loadRecordedQuality();
+    await loadHandoff();
     // Only this fixed local recording path is eligible; imported URLs are inert.
     const recording = await fetch('./recording.webm', {method: 'HEAD', credentials: 'omit'});
     if (recording.ok && (recording.headers.get('content-type') || '').startsWith('video/')) {
       const video = $('walkthrough'); video.muted = true; video.volume = 0.1; video.autoplay = false; video.src = './recording.webm';
-      const track = node('track'); track.kind = 'captions'; track.label = 'Walkthrough captions'; track.srclang = 'en'; track.src = './recording.vtt'; track.default = true; video.append(track);
+      const track = node('track'); track.kind = 'captions'; track.label = 'Walkthrough captions'; track.srclang = 'en'; track.src = './captions.vtt'; track.default = true; video.append(track);
       try { const volume = Number(sessionStorage.getItem('workbench-preview-volume')); if (sessionStorage.getItem('workbench-preview-volume') !== null && Number.isFinite(volume) && volume >= 0 && volume <= 1) video.volume = volume; } catch {}
       video.addEventListener('volumechange', () => { try { sessionStorage.setItem('workbench-preview-volume', String(video.volume)); } catch {} });
       $('recording-section').hidden = false;

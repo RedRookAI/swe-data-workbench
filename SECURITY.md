@@ -8,3 +8,5 @@ A local hash-linked audit trail helps identify changes relative to retained refe
 
 Use an isolated task directory. Do not point the application at another project's database/workspace or attach credentials to fixture processes. Do not expose the live execution API publicly. Review runtime requirements and the recorded verification profile before adapting it to another workload.
 
+
+The optional change-handoff path is read-only toward its source project. Evidence attachments and field references are data; capture executes no supplied checks or commands. Unsigned external reports remain external even when they declare the selected source revision. Handoff readiness authorizes no source-project effects and cannot bypass native accepted-code gates. The public page renders selected snapshots as inert text.

@@ -12,6 +12,16 @@ def main(argv=None):
     parser.add_argument('--root', type=Path, default=Path('.workbench'))
     parser.add_argument('--bundle', help='Owner-selected built-in name or local bundle directory')
     commands = parser.add_subparsers(dest='command', required=True)
+    capture = commands.add_parser('capture-handoff', help='Capture a committed change and external evidence without executing checks')
+    for name in ('repo', 'base', 'candidate', 'request', 'operation-key'):
+        capture.add_argument('--' + name, required=True)
+    capture.add_argument('--evidence', action='append', default=[], help='Owner-selected NAME=FILE attachment; never executed')
+    commands.add_parser('handoff').add_argument('change_id')
+    change_review = commands.add_parser('review-handoff')
+    change_review.add_argument('change_id'); change_review.add_argument('--request', type=Path, required=True)
+    change_export = commands.add_parser('export-handoff')
+    change_export.add_argument('change_id'); change_export.add_argument('--output', type=Path, required=True)
+    commands.add_parser('verify-handoff').add_argument('path', type=Path)
     prepare = commands.add_parser('prepare-bundle', help='Read committed source and selected inputs into a fresh trusted bundle; runs no checks')
     prepare.add_argument('--repo', type=Path, required=True, help='Local Git repository with all selected objects present')
     prepare.add_argument('--commit', required=True, help='Explicit base commit/revision, resolved to its exact commit ID')
@@ -56,6 +66,23 @@ def main(argv=None):
     export.add_argument('--operation-key', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command in ('capture-handoff', 'handoff', 'review-handoff', 'export-handoff', 'verify-handoff'):
+            from . import handoff
+            from .bundle import _read
+            if args.command == 'capture-handoff':
+                evidence = {}
+                for item in args.evidence:
+                    if '=' not in item or item.split('=', 1)[0] in evidence:
+                        raise WorkbenchError('invalid-handoff', 'Supply unique NAME=FILE evidence attachments.')
+                    name, path = item.split('=', 1); evidence[name] = path
+                result = handoff.capture(args.root, repo=args.repo, base=args.base, candidate=args.candidate,
+                    request=handoff.parse(_read(args.request)), evidence=evidence, operation_key=args.operation_key)
+            elif args.command == 'handoff': result = handoff.read(args.root, args.change_id)
+            elif args.command == 'review-handoff': result = handoff.review(args.root, args.change_id, **handoff.parse(_read(args.request)))
+            elif args.command == 'export-handoff': result = handoff.export(args.root, args.change_id, args.output)
+            else: result = handoff.verify(args.path)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result.get('ok', True) else 1
         if args.command == 'prepare-bundle':
             from .bundle import prepare_bundle
             arguments = vars(args).copy()

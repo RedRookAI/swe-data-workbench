@@ -21,6 +21,7 @@
   <main class="main" id="main">
     <header class="topbar"><div><p class="eyebrow">EVIDENCE TO DATASET</p><h1>Submission review</h1><p class="muted">Inspect the patch. Read the evidence. Make the call.</p></div><span class="mode" id="mode">Recorded · read only</span></header>
     <div id="message" role="status" aria-live="polite" class="notice" hidden></div>
+    <section class="card" id="handoff-section" aria-labelledby="handoff-heading" hidden><p class="eyebrow">REAL CHANGE HANDOFF</p><h2 id="handoff-heading">What changed, and what is ready?</h2><div id="handoff-content"></div></section>
     <section class="card" id="connection" hidden aria-labelledby="connection-title">
       <h2 id="connection-title">Connect as owner</h2><p>Enter the owner token for this private instance. It stays in memory until this page closes or you disconnect.</p>
       <form id="connect-form"><label for="token">Owner token</label><input type="password" id="token" autocomplete="off" spellcheck="false" required minlength="32"><div class="actions"><button class="primary" type="submit">Connect</button><button type="button" id="disconnect">Disconnect</button></div></form>

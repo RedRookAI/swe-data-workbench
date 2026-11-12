@@ -252,3 +252,8 @@ summary .badge { margin-left: 10px; }
 #quality-content form { margin: 16px 0; }
 #quality-content form > button { margin-top: 14px; }
 #task-findings, #calibration-reviews { font-family: ui-monospace, monospace; font-size: .8rem; }
+.handoff-identity { display:grid; grid-template-columns:9rem minmax(0,1fr); gap:.55rem 1rem; margin:1.25rem 0; }
+.handoff-identity dt { color:var(--muted); }
+.handoff-identity dd { margin:0; overflow-wrap:anywhere; }
+#handoff-content pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:600px) { .handoff-identity { grid-template-columns:1fr; gap:.25rem; } .handoff-identity dd { margin-bottom:.6rem; } }

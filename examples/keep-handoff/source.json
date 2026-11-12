@@ -1,0 +1,26 @@
+{
+  "base": "acb84e9be37a681790a4943718c675a0ee1566a0",
+  "candidate": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+  "report_commit": "e119a413aec42715ac35c98f40c51f8f1cd335f2",
+  "report_path": "docs/qualification/preparation-portability-2026-11-12.json",
+  "report_sha256": "0fa47840f7721c951a87875b5936ac7ab0e23f7ed385f93205e3c57cdde6a222",
+  "origin": "Actual public Keep source and unsigned published qualification evidence, implemented by another instance. Workbench made no Keep changes.",
+  "revision_roles": {
+    "product_source": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+    "qualification_workflow": "c40674a94bce057ed879e9e754c43ca9f169609c",
+    "receipt_sourceRevision": "The constructed consumer fixture repository created by source-preparation.mjs, not the Keep product commit. The script assigns revision from the fixture git rev-parse HEAD and writes that into sourceRevision.",
+    "mapping_evidence": "The frozen workflow explicitly checks out product source e53867c and asserts git HEAD; the frozen fixture harness separately initializes/commits the consumer repository."
+  },
+  "provenance_sources": {
+    "source-preparation.mjs": {
+      "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+      "path": "docs/qualification/source-preparation.mjs",
+      "git_blob": "3ccc8ae51fdd1eabc09854931d6f771b920bf8a6"
+    },
+    "preparation-workflow.yml": {
+      "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+      "path": ".github/workflows/source-checks.yml",
+      "git_blob": "0c8b25f895b4dacb40df364a6114dea04376612f"
+    }
+  }
+}

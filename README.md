@@ -1,22 +1,38 @@
 # SWE Data Workbench
 
-**Find weak coding tasks before their results enter your dataset.**
+**Review software changes and coding tasks with evidence you can hand off.**
 
-SWE Data Workbench prepares repository tasks, executes admitted patches, records quality findings and freezes an inspectable evaluation dataset. It keeps task approval separate from candidate correctness, with exact source, check and review identities behind each result.
+SWE Data Workbench captures committed changes, keeps evidence and review decisions tied to exact versions, and exports a package another reviewer can inspect. Its coding-task workflow also executes admitted patches, records grader findings and freezes evaluation datasets.
 
 Explore the recorded audit and silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The current example catches a recovery checker that gives buggy ingestion code full credit. After repair, the same code earns 50/100 and fails the critical recovery gate. An alternate valid design, an authored reference and one recorded Codex attempt pass. An unapproved variant stays unexecuted. Two actual AI-assisted calibration reviews prompted an additional durable-state assertion; their judgments and the subsequent repair are retained.
+The current real-change example reviews a Keep correction made by another instance: checking sandbox readiness before attempting dependency installation. It separates the corrected .22 source from the .21 download, preserves the reported check scope and explains the different product, workflow and fixture revisions. Keep remains read-only throughout this workflow.
 
-![Actual task-quality workbench](docs/images/workbench.png)
+A fresh AI-assisted review recovered the change without the original chat and identified the missing revision-role explanation. The later package includes the frozen workflow and harness that resolve it. Reported checks stay labeled as external evidence; the workbench performs no Keep execution, merge or release.
+
+The task-quality example remains available below: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
+
+![Actual workbench evidence view](docs/images/workbench.png)
 
 Installable wheel, original example inputs, recording and verified evaluation exports:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a4
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a5
 
-## Run it today
+## Review a real change
+
+Requires Linux, Python3.12 and Git. Install requirements.lock in a project-local virtual environment. Select a local repository containing the example commits, then run:
+
+```sh
+.venv/bin/python tools/run_handoff_trial.py --repo /path/to/your/local/keep-repository --root .state/change-handoff
+```
+
+The input repository is read-only: no checkout, reset, installation or project execution. The command captures committed before/after files and selected evidence, explicitly replays the recorded assessment, exports the handoff and verifies it in a fresh process. Full source-object acquisition instructions and generic capture/review/export commands are in examples/keep-handoff/README.md. Keep is an example source, not a runtime dependency.
+
+This is an optional portable handoff. Per-change evidence mapping still requires an operator. The trial demonstrates comprehension and preserved identities; human time savings and broad daily adoption remain unmeasured.
+
+## Run the coding-task example
 
 Requires Linux, Python 3.12 and Git. The new ingestion example uses the Python standard library for its checks and makes no network or model calls.
 
@@ -40,6 +56,7 @@ Use the server through your own trusted private connection with `?mode=live`. Th
 
 ## What is implemented
 
+- Capture a real committed change and selected external evidence without executing its project. Preserve version-bound review history and export an offline-verifiable handoff.
 - Read committed source and selected patches into an inspectable task bundle without checkout or execution during preparation.
 - Import native or SWE-bench-style JSONL with exact raw bytes, per-occurrence attribution and duplicate accounting. Imported claims do not grant execution permission.
 - Run baseline and candidate checks in separate workspaces with ordinary Git patch application, bounded retained output and active deadlines. Preserve the original source.
@@ -80,4 +97,4 @@ Execution admits inspected exact source/check/patch tuples. Verifier integrity c
 
 Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. Keep supplied prior art for recovery and auditable decisions; this application runs independently.
 
-Details: examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.
+Details: docs/change-handoff.md, examples/keep-handoff/README.md, examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.

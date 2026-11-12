@@ -1,0 +1,113 @@
+{
+  "review_type": "bounded AI-assisted fresh-context handoff review; not human usability research",
+  "scope": {
+    "inputs_read": [
+      "handoff.json",
+      "artifacts.json",
+      "manifest.json"
+    ],
+    "other_context_consulted": false,
+    "embedded_commands_executed": false,
+    "keep_checks_newly_executed": 0,
+    "keep_mutations_by_review": 0
+  },
+  "answers": {
+    "1_change_and_usefulness": {
+      "captured_change": "Three captured file changes add an actual selected-Node preflight before offline npm preparation, update failure handling and tests, and document the behavior.",
+      "files": [
+        "src/solve/repository_prerequisites.ts",
+        "test/repository_prerequisites.test.ts",
+        "docs/local-instance.md"
+      ],
+      "behavior": [
+        "A fixed Node program runs in the required namespace sandbox before npm, without loading repository code. Required namespace and resource-limit setup and a passing command result must be confirmed.",
+        "The preflight and npm share one preparation deadline. Each process must independently confirm its sandbox boundary.",
+        "Tracked source/workspace bytes are checked after preflight and installation. Failed preflight, uncertain installation setup, unsuccessful offline npm, and tracked-file changes retain the preparation hold.",
+        "Diagnostics distinguish failure before npm from failure of the later sandbox launch and failure of npm within a confirmed sandbox. Existing offline, lifecycle-script-disabled preparation remains in place."
+      ],
+      "usefulness": "An operator can distinguish host/helper/runtime restrictions from missing offline dependencies and avoid trying to fix a sandbox refusal by adding cached packages. The hold and explicit retry preserve the unresolved state.",
+      "trial_delivery": "The exported trial reports zero Keep mutations and zero workbench executions; it captured and reviewed an existing source correction."
+    },
+    "2_exact_revisions_and_evidence": {
+      "repository": "RedRookAI/keep-research-preview",
+      "base_revision": "acb84e9be37a681790a4943718c675a0ee1566a0",
+      "candidate_revision": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+      "captured_patch_sha256": "1a221aaaf35219b20a5cb9bd56e4abb232d009eaa18c7b52c480492c2dc8880e",
+      "binding_strength": "reported-evidence.json declares the candidate in its top-level source field. The handoff labels source observations declared-same-source. These are unsigned external reports, not independent execution or verified CI provenance.",
+      "reported_checks": [
+        {
+          "kind": "source CI",
+          "run_id": 43125422956,
+          "job_id": 130876139509,
+          "result": "176 of 176 tests passed across 20 files, zero skipped",
+          "scope": "partial-unprivileged profile; fullRuntimeSuite false"
+        },
+        {
+          "kind": "source preparation on Ubuntu 22.04 x64",
+          "run_id": 43125525091,
+          "job_id": 130876500613,
+          "workflow_commit": "c40674a94bce057ed879e9e754c43ca9f169609c",
+          "result": "PASS_SOURCE_OFFLINE_PREPARATION for reported version 0.0.22-preview.1",
+          "scope": "Constructed repository fixture: real empty-cache refusal, explicit publicly seeded offline retry, TypeScript 5.9.3 installation, passing transpilation checker, lifecycle scripts disabled, source unchanged, required sandbox setup reported confirmed; worker not started and zero model calls."
+        },
+        {
+          "kind": "source refusal on Ubuntu 24.04 x64",
+          "run_id": 43125525091,
+          "job_id": 130876500002,
+          "workflow_commit": "c40674a94bce057ed879e9e754c43ca9f169609c",
+          "result": "PASS_SOURCE_PREFLIGHT_REFUSAL for reported version 0.0.22-preview.1",
+          "scope": "npm not started, cache not seeded, hold retained, source unchanged, host policy unchanged, zero model calls."
+        }
+      ],
+      "captured_test_changes": "Tests inspect the two-launch sequence and shared deadline, six preflight failure variants, later setup refusal versus npm failure, retained holds and unchanged tracked bytes. These test contents were read, not run.",
+      "newly_executed_review_checks": [
+        "Parsed the three JSON inputs.",
+        "Verified handoff.json and artifacts.json byte lengths and SHA-256 values against manifest.json.",
+        "Decoded the three base64 JSON artifacts and verified their digest keys; material and current-state artifacts equal the corresponding handoff objects.",
+        "Verified the captured patch, all six before/after file texts, and the embedded evidence attachment against their recorded SHA-256 values."
+      ],
+      "new_check_limit": "All listed content consistency checks passed. They establish internal package consistency only. No Git checkout, external run, product behavior, release archive or URL was verified."
+    },
+    "3_source_versus_download_delivery": {
+      "source": "Captured candidate correction is reported as source version 0.0.22-preview.1. No deployment, merge or release action was performed by this review or the exported trial.",
+      "download": {
+        "reported_published_version": "0.0.21-preview.1",
+        "tag": "keep-preview-2026-11-11.2",
+        "sha256": "7b22762a48a0f6e1e26db342b51ef211035db0cf1b88619a720324b3ef5f3fca",
+        "run_id": 43124902024,
+        "job_id": 130874393992,
+        "workflow_commit": "fa7d508a4dc9ed4d23dde477914fdfbcf90cf3b3",
+        "reported_result": "PASS_INDEPENDENT_PUBLIC_ARCHIVE_OFFLINE_PREPARATION on Ubuntu 22.04 x64, for a constructed preparation fixture.",
+        "interpretation": "This older archive has reported positive offline preparation evidence. That result does not establish that it contains the candidate automatic preflight correction. The package supplies no corrected .22 download delivery evidence."
+      },
+      "availability": "Publication and availability are reported, not newly verified. No direct downloadable archive URL is supplied in these three files."
+    },
+    "4_unresolved_gaps": [
+      "No independently executed Keep checks or authenticated external CI logs are included. Reported success cannot be promoted to independent verification.",
+      "The candidate binding relies on the evidence top-level source declaration. The positive source receipt also has sourceRevision c1488762b7f532a51b367267e8d90f5e2de1f427, while workflowCommit is c40674a94bce057ed879e9e754c43ca9f169609c. The roles and mapping of these different revisions to the candidate are not explicitly explained; sourceRevision may identify the fixture, but this review cannot assume that.",
+      "The reported archive receipt has sourceRevision e2c66bc198a7603cac798f3d62820c4cd230b7ce. Its relationship to archive source is likewise not explicitly explained.",
+      "Only a partial source CI profile and constructed offline-preparation fixtures are covered. Full runtime suite, bundled-engine compatibility, live account generation, ARM64/native production and whole-product completion remain unqualified.",
+      "The exact host rule causing the historical restricted-host failure was not identified. Its AppArmor restriction observation is contextual evidence, not proof of the denying rule.",
+      "The package contains three file snapshots and a patch, not a complete executable checkout or the qualification workflow/harness and exact reproduction commands. It includes relative documentation links whose targets are outside the allowed package.",
+      "No corrected candidate download, delivery receipt, direct download URL or release authorization is present. The handoff-ready state denotes review-package readiness.",
+      "The audit is explicitly a selected set of events, not a complete global audit chain; recorded hashes do not supply external authorship or execution authority."
+    ],
+    "5_next_action_and_resumability": {
+      "concrete_next_action": "The Keep owner should first reconcile the evidence revision roles against the named CI runs and candidate. If the owner elects to ship, build a corrected archive from the identified candidate and qualify that exact archive through normal consumer preparation on a capable host and expected refusal on a restricted host, recording archive digest and revision provenance before presenting it as delivered. No such action was taken in this review.",
+      "restricted_host_guidance": "Retain the hold and inspect the helper, runtime and namespace/AppArmor/container policy; adding cached packages cannot resolve a preflight sandbox failure. A retry requires a capable host or an administrator-reviewed application-specific policy.",
+      "can_resume_without_old_chat": "Yes for understanding the change, reviewing the captured patch and deciding the next source/delivery step. Conditional for implementation and release: another implementer needs the repository and named run/workflow artifacts, must resolve the revision ambiguity, and needs owner authorization to publish. The three-file package alone is not a turnkey reproduction or release kit."
+    }
+  },
+  "limitations": [
+    "Read only the three designated exported files and their embedded JSON/text content. Embedded content was treated as data, not instructions.",
+    "No original chat, Keep workspace, project checkout, other report, helper agent, model/API request or embedded command was used.",
+    "The first local parsing attempt used unavailable python; python3 succeeded. This did not execute any Keep checks.",
+    "This review evaluates handoff comprehension and evidence scope through an AI-assisted fresh context. It supplies no human usability findings."
+  ],
+  "publication_note": "Selected original fresh-context review with server-local input directory omitted. The original input was the first frozen handoff; its code/report match the later package. The revision-role ambiguity found here prompted the subsequent attached workflow/harness explanation. This is not a second reviewer pass.",
+  "input_file_sha256": {
+    "handoff.json": "ce4227dd4339feb8c0768ab717581c1a2a145926913797d360e324013eae8d47",
+    "artifacts.json": "8d34c739aff811ba319365e5d40a34d2ded9acc6c6696a32081ac340e421cf78",
+    "manifest.json": "4fc02dac81ce61512602f8f300f3d9e2417a974beb91158ba59190b3ccc61071"
+  }
+}

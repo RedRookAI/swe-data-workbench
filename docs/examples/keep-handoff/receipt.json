@@ -1,0 +1,89 @@
+{
+  "schema": "swe-workbench-handoff-trial/v1",
+  "export": {
+    "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b",
+    "ok": true,
+    "errors": [],
+    "change_id": "keep-sandbox-preflight",
+    "revision": 1
+  },
+  "fresh_process_verification": {
+    "ok": true,
+    "errors": [],
+    "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b",
+    "change_id": "keep-sandbox-preflight",
+    "revision": 1
+  },
+  "source": {
+    "base": "acb84e9be37a681790a4943718c675a0ee1566a0",
+    "candidate": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+    "report_commit": "e119a413aec42715ac35c98f40c51f8f1cd335f2",
+    "report_path": "docs/qualification/preparation-portability-2026-11-12.json",
+    "report_sha256": "0fa47840f7721c951a87875b5936ac7ab0e23f7ed385f93205e3c57cdde6a222",
+    "origin": "Actual public Keep source and unsigned published qualification evidence, implemented by another instance. Workbench made no Keep changes.",
+    "revision_roles": {
+      "product_source": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+      "qualification_workflow": "c40674a94bce057ed879e9e754c43ca9f169609c",
+      "receipt_sourceRevision": "The constructed consumer fixture repository created by source-preparation.mjs, not the Keep product commit. The script assigns revision from the fixture git rev-parse HEAD and writes that into sourceRevision.",
+      "mapping_evidence": "The frozen workflow explicitly checks out product source e53867c and asserts git HEAD; the frozen fixture harness separately initializes/commits the consumer repository."
+    },
+    "provenance_sources": {
+      "source-preparation.mjs": {
+        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+        "path": "docs/qualification/source-preparation.mjs",
+        "git_blob": "3ccc8ae51fdd1eabc09854931d6f771b920bf8a6"
+      },
+      "preparation-workflow.yml": {
+        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+        "path": ".github/workflows/source-checks.yml",
+        "git_blob": "0c8b25f895b4dacb40df364a6114dea04376612f"
+      }
+    }
+  },
+  "review": {
+    "actor": "operator",
+    "change_id": "keep-sandbox-preflight",
+    "decision": "handoff-ready",
+    "findings": [
+      "The frozen report identifies its published download as0.0.21-preview.1, while this source evidence covers0.0.22-preview.1. Do not claim the download includes the candidate preflight correction.",
+      "Check outcomes are unsigned external reports; the workbench executed zero Keep checks.",
+      "Source CI covers176tests in a partial unprivileged profile; full runtime/engine/ARM64 qualification is not established by this report."
+    ],
+    "material_digest": "b1fd3eb41a9b6796ff2cfcbe585d7648db8ba04f7dc546df90219b06ed500ff7",
+    "next_action": "The Keep owner can decide whether to publish a corrected download. For restricted-host preparation, adding cached packages does not resolve a sandbox preflight failure. This trial makes no Keep change or delivery.",
+    "reason": "Scripted replay of the recorded AI-assisted assessment: The real source correction and its scope are inspectable. The report names this candidate; it records supported-host preparation and restricted-host refusal. This is readiness of the review package, not independent execution or authority to ship Keep. Revision roles were checked against the retained workflow and harness: e53867c is the product source, c40674a is the qualification workflow, and receipt.sourceRevision identifies the separately created consumer fixture. The workflow explicitly selects the product candidate.",
+    "reviewer_mode": "scripted_adjudication",
+    "revision": 1,
+    "schema": "swe-workbench-handoff/v1"
+  },
+  "steps": [
+    {
+      "operation": "capture",
+      "elapsed_seconds": 0.07300808699801564
+    },
+    {
+      "operation": "review",
+      "elapsed_seconds": 0.035970575641840696
+    },
+    {
+      "operation": "export",
+      "elapsed_seconds": 0.044863014947623014
+    },
+    {
+      "operation": "fresh-process-verify",
+      "elapsed_seconds": 0.03728645388036966
+    },
+    {
+      "operation": "fresh-process-read",
+      "elapsed_seconds": 0.036060862708836794
+    }
+  ],
+  "application_model_calls": 0,
+  "keep_application_commands_executed": 0,
+  "keep_mutations": 0,
+  "scope": "Git object reads and reported evidence only. Step elapsed times measure tool execution, not human review speed or development effort. The assisted review examines actual code/report; this driver replays its recorded reasons.",
+  "projection": {
+    "scope": "Public evidence projection; server-local state/export paths omitted. Original receipt retained privately.",
+    "original_sha256": "ca342e8779c65c21e18d4efaf9fb734d65a8c980280a4c1a3337f4cb105e3aa2"
+  }
+}

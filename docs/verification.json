@@ -1,126 +1,36 @@
 {
-  "version": "0.1.0a4",
-  "checked_date": "2026-11-12",
-  "baseline": "f7ccaf9f0d68ed2e164539c539a891f66211c0de",
+  "version": "0.1.0a5",
+  "checked": "2026-11-12",
+  "baseline": "9d70da2ced3b72ef2fbc3568b60879eb6df7172a",
   "source_sha256": {
-    "swe_workbench/__init__.py": "10073a676863cbacd17ca774197cf23a6074fdc1765353ce6fa2240d36d12fb4",
+    "swe_workbench/__init__.py": "ebecf4af9144670d689ced1b45b8abea9f00ed8f8bf425bca05472bc9c3ec253",
     "swe_workbench/api.py": "ecd3da3c95129ffc76a91ddb6436b099a2310fd18ce5c270ff02a1d1b3be4cc2",
     "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
     "swe_workbench/bundle.py": "767716053079a01f3137b746730758dc39558ed21441b26a204f8d7062beb333",
-    "swe_workbench/cli.py": "4175d50cdd4bb3198845a93301a1cc17daa100d56df25c389b8319087f13d530",
+    "swe_workbench/cli.py": "a49ea8cd7e9b605dfce9436e82e6fb09bed9453f566ea21a14120fd610bc555b",
     "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
     "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
     "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
     "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
     "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/handoff.py": "479fb60a881eb6a7411c9e918067be91e55f7f6c98c235984be8a79408eaa4be",
     "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
     "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
     "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
     "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
     "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
-    "web/app.js": "e051245879c5a8a91b1ec39b3529760e826734e5a181c19880575c6467b0f1a7",
-    "web/index.html": "64d550027b57d62dddd35cef79b55c2c9744a411ba2b2cf1178f8e1ae6fb692d",
-    "web/style.css": "868b5829a6afd9a300820075dab91dbe334a77660e377c7af616f8e86a7607b9"
+    "web/app.js": "0e6ccebcb7d009d3b876a445f41871fc7bd56fe37698f76a04fa6bdba2bea6d4",
+    "web/index.html": "12e82fadd827e6dacb0decf62ed27001ab27dc664dda93b326b0d24e9729bc08",
+    "web/style.css": "52b3859f4b6e7dcbb1f6a1cfb8215b94c542884105ea586812a386d6d7381769"
   },
-  "wheel": {
-    "name": "swe_data_workbench-0.1.0a4-py3-none-any.whl",
-    "sha256": "0b0e7bc0a0a9a2d6ae70b608a10374c8d5c085532f483d0da66bb4cdd335b2d0"
-  },
-  "focused_checks": {
-    "worker": [
-      {
-        "command": ".venv/bin/python -m unittest discover -s tests -p test_worker_verifier.py -v",
-        "result": "7 passed in0.177s",
-        "covers": [
-          "reference and alternate pass the same external behavioral verifier",
-          "candidate-local fake checker cannot replace entrypoint",
-          "Git traversal patch cannot alter sibling verifier",
-          "candidate symlink effects refused before checks",
-          "runtime verifier mutation invalidates otherwise-passing evidence",
-          "verifier-content change changes check/item identity; legacy digest unchanged",
-          "invalid protected paths refuse execution"
-        ]
-      },
-      {
-        "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_bundle.BundleTests.test_optional_protected_verifier_and_evaluation_metadata_bind_preparation test_bundle.BundleTests.test_optional_role_validation_leaves_no_partial_bundle test_bundle.BundleTests.test_cli_optional_verifier_files_does_not_initialize_database test_bundle.BundleTests.test_committed_bytes_not_dirty_or_untracked_inputs_and_stable_identity -v",
-        "result": "4 passed in0.213s",
-        "covers": [
-          "optional roles/protected-check digest agree with actual Workbench record",
-          "invalid path/type/evaluation leaves no partial bundle",
-          "CLI prep remains before DB initialization",
-          "original committed bytes and source identities unchanged"
-        ]
-      },
-      {
-        "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_runner.RunnerTests.test_real_baseline_candidate_concurrency_and_exact_allowlist -v",
-        "result": "1 passed in0.194s",
-        "covers": [
-          "actual old baseline/candidate checks, exact allowlist, source preservation, worker ceiling"
-        ]
-      },
-      {
-        "command": "verify_export on original three-file synthetic, real-upstream and prepared-examined export sets",
-        "result": "all3passed unchanged",
-        "manifest_digests": [
-          "16cd48ea6b95dda0ee6a3c6c9d9a3ede4d46e9be61d82afb1c23835e4ab62d6e",
-          "e198d661745b60da3a07a1c8b973f5f72a0756f8d45ab1c4d3bcf77f92fe6aab",
-          "5f2564946f8a312c0fe911108ffdb74973bde0970940732e1e8b38fec8f36a7d"
-        ]
-      }
-    ],
-    "core": [
-      {
-        "command": "python3 -m unittest discover -s tests -p test_evaluation.py -v",
-        "result": "6 passed in5.446s",
-        "coverage": [
-          "actual protected weighted measurements100/50/0/null with independent critical gate",
-          "draft/ref-alt approval prerequisites and openhigh blockers",
-          "findings retention and exact resolution",
-          "stale/idempotent task reviews",
-          "SQL state+audit rollback/reload",
-          "honest calibration pair count/conflicts",
-          "alloutcome samecut export",
-          "challenge exclusion and historical material/artifacts",
-          "legacy accepted-code compatibility",
-          "tampered approval/rubric/score/raw/machine refusal",
-          "malformed criterion definitions"
-        ]
-      },
-      {
-        "command": "Affected calibration + missing-original-material export tests after small validation changes",
-        "result": "2 passed in1.363s"
-      },
-      {
-        "command": "Affected historical/export test with added stale-cross-context revision assertion",
-        "result": "1 passed in1.506s after task-global revision correction"
-      }
-    ],
-    "ui": [
-      {
-        "command": ".venv/bin/python -m pytest -q tests/test_api.py -k 'task_quality or calibration_records or evaluation_export_uses'",
-        "result": "8passed,21deselected;0.30s",
-        "scope": "Explicit narrow adapter doubles: auth+Origin+server actor, task revision forwarded/typed conflict, finding and mode schema, raw calibration reviews preserved, fixed owned export path omitted from response"
-      },
-      {
-        "command": "PLAYWRIGHT_BROWSERS_PATH=/root/workspaces/swe-data-workbench/.browsers .venv/bin/python -m pytest -q tests/test_web.py -k 'recorded_quality_versions or live_quality_revision or recorded_is_inert'",
-        "result": "3passed,4deselected;1.43s",
-        "scope": "Actual Chromium/test-only synthetic view data: paired versions, false pass, numeric total alongside critical failure, failed/pending criteria, null not zero, feedback/AI reviewer attribution inert without external requests,390px containment; live JSON validation/current revision, actual payload mode/calibration/separate export; old static404quality/security/player behavior"
-      },
-      {
-        "command": "PLAYWRIGHT_BROWSERS_PATH=/root/workspaces/swe-data-workbench/.browsers .venv/bin/python -m pytest -q tests/test_web.py::test_live_token_only_in_headers_review_binds_current_identity",
-        "result": "1passed;0.86s",
-        "scope": "Affected legacy live fallback for typed evaluation-unavailable422; ordinary submission review/token workflow remains usable"
-      },
-      {
-        "command": "node --check web/app.js",
-        "result": "passed"
-      }
-    ]
+  "wheel_sha256": "7d1db9f2364183c86739c1aa8641f25941897ae6154ae8e521a31f2ab48ed65e",
+  "focused_tests": {
+    "cases": 6,
+    "scope": "Exact read-only capture and raw bytes; idempotence/history; stale and missing/mismatched source; fresh-process export verification and tamper refusal; source overlap, duplicate JSON keys and unsupported mode. Four initial cases passed; idempotency assertion in the fifth was corrected and that case passed. Application behavior was unchanged by that correction. A final export-policy check refuses relabeling external evidence as native execution or source mutation; the guard was added and the final wheel requalified after that specific inspection finding."
   },
   "installed_artifact": {
-    "profile": "installed-wheel-a4",
-    "version": "0.1.0a4",
-    "imports_from_site_packages": true,
+    "version": "0.1.0a5",
+    "installed_imports": true,
     "matched_source_files": [
       "swe_workbench/evaluation.py",
       "swe_workbench/worker.py",
@@ -128,6 +38,7 @@
       "swe_workbench/__init__.py",
       "swe_workbench/evaluation_export.py",
       "swe_workbench/core.py",
+      "swe_workbench/handoff.py",
       "swe_workbench/assets.py",
       "swe_workbench/api.py",
       "swe_workbench/server.py",
@@ -152,260 +63,100 @@
       "bundles/unicode-hyphen/catalog.json",
       "bundles/unicode-hyphen/upstream.patch"
     ],
-    "driver_receipt": "/tmp/swe-wheel-a4-90fq_cl3/demo/receipt.json",
-    "state": "/tmp/swe-wheel-a4-90fq_cl3/demo/workbench",
-    "same_cut_repeat": true,
-    "owner_api": "unauthorized rejected; authenticated real approved context; installed assets passed",
-    "new_model_calls": 0,
-    "versions": [
-      {
-        "version": "weak-v1",
-        "quality": "needs-repair",
-        "verification": {
-          "ok": true,
-          "errors": [],
-          "manifest_digest": "5432c6bd138c7d5979d9c11ed36b103bc7d0dcba31a042e519b9d0206bbb6624",
-          "export_id": "evaluation-da273f6fa99ed86fe7f1115c4ff383c0801e4a2e98232573c34182284c49515f",
-          "candidate_count": 5,
-          "clean_task_count": 0,
-          "audit_task_count": 1
-        },
-        "scores": [
-          [
-            "authored_control",
-            "candidate",
-            100,
-            true
-          ],
-          [
-            "authored_control",
-            "alternate",
-            100,
-            true
-          ],
-          [
-            "imported_unverified",
-            "candidate",
-            null,
-            null
-          ],
-          [
-            "authored_control",
-            "reference",
-            100,
-            true
-          ],
-          [
-            "recorded_codex_attempt",
-            "candidate",
-            100,
-            true
-          ]
-        ]
-      },
-      {
-        "version": "fixed-v3",
-        "quality": "approved",
-        "verification": {
-          "ok": true,
-          "errors": [],
-          "manifest_digest": "3dd0abe40f937419b6e52125aa3bd7468aa39ab2027ce8a9036a39b58fb5d191",
-          "export_id": "evaluation-0f59dfbc40b154ee60695bbdf65a0fe0bcaf29993db49337ee016e1b790316a7",
-          "candidate_count": 5,
-          "clean_task_count": 1,
-          "audit_task_count": 0
-        },
-        "scores": [
-          [
-            "recorded_codex_attempt",
-            "candidate",
-            100,
-            true
-          ],
-          [
-            "imported_unverified",
-            "candidate",
-            null,
-            null
-          ],
-          [
-            "authored_control",
-            "candidate",
-            50,
-            false
-          ],
-          [
-            "authored_control",
-            "reference",
-            100,
-            true
-          ],
-          [
-            "authored_control",
-            "alternate",
-            100,
-            true
-          ]
-        ]
-      }
-    ],
-    "integrity": {
+    "verification": {
       "ok": true,
-      "schema_version": 1,
-      "audit_root": "0dd4aff8ce07721bbce4464deab1f503c4eabd00ed031db9b3ff0c8fe9198c26",
-      "audit_events": 42,
-      "verified_results": 8,
-      "journal_mode": "delete",
-      "synchronous": 2,
-      "foreign_keys": 1
-    }
+      "errors": [],
+      "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b",
+      "change_id": "keep-sandbox-preflight",
+      "revision": 1
+    },
+    "same_cut_repeat": true,
+    "keep_application_commands": 0,
+    "keep_mutations": 0,
+    "application_model_calls": 0,
+    "scope": "Installed capture/review/export plus fresh-process read and offline verification; existing Keep reports are not rerun."
   },
   "static_browser": {
-    "profile": "local-static-public",
+    "profile": "local",
     "http": 200,
-    "unique_items": 5,
-    "false_passes_exposed": 1,
-    "two_actual_quality_versions": true,
-    "evaluation_downloads": 6,
-    "preserved_views": {
-      "prepared": 3,
-      "unicode-hyphen": 3,
-      "synthetic": 6
-    },
+    "real_handoff_visible": true,
+    "reported_and_native_separated": true,
+    "downloads": 3,
+    "historical_views": 3,
+    "quality_demo_preserved": true,
     "initial_player": {
       "paused": true,
       "muted": true,
       "controls": true,
       "volume": 0.1,
-      "autoplay": false,
-      "tracks": 1
+      "autoplay": false
     },
+    "captions_http": 200,
+    "captions_vtt": true,
     "zero_volume_retained": true,
     "mobile_fit": true,
-    "browser_errors": [],
+    "inert_import_check": "passed",
+    "errors": [],
     "api_requests": [],
     "external_requests": []
   },
-  "recording": {
-    "duration_seconds": 22.615,
-    "sha256": "b69dc02db134c03ba31a081a6089b652487c4ca106f440c0c6706c7307eeb0a0",
-    "browser_errors": [],
-    "model_calls": 0,
-    "decision_origin": "scripted browser replay of actual prior AI-assisted task assessments"
+  "real_keep_input": {
+    "base": "acb84e9be37a681790a4943718c675a0ee1566a0",
+    "candidate": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+    "report_commit": "e119a413aec42715ac35c98f40c51f8f1cd335f2",
+    "report_path": "docs/qualification/preparation-portability-2026-11-12.json",
+    "report_sha256": "0fa47840f7721c951a87875b5936ac7ab0e23f7ed385f93205e3c57cdde6a222",
+    "origin": "Actual public Keep source and unsigned published qualification evidence, implemented by another instance. Workbench made no Keep changes.",
+    "revision_roles": {
+      "product_source": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+      "qualification_workflow": "c40674a94bce057ed879e9e754c43ca9f169609c",
+      "receipt_sourceRevision": "The constructed consumer fixture repository created by source-preparation.mjs, not the Keep product commit. The script assigns revision from the fixture git rev-parse HEAD and writes that into sourceRevision.",
+      "mapping_evidence": "The frozen workflow explicitly checks out product source e53867c and asserts git HEAD; the frozen fixture harness separately initializes/commits the consumer repository."
+    },
+    "provenance_sources": {
+      "source-preparation.mjs": {
+        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+        "path": "docs/qualification/source-preparation.mjs",
+        "git_blob": "3ccc8ae51fdd1eabc09854931d6f771b920bf8a6"
+      },
+      "preparation-workflow.yml": {
+        "ref": "c40674a94bce057ed879e9e754c43ca9f169609c",
+        "path": ".github/workflows/source-checks.yml",
+        "git_blob": "0c8b25f895b4dacb40df364a6114dea04376612f"
+      }
+    }
   },
-  "exports": [
-    {
-      "ok": true,
-      "errors": [],
-      "manifest_digest": "03ac40deed075b22dbebb1190da9688ba8cdf9c362fc3aaac387a068973cab11",
-      "export_id": "evaluation-4db50237f7905c82817d783383f547fa9854182500e182901e6ae65efdfb8bae",
-      "candidate_count": 5,
-      "clean_task_count": 0,
-      "audit_task_count": 1
-    },
-    {
-      "ok": true,
-      "errors": [],
-      "manifest_digest": "e4a121e77c6c1771c597b9914165fb61c9df0840a7bfe4b22383851bd2f82a22",
-      "export_id": "evaluation-eb5b03356acf2064c4a5b517cea5e4b3f86bdc68c65b6ded0bd8b13e7eb74812",
-      "candidate_count": 5,
-      "clean_task_count": 1,
-      "audit_task_count": 0
-    }
-  ],
-  "comparison": [
-    {
-      "patch_digest": "c02211fb86b42dbc17008ed8d7affe10c47193c73e4a0210e28b3948da85472e",
-      "label": "Existing behavior control",
-      "origin": "authored_control",
-      "before_score": 100,
-      "after_score": 50,
-      "before_critical": true,
-      "after_critical": false,
-      "false_pass": true
-    },
-    {
-      "patch_digest": "04539c7096332418cc1f81c33e09975a12efad5434fafd65778f41feb73badf8",
-      "label": "Alternate valid design",
-      "origin": "authored_control",
-      "before_score": 100,
-      "after_score": 100,
-      "before_critical": true,
-      "after_critical": true,
-      "false_pass": false
-    },
-    {
-      "patch_digest": "06142e889d5746f80ef72d636aeba1fd10e05730c81e7b8c59f241a90952d884",
-      "label": "Unapproved variant",
-      "origin": "imported_unverified",
-      "before_score": null,
-      "after_score": null,
-      "before_critical": null,
-      "after_critical": null,
-      "false_pass": false
-    },
-    {
-      "patch_digest": "df39eeb0d618006e2f862f7a7c0a01802ffa40e6f4da0a6eb057f6bcbb2ae1de",
-      "label": "Authored reference",
-      "origin": "authored_control",
-      "before_score": 100,
-      "after_score": 100,
-      "before_critical": true,
-      "after_critical": true,
-      "false_pass": false
-    },
-    {
-      "patch_digest": "b797020f9c484de102109a1d93a760f7788e05bc8111ea8e3078bcc8311103af",
-      "label": "Recorded Codex attempt",
-      "origin": "recorded_codex_attempt",
-      "before_score": 100,
-      "after_score": 100,
-      "before_critical": true,
-      "after_critical": true,
-      "false_pass": false
-    }
-  ],
-  "old_evidence": "Nine earlier public frozen files are byte-identical. Original three historical exports also verified by focused worker checks.",
-  "builder_mismatch_rejected": true,
-  "qualification_notes": [
-    "Initial no-build-isolation wheel command could not find setuptools in the project venv; normal isolated pinned build succeeded. No runtime dependency changed.",
-    "The new CLI preservation assertion first expected scalar3; actual unchanged public API returns {checkpoint:3}. Corrected verifier expectation; failed state retained; final installed path passed.",
-    "A recording locator raced a same-batch async rerender. Avoided a redundant batch-select change and waited for changed batch response; final recording passed with no check rerun.",
-    "Two calibration reviews both requested changes on weak/v2. v3 incorporates their feedback; original review judgments remain unchanged."
-  ],
-  "coverage_limit": "Signed64 aggregate overflow is not dynamically measured; retained open medium finding.",
-  "public_status": "Public GitHub source/tag/release assets and hosted version4 verified. This main-branch documentation adds hosted results after the immutable release qualification cut; release bytes remain unchanged.",
-  "hosted_publication": {
-    "site_version": 4,
-    "source_commit": "c11ff88c4da570571c59c0c20b27861636ab32ab",
-    "deployment_id": "appgdep_6af4fac0a8d081918184a1654238bbb3",
-    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
-    "status": "succeeded",
-    "browser": {
-      "profile": "hosted-public",
-      "http": 200,
-      "unique_items": 5,
-      "false_passes_exposed": 1,
-      "two_actual_quality_versions": true,
-      "evaluation_downloads": 6,
-      "preserved_views": {
-        "prepared": 3,
-        "unicode-hyphen": 3,
-        "synthetic": 6
+  "fresh_context_review": "One actual AI-assisted review of the first frozen handoff, given only its three files; it recovered the change and raised the subsequently clarified revision roles. Original input hashes and finding preserved.",
+  "workbench_native_executions_for_keep": 0,
+  "keep_mutations": 0,
+  "application_model_calls": 0,
+  "effort": {
+    "command_steps": [
+      {
+        "operation": "capture",
+        "elapsed_seconds": 0.07300808699801564
       },
-      "initial_player": {
-        "paused": true,
-        "muted": true,
-        "controls": true,
-        "volume": 0.1,
-        "autoplay": false,
-        "tracks": 1
+      {
+        "operation": "review",
+        "elapsed_seconds": 0.035970575641840696
       },
-      "zero_volume_retained": true,
-      "mobile_fit": true,
-      "browser_errors": [],
-      "api_requests": [],
-      "external_requests": []
-    }
-  }
+      {
+        "operation": "export",
+        "elapsed_seconds": 0.044863014947623014
+      },
+      {
+        "operation": "fresh-process-verify",
+        "elapsed_seconds": 0.03728645388036966
+      },
+      {
+        "operation": "fresh-process-read",
+        "elapsed_seconds": 0.036060862708836794
+      }
+    ],
+    "total_command_seconds": 0.2271889941766858,
+    "interpretation": "Tool execution only; human baseline and review speed unavailable. Per-change evidence mapping and feature construction remain separate overhead."
+  },
+  "decision": "Retain optional portable handoff; avoid broader orchestration or mandatory use. No measured human productivity claim.",
+  "caption_correction": "The earlier video requested recording.vtt while the published file was captions.vtt. Current assets now request captions.vtt, and actual HTTP200 plus WEBVTT content were checked; original media/release bytes preserved.",
+  "public_status": "Local source/artifact/browser audit complete; publication pending at this evidence cut."
 }

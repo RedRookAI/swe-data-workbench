@@ -1,0 +1,96 @@
+{
+  "change_id": "keep-sandbox-preflight",
+  "title": "Check sandbox readiness before installing dependencies",
+  "goal": "Make offline preparation failures actionable: check the required sandbox first, retain the preparation hold on failure, and distinguish a sandbox restriction from missing cached packages. Inspect source readiness separately from the published download.",
+  "repository": "https://github.com/RedRookAI/keep-research-preview",
+  "observations": [
+    {
+      "label": "Candidate source version",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourcePositive",
+        "receipt",
+        "keepVersion"
+      ],
+      "scope": "Source profile, not a new download",
+      "required": true,
+      "context_path": [
+        "source"
+      ]
+    },
+    {
+      "label": "Source checks",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceCI"
+      ],
+      "scope": "Partial unprivileged source checks; not full-suite qualification",
+      "required": true,
+      "context_path": [
+        "source"
+      ]
+    },
+    {
+      "label": "Ubuntu22 preparation",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourcePositive",
+        "receipt",
+        "status"
+      ],
+      "scope": "Constructed offline-preparation fixture on a capable host",
+      "required": true,
+      "context_path": [
+        "source"
+      ]
+    },
+    {
+      "label": "Ubuntu24 preflight refusal",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceRestrictedHost",
+        "receipt",
+        "status"
+      ],
+      "scope": "Correct refusal on a restricted host",
+      "required": true,
+      "context_path": [
+        "source"
+      ]
+    },
+    {
+      "label": "npm started on restricted host",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "sourceRestrictedHost",
+        "receipt",
+        "npmStarted"
+      ],
+      "scope": "Expected false: sandbox preflight stops installation",
+      "required": true,
+      "context_path": [
+        "source"
+      ]
+    },
+    {
+      "label": "Download version in the frozen report",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "publishedArchive",
+        "version"
+      ],
+      "scope": "Previously published archive; no assertion that candidate fix is included",
+      "required": false
+    },
+    {
+      "label": "Earlier restricted-host error",
+      "attachment": "reported-evidence.json",
+      "field_path": [
+        "historicalRestrictedHost",
+        "error"
+      ],
+      "scope": "Historical diagnostic, retained rather than presented as a current candidate failure",
+      "required": false
+    }
+  ]
+}

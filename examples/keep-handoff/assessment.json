@@ -1,0 +1,15 @@
+{
+  "decision": "handoff-ready",
+  "reason": "The real source correction and its scope are inspectable. The report names this candidate; it records supported-host preparation and restricted-host refusal. This is readiness of the review package, not independent execution or authority to ship Keep. Revision roles were checked against the retained workflow and harness: e53867c is the product source, c40674a is the qualification workflow, and receipt.sourceRevision identifies the separately created consumer fixture. The workflow explicitly selects the product candidate.",
+  "findings": [
+    "The frozen report identifies its published download as0.0.21-preview.1, while this source evidence covers0.0.22-preview.1. Do not claim the download includes the candidate preflight correction.",
+    "Check outcomes are unsigned external reports; the workbench executed zero Keep checks.",
+    "Source CI covers176tests in a partial unprivileged profile; full runtime/engine/ARM64 qualification is not established by this report."
+  ],
+  "next_action": "The Keep owner can decide whether to publish a corrected download. For restricted-host preparation, adding cached packages does not resolve a sandbox preflight failure. This trial makes no Keep change or delivery.",
+  "reviewer_mode": "ai_assisted_adjudication",
+  "binding": {
+    "candidate": "e53867c1c2add998b9d382f26fc6c7aa97b3b2b7",
+    "report_sha256": "0fa47840f7721c951a87875b5936ac7ab0e23f7ed385f93205e3c57cdde6a222"
+  }
+}
