@@ -203,8 +203,8 @@
   "private_state_and_tickets_published": false,
   "old_release_bytes_preserved": true,
   "human_usability_and_time_saving": "unmeasured",
-  "ci_status": "Configured/local clean invocation passed; actual hosted CI pending audited source push.",
-  "public_status": "Private qualified checkpoint; publication receipt follows source/release/hosting/CI verification.",
+  "ci_status": "Hosted push run43218708022 completed successfully on first attempt at source7f8633d677974f978a6b1bb8174dbf809024440a, including clean checks, wheel build and isolated installed rehearsal.",
+  "public_status": "Published v0.1.0a9 and hosted version9 verified2026-11-12. The original release verification asset retains its prepublication cut; current docs append the actual hosted/CI receipt.",
   "actual_mixed_restore": {
     "mixed_v3_v4_restore": {
       "private-module-delivery": true,
@@ -212,5 +212,174 @@
       "authored-report-example": true
     },
     "original_histories_retained": true
+  },
+  "publication": {
+    "code_commit": "7f8633d677974f978a6b1bb8174dbf809024440a",
+    "tag": "v0.1.0a9",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a9",
+    "assets_verified": 6,
+    "asset_size_and_sha256_match_local": true,
+    "tag_full_sha_match": true,
+    "assets": [
+      {
+        "name": "daily-change-exports.zip",
+        "bytes": 68764,
+        "sha256": "sha256:de71158db8953061da9f027d8b9636852ee9108bf4fcc835bd0ad8c816510c68"
+      },
+      {
+        "name": "installed-daily-qualification.json",
+        "bytes": 491,
+        "sha256": "sha256:db2c8b809aea38f00d98a2372b8d815ee945a30d8bd22f9588827d72dd7e7c14"
+      },
+      {
+        "name": "private-ui-regression-recipe.zip",
+        "bytes": 3285,
+        "sha256": "sha256:e67c9bfca62021802cd54056a2e91c0a2067fa79ad7fd8d2af4ecdc62243ae29"
+      },
+      {
+        "name": "SHA256SUMS",
+        "bytes": 485,
+        "sha256": "sha256:858f87cecfc38ec79a7d8f3293d86d5eb1e45ba338256a28b6f21a847a072c43"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a9-py3-none-any.whl",
+        "bytes": 143885,
+        "sha256": "sha256:1e18b99a7b4b92e8b3da63178f402c989a7e819438e32e886b572e858de8134b"
+      },
+      {
+        "name": "verification.json",
+        "bytes": 12499,
+        "sha256": "sha256:cf035ed92e363ebed084da1dfc74fc538bb32019bed9fc944fc90685761247b4"
+      }
+    ],
+    "ci": {
+      "id": 43218708022,
+      "head_sha": "7f8633d677974f978a6b1bb8174dbf809024440a",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43218708022",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 131184437466,
+          "name": "focused",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 43218708022,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install pinned tools and Chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Check corrected source paths",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Build and install one wheel",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Check isolated installed compatibility and daily workflow",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        }
+      ]
+    },
+    "site_version": 9,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "deployment_id": "appgdep_6af5b22a373c81918ea1e3241705b402",
+    "deployment_status": "succeeded",
+    "saved_version_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_9ed02ad940508191a5262674f27cd44b",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "attention_to_detail": true,
+      "verified_overview": true,
+      "authored_failed_unknown_case": true,
+      "original_numeric_duration_text": true,
+      "real_cases": [
+        {
+          "reported_passed": 3,
+          "source": "swe_workbench/junit_report.py",
+          "history": true,
+          "downloads": 3
+        },
+        {
+          "reported_passed": 1,
+          "source": "swe_workbench/api.py",
+          "history": true,
+          "downloads": 3
+        }
+      ],
+      "historical_needs_work_preserved": true,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "legacy_direct_paths": {
+      "prepared": 200,
+      "unicode-hyphen": 200,
+      "synthetic": 200
+    }
   }
 }
