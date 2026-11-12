@@ -37,6 +37,11 @@ jobs:
           python -m venv .venv
           .venv/bin/python -m pip install -r requirements-dev.lock
           .venv/bin/python -m playwright install --with-deps chromium
+      - name: Install Node for the pinned Unicode fixture
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends nodejs
+          /usr/bin/node --version
       - name: Build and install packager before tests
         id: install
         run: |

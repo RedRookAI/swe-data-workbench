@@ -16,5 +16,12 @@
   "original_evidence_media_files_unchanged": 87,
   "new_model_calls": 0,
   "prior_verification": "verification-v0.1.0a12.md/json",
-  "publication": "Source CI, release download and deployed preview receipt will be appended after observation."
+  "publication": "Source CI, release download and deployed preview receipt will be appended after observation.",
+  "initial_ci": {
+    "run_id": 43259673888,
+    "source": "db44aa490896b5a455eb69dc5a2a116c86ef316d",
+    "passed": 55,
+    "failed": 1,
+    "cause": "Pinned /usr/bin/node runtime absent on hosted runner. CI now installs nodejs; regression reports explicit prerequisite failure."
+  }
 }

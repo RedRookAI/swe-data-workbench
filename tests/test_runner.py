@@ -71,6 +71,7 @@ class RunnerTests(unittest.TestCase):
 class WorkerGitDiscoveryTests(unittest.TestCase):
     def test_full_upstream_patch_applies_inside_git_ancestor(self):
         from swe_workbench.worker import evaluate
+        self.assertTrue(Path("/usr/bin/node").is_file(), "The pinned Unicode fixture requires Node at /usr/bin/node; install nodejs before running this integration test.")
         repo = Path(__file__).resolve().parents[1]
         bundle = repo / 'bundles' / 'unicode-hyphen'
         task = next(iter(json.loads((bundle / 'catalog.json').read_text())['tasks'].values()))
