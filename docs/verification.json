@@ -265,5 +265,86 @@
   "old_release_bytes_preserved": true,
   "human_time_savings": "unmeasured",
   "independent_human_usability": "unmeasured",
-  "public_status": "Privately saved qualification cut; publication receipt will be appended after source/release/hosting audit."
+  "public_status": "Published v0.1.0a8 and hosted version8 verified2026-11-12. Release assets retain their original prepublication verification cut; this later receipt does not replace bytes.",
+  "publication": {
+    "code_commit": "e4801bedecce328af1fd84605491bb6d9fa4a786",
+    "tag": "v0.1.0a8",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a8",
+    "assets_verified": 6,
+    "asset_size_and_sha256_match_local": true,
+    "tag_full_sha_match": true,
+    "assets": [
+      {
+        "name": "daily-change-exports.zip",
+        "bytes": 48000,
+        "sha256": "sha256:867d19b15867179efd01713f36c9497895fa323759dcd8bfb581e3c5ada6f797"
+      },
+      {
+        "name": "installed-daily-qualification.json",
+        "bytes": 867,
+        "sha256": "sha256:31fa2b6242130dc4edbacf22e126414128b0fb2ab8ca6d66d843f8b98f222a92"
+      },
+      {
+        "name": "private-ui-regression-recipe.zip",
+        "bytes": 3285,
+        "sha256": "sha256:e67c9bfca62021802cd54056a2e91c0a2067fa79ad7fd8d2af4ecdc62243ae29"
+      },
+      {
+        "name": "SHA256SUMS",
+        "bytes": 485,
+        "sha256": "sha256:579f21a8aec4a9e37bc6e0ce4c4b4e553f941a861ae2ce0862b20a61ef3f51f0"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a8-py3-none-any.whl",
+        "bytes": 134202,
+        "sha256": "sha256:8a4c4dd6108238ceeb22213e1b1f534342f31b82d87f53d5c8687ccf1e091324"
+      },
+      {
+        "name": "verification.json",
+        "bytes": 13251,
+        "sha256": "sha256:da57857f3c4c3237b066b08c7c4c398b2ecc83d5e99e28cdacd5ce08e9a5bdf6"
+      }
+    ],
+    "site_version": 8,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "deployment_id": "appgdep_6af55249b84c81918ae4edae6bba2452",
+    "deployment_status": "succeeded",
+    "saved_version_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_0689d01547f881918c060cdc3390a5b8",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "attention_to_detail": true,
+      "real_cases": [
+        {
+          "reported_passed": 3,
+          "source": "swe_workbench/junit_report.py",
+          "history": true,
+          "downloads": 3
+        },
+        {
+          "reported_passed": 1,
+          "source": "swe_workbench/api.py",
+          "history": true,
+          "downloads": 3
+        }
+      ],
+      "historical_needs_work_preserved": true,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    }
+  }
 }
