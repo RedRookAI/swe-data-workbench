@@ -27,7 +27,7 @@ def main(argv=None):
     backup=commands.add_parser('backup-state',help='Private quiescent SQLite/artifact snapshot');backup.add_argument('--output',type=Path,required=True)
     restore=commands.add_parser('restore-state',help='Restore a private snapshot to a fresh root');restore.add_argument('path',type=Path);restore.add_argument('--output',type=Path,required=True)
     view=commands.add_parser('build-handoff-view',help='Build a selected read-only view without task data/DB');view.add_argument('path',type=Path);view.add_argument('--output',type=Path,required=True)
-    junit=commands.add_parser('import-junit',help='Read an existing pytest XML report; executes nothing');junit.add_argument('path',type=Path);junit.add_argument('--context',type=Path);junit.add_argument('--output',type=Path,required=True)
+    junit=commands.add_parser('import-junit',help='Read an existing pytest XML report; executes nothing');junit.add_argument('path',type=Path);junit.add_argument('--context',type=Path);junit.add_argument('--ci-receipt',type=Path);junit.add_argument('--check-definition',type=Path);junit.add_argument('--output',type=Path,required=True)
     context=commands.add_parser('configure-project',help='Save explicitly selected owner defaults');context.add_argument('--output',type=Path,required=True)
     for name in ('repo','profile','evidence-directory','state','base-ref','candidate-ref'):context.add_argument('--'+name,required=True)
     association=commands.add_parser('associate-project',help='Explicitly associate legacy state; audited --relocate supports deliberate source moves');association.add_argument('context',type=Path);association.add_argument('--relocate',action='store_true')
@@ -40,7 +40,7 @@ def main(argv=None):
     selected.add_argument('--finding',action='append',default=[]);selected.add_argument('--responsible-party');selected.add_argument('--operation-key');selected.add_argument('--reviewer-mode',default='ai_assisted_adjudication')
     package=commands.add_parser('prepare-review',help='Assemble one existing report/change into a selected review package; never approves or publishes');package.add_argument('context',type=Path);package.add_argument('--output',type=Path,required=True);package.add_argument('--resume',action='store_true')
     for name in ('change-id','title','goal','base','candidate'):package.add_argument('--'+name)
-    package.add_argument('--report',type=Path);package.add_argument('--run-context',type=Path)
+    package.add_argument('--report',type=Path);package.add_argument('--run-context',type=Path);package.add_argument('--ci-receipt',type=Path);package.add_argument('--check-definition',type=Path)
     project_view=commands.add_parser('build-project-view',help='Freeze selected attention list and views');project_view.add_argument('context',type=Path);project_view.add_argument('--output',type=Path,required=True)
     attention=commands.add_parser('attention',help='List captured changes in the selected owned context');attention.add_argument('context',type=Path);attention.add_argument('--only-attention',action='store_true')
     summary=commands.add_parser('handoff-summary',help='Readable summary from retained current evidence');summary.add_argument('context',type=Path);summary.add_argument('change_id')
@@ -141,7 +141,7 @@ def main(argv=None):
                 result=configure(args.output,**{k:getattr(args,k) for k in ('repo','profile','evidence_directory','state','base_ref','candidate_ref')})
             elif args.command=='prepare-review':
                 from .review_package import assemble
-                result=assemble(args.context,args.output,resume=args.resume,change_id=args.change_id,title=args.title,goal=args.goal,report=args.report,run_context=args.run_context,base=args.base,candidate=args.candidate)
+                result=assemble(args.context,args.output,resume=args.resume,change_id=args.change_id,title=args.title,goal=args.goal,report=args.report,run_context=args.run_context,base=args.base,candidate=args.candidate,ci_receipt=args.ci_receipt,check_definition=args.check_definition)
             elif args.command=='associate-project':
                 from .project_scope import associate
                 result=associate(args.context,relocate=args.relocate)
@@ -153,7 +153,7 @@ def main(argv=None):
                 result=review_selection(args.context,args.selection,decision=args.decision,reason=args.reason,findings=args.finding,next_action=args.next_action,responsible_party=args.responsible_party,operation_key=args.operation_key,reviewer_mode=args.reviewer_mode)
             elif args.command=='import-junit':
                 from .junit_report import import_report
-                result=import_report(args.path,args.output,args.context)
+                result=import_report(args.path,args.output,args.context,args.ci_receipt,args.check_definition)
             elif args.command=='build-handoff-view':
                 from .handoff_view import build
                 result=build(args.path,args.output)

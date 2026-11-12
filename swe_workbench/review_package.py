@@ -27,7 +27,7 @@ def current(root,key):
         if error.code=='handoff-not-found':return None
         raise
 
-def assemble(context_path,output,*,resume=False,change_id=None,title=None,goal=None,report=None,run_context=None,base=None,candidate=None):
+def assemble(context_path,output,*,resume=False,change_id=None,title=None,goal=None,report=None,run_context=None,base=None,candidate=None,ci_receipt=None,check_definition=None):
     context=load(context_path);check(context);target=Path(output).absolute();receipt_path=target/'receipt.json';context_sha=digest(canonical(context))
     require(target.parent.is_dir() and not target.is_symlink(),'review.output: choose an owned directory under an existing parent')
     for value in (context['repo'],context['state']):
@@ -37,7 +37,7 @@ def assemble(context_path,output,*,resume=False,change_id=None,title=None,goal=N
         require(all(isinstance(x,str) and x.strip() for x in (change_id,title,goal)) and report is not None,'review.inputs: supply change ID, title, goal and existing report')
         stage=Path(tempfile.mkdtemp(prefix='.review-package-',dir=target.parent))
         try:
-            import_report(report,stage/'imported',run_context)
+            import_report(report,stage/'imported',run_context,ci_receipt,check_definition)
             generated=parse(_read(stage/'imported/profile.json'));profile=parse(_read(context['profile']))
             require(profile.get('observations')==generated['observations'] and profile.get('attachments')==generated['attachments'],'review.profile: this command supports the pytest import profile; use the explicit commands for custom mappings')
             preview=collect(context_path,change_id=change_id,title=title,goal=goal,base=base,candidate=candidate,evidence_directory=stage/'imported',preview=True)

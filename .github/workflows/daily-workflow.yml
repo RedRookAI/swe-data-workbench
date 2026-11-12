@@ -2,10 +2,16 @@ name: Daily workflow
 on:
   push:
     branches: [main]
-    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/ci_*', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
   pull_request:
-    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/ci_*', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
   workflow_dispatch:
+    inputs:
+      case:
+        description: Fixed qualification recipe (failure probe intentionally fails CI)
+        type: choice
+        options: [normal, itsdangerous, intentional-failure]
+        default: normal
 permissions:
   contents: read
 jobs:
@@ -13,26 +19,69 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       PYTHONDONTWRITEBYTECODE: '1'
+      WB_CASE: ${{ inputs.case || 'normal' }}
+      WB_PR_HEAD: ${{ github.event.pull_request.head.sha }}
+      WB_PR_BASE: ${{ github.event.pull_request.base.sha }}
+      WB_PUSH_BASE: ${{ github.event.before }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
       - name: Install pinned tools and Chromium
+        id: tools
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install -r requirements-dev.lock
           .venv/bin/python -m playwright install --with-deps chromium
-      - name: Check corrected source paths
-        run: |
-          .venv/bin/python -m pytest tests/test_project_scope.py tests/test_report_containment.py tests/test_exact_observations.py tests/test_attention_cut.py tests/test_review_package.py tests/test_handoff_browser.py tests/test_review_overview.py tests/test_private_assets.py -q -p no:cacheprovider
-      - name: Build and install one wheel
+      - name: Build and install packager before tests
+        id: install
         run: |
           .venv/bin/python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/workbench-wheel" .
           .venv/bin/python -m pip install --no-deps --force-reinstall "$RUNNER_TEMP"/workbench-wheel/*.whl
-      - name: Check isolated installed compatibility and daily workflow
+      - name: Prepare fixed source and base policy
+        id: setup
+        run: .venv/bin/python -I tools/ci_recipe.py setup --workspace "$GITHUB_WORKSPACE" --root "$RUNNER_TEMP/workbench-ci" --case "$WB_CASE"
+      - name: Run selected pytest command once and retain actual exit
+        id: checks
+        run: .venv/bin/python -I tools/ci_recipe.py check --root "$RUNNER_TEMP/workbench-ci"
+      - name: Assemble selected report even when checks fail
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        id: package
+        run: |
+          mkdir -p "$RUNNER_TEMP/workbench-ci"
+          .venv/bin/python -I tools/ci_recipe.py package --root "$RUNNER_TEMP/workbench-ci"
+      - name: Upload selected evidence only
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        id: artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: selected-review-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ inputs.case || 'normal' }}
+          path: ${{ runner.temp }}/workbench-ci/share/
+          if-no-files-found: error
+          include-hidden-files: false
+          overwrite: false
+      - name: Record provider upload identity separately
+        if: ${{ !cancelled() }}
+        env:
+          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact-digest }}
+          CHECK_OUTCOME: ${{ steps.checks.outcome }}
+          PACKAGE_OUTCOME: ${{ steps.package.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.artifact.outcome }}
+        run: |
+          python - <<'PY'
+          import json,os
+          fields={key:os.environ.get(key) for key in ('CHECK_OUTCOME','PACKAGE_OUTCOME','UPLOAD_OUTCOME','ARTIFACT_ID','ARTIFACT_URL','ARTIFACT_DIGEST')}
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('\n## Provider transport receipt\n\n```json\n'+json.dumps(fields,indent=2)+'\n```\n\nProvider transport identity is separate from the selected content manifest. Missing upload identity means delivery is unverified. Original check status remains unchanged.\n')
+          PY
+      - name: Check isolated installed compatibility and authored daily fixture
+        if: ${{ success() && (inputs.case == 'normal' || inputs.case == '') }}
         run: |
           .venv/bin/python -I -m swe_workbench.release_check --wheel "$RUNNER_TEMP"/workbench-wheel/*.whl --legacy-export "$GITHUB_WORKSPACE/docs/examples/keep-handoff/export" --current-export "$GITHUB_WORKSPACE/docs/examples/everyday-handoff/export" --output "$RUNNER_TEMP/workbench-compatibility"
           .venv/bin/python -I "$GITHUB_WORKSPACE/tools/qualify_daily.py" --output "$RUNNER_TEMP/workbench-daily"

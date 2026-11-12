@@ -20,3 +20,5 @@ A local focused invocation is:
 ```
 
 Provision Chromium with the pinned Playwright tool in your own environment. Existing explicit PLAYWRIGHT_BROWSERS_PATH or SWE_WORKBENCH_CHROMIUM settings can select an installed browser where supported. The handoff browser tests generate owned temporary views and use tracked exports; they require no dist or private coordination directory. After installing the selected wheel, use tools/qualify_daily.py from Python isolated mode outside the checkout to exercise the composed CLI, actual private UI, verified overview and private restore. Its reports and decisions are explicitly authored/scripted fixtures.
+
+The CI evidence path adds no Python runtime dependency. GitHub native upload-artifact v7 is pinned to cf430e030ddbb5b0abf93d22962f4752f3646cd9. Its current official tag/README was checked2026-11-12. Fixed external qualification fetches the two pinned public itsdangerous commits and runs only its signer module with the existing tools; historical dependency locks are not installed.

@@ -59,17 +59,26 @@ def project(raw,context_raw=None):
                 if declared!=actual:warnings.append({'suite':suite.get('name',''),'field':key,'declared':declared,'observed':actual})
     return {'schema':SCHEMA,'report_sha256':digest(raw),'context_sha256':None if context_raw is None else digest(context_raw),'context_text':None if context_raw is None else _text(context_raw,'Run context'),'execution_revision':revision if state=='clean' else None,'source_state':state,'definition_sha256':definition,'inputs':inputs,'cases':cases,'counts':counts,'executed':counts['passed']+counts['failed']+counts['error'],'aggregate_warnings':warnings,'assurance':ASSURANCE}
 
-def import_report(path,output,context=None):
+def import_report(path,output,context=None,ci_receipt=None,check_definition=None):
     raw=_read(path);context_raw=_read(context) if context else None
     try:report=project(raw,context_raw)
     except (ValueError,TypeError) as exc:
         from .errors import WorkbenchError
         raise WorkbenchError('junit-report',str(exc)) from exc
+    extras={}
+    if ci_receipt is not None or check_definition is not None:
+        require(ci_receipt is not None and check_definition is not None and context_raw is not None,'junit.ci: supply receipt, definition and run context together')
+        from .ci_evidence import validate
+        ci_raw=_read(ci_receipt);definition_raw=_read(check_definition);validate(ci_raw,raw,context_raw,definition_raw)
+        report['ci_receipt_sha256']=digest(ci_raw);extras={'ci-receipt.json':ci_raw,'check-definition.json':definition_raw}
     target=Path(output).absolute();require(target.parent.is_dir() and not target.exists() and not target.is_symlink(),'junit.output: choose a fresh directory')
     profile={'schema':'swe-workbench-handoff-profile/v1','id':'pytest-results','version':'1','repository':'owner-selected-project','attachments':['report.json','original.xml'],'observations':[{'label':'Reported '+name,'attachment':'report.json','field_path':['counts',name],'context_path':['execution_revision'],'required':True,'scope':'Count of '+name+' cases in the selected external pytest report.'} for name in ('passed','failed','error','skipped')]}
+    profile['attachments'].extend(extras)
+    if extras:profile['id']='pytest-ci-results'
     stage=Path(tempfile.mkdtemp(prefix='.junit-',dir=target.parent))
     try:
         (stage/'original.xml').write_bytes(raw);(stage/'report.json').write_bytes(canonical(report)+b'\n');(stage/'profile.json').write_bytes(canonical(profile)+b'\n')
+        for name,content in extras.items():(stage/name).write_bytes(content)
         for f in stage.iterdir():
             with f.open('rb') as stream:__import__('os').fsync(stream.fileno())
         _fsync_directory(stage);_publish(stage,target);_fsync_directory(target.parent)

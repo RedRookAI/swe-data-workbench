@@ -4,6 +4,8 @@ Configure a project once. Select a change and an existing test report, inspect t
 
 The daily path reads committed Git objects and selected local reports. It creates no new model request and does not run the source project's tests. The separate regression recipe explicitly runs its one admitted check when invoked.
 
+The optional fixed CI recipe executes the declared pytest selection and feeds its observed results into this same report-only assembly path. See ci-review.md.
+
 ## Start with an existing pytest report
 
 If a run already produced JUnit XML, import that file. If you need to produce one during your normal check run, pytest supports --junit-xml=results.xml. The importer supports the pytest testsuite/testsuites dialect and keeps the exact original XML.

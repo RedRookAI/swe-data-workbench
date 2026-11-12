@@ -468,6 +468,20 @@ function renderHandoffReports(root,record) {
     if(report.status==='invalid-supported-report' || !Array.isArray(report.cases) || !report.cases.every(c=>['passed','failed','error','skipped','unavailable'].includes(c.outcome))){section.append(node('p','Invalid supported report; inspect retained evidence.'));continue;}
     const counts={};for(const c of report.cases)counts[c.outcome]=(counts[c.outcome]||0)+1;
     section.append(node('h4',report.attachment+' · '+report.binding),node('p',Object.entries(counts).map(([k,v])=>v+' '+k).join(' · ')||'No executed cases'));
+    if(report.ci){
+      const ci=report.ci,p=ci.provider;
+      section.append(node('h4','Observed execution'),node('p','Process: '+ci.exit_code+' · '+ci.process_outcome+'; XML: '+ci.report_status+'; source: '+ci.source_state),node('p','Tested product: '+ci.product_repository+' @ '+ci.tested_revision));
+      if(p){
+        section.append(node('p','Workflow: '+p.repository+' @ '+p.workflow_revision+'; run '+p.run_id+'; attempt '+p.attempt+'; job '+p.job));
+        // Construct from validated identity, never an imported free-form URL.
+        if(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(p.repository)&&/^[1-9][0-9]*$/.test(p.run_id)&&/^[1-9][0-9]*$/.test(p.attempt)){
+          const link=node('a','Open original GitHub run');link.href='https://github.com/'+p.repository+'/actions/runs/'+p.run_id+'/attempts/'+p.attempt;link.rel='noopener noreferrer';section.append(link);
+        }
+        if(p.proposed_head)section.append(node('p','Proposed PR head: '+p.proposed_head+'; base: '+p.proposed_base));
+      }else section.append(node('p','Local execution; CI identity unavailable.'));
+      for(const issue of ci.problems)section.append(node('p',issue));
+      section.append(node('p',ci.assurance,'small muted'));
+    }
     if(report.warnings?.length)section.append(node('p','Reported suite counts differ from retained cases; inspect the discrepancy.'));
     if(!report.cases.some(c=>['passed','failed','error'].includes(c.outcome)))section.append(node('p','No executed cases; skipped/unavailable evidence is separate from success.'));
     const details=node('details');details.append(node('summary','Actual reported cases and scope'));

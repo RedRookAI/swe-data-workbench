@@ -93,3 +93,9 @@ Local project association uses private schema1 meta plus an audit event containi
 The attention index is a selection, not an authority for healthy status. Each safe generated leaf is verified; revision/material/decision/owner/next-action/attention association must agree, with purpose, source scope and report problems derived from that package. Unavailable/mismatch entries stay attention-worthy. A single bounded validated SQLite cut supplies attention records; the read lock ends before report projection and HTML work.
 
 Review-package/v1 receipts record prepared, capture-failed, captured and complete stages. Source refs/material and before-state are frozen before capture; transactional compare-and-set prevents stale replacement. Exact selection and committed stage survive a later view failure. An explicit resume completes that selection or refuses changed inputs/state. It opens no service, executes no report command and records no inferred approval.
+
+## Optional CI evidence
+
+CI-receipt/v1 is a separate attachment. It binds exact report/context/check-definition SHA256 values, actual tested product and observed source, allowlisted workflow/run/attempt/job/PR identities, process exit and report availability. Check-definition/v1 holds caller-declared argv, selected input identities and observed runtime/import scope. The unchanged run-context/v1 remains closed to these provider fields. Original XML/context/definition/receipt bytes retain their identities.
+
+An imported JUnit projection gains ci_receipt_sha256 only when the optional receipt and definition are explicitly supplied. The generated CI profile adds ci-receipt.json and check-definition.json. Derived reported_checks gains validated CI scope only for those new projections; old material output is unchanged. Validation recomputes cross-links and rejects conflicting source labels. Provider ZIP identity is obtained after upload and remains separate from internal package identity.

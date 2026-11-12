@@ -18,7 +18,7 @@ The earlier task-quality example remains linked from the current view: a weak re
 
 Installable wheel, two daily-change exports, regression recipe and verification:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a9
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a10
 
 ## Try a complete handoff
 
@@ -29,6 +29,14 @@ Import an existing report, select your project context, capture a change and ins
 Select a saved profile, exact source commits, the requested goal and the existing evidence directory. Capture reads the committed files and only the profile-declared evidence names. Normal repeated capture retains the latest review state. It performs no source-project execution or delivery.
 
 The generic command and version-bound review/export flow are documented in docs/everyday-handoffs.md. A complete public profile is in examples/keep-handoff/profile.json. Existing explicit-request capture remains supported.
+
+## Keep actual CI results with the change
+
+The GitHub workflow now records its selected pytest invocation once, retains the original XML and observed source/run context, and prepares a downloadable review. Failed tests keep their failed CI status. A package starts unreviewed.
+
+The same fixed recipe can inspect a pinned historical itsdangerous change. Its original signer tests run against the selected source; upstream authorship and the BSD notice stay with the export. The intentional failure option is a separate, clearly labeled artifact-delivery check.
+
+See docs/ci-review.md for the commands, base-selection policy, artifact contents and limits. CI downloads require GitHub sign-in and follow repository retention. The selected browser view needs HTTP serving; the public preview supplies that for audited examples.
 
 ## Review the original real-change example
 

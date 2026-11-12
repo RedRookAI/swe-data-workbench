@@ -54,3 +54,9 @@ The v4 worker optionally materializes verifier files in a sibling directory outs
 The ingestion verifier's direct child inherits the owned worker group and uses a short process timeout. Its exit intentionally exercises application recovery inside an attempt-owned directory. This does not add a detached service or change the existing worker ownership/capture protocol.
 
 Task-quality records reuse schema1 meta pointers, immutable artifacts and transactional audit rows. Task-global revision tokens prevent stale decisions crossing material versions. Evaluation export preserves all measured or missing candidate outcomes; accepted-code export remains unchanged. The first original ingestion profile and feedback loop are implemented; migration/concurrency profiles remain planned.
+
+## Observed CI evidence
+
+An observing producer separates the existing check invocation from report import. The caller executes its declared argv once; start/finish observations retain checkout HEAD/status and selected input hashes. A versioned receipt binds XML/context/definition bytes and keeps workflow source separate from tested product source. The optional pytest CI profile adds two attachments; old projections and histories keep their existing identities.
+
+The fixed GitHub recipe installs the packager before tests and attempts selected evidence delivery after nonzero test exits. CI status, XML outcomes, package construction and explicit review are separate facts. Staging selects only the shareable export/view/summary and public provenance; upload identity is recorded after upload. Missing source comparisons or report bytes produce diagnostics. The external case reuses this path in an owned pinned checkout. See ci-review.md for exact commands and limits.

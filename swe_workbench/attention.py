@@ -10,7 +10,7 @@ def _detail(root,change_id):
 def project_record(store,record):
     state=record['state'];change_id=state['change_id'];reports=extract(record['material'])
     current=[r for r in reports if r.get('binding')!='declared-base-source']
-    bad=any(r['status']!='reported' or r.get('binding')!='declared-same-source' or r.get('warnings') or sum(r.get('counts',{}).get(k,0) for k in ('passed','failed','error'))==0 or any(r.get('counts',{}).get(k,0) for k in ('failed','error','unavailable')) for r in current)
+    bad=any(r['status']!='reported' or r.get('binding')!='declared-same-source' or r.get('warnings') or r.get('ci',{}).get('problems') or sum(r.get('counts',{}).get(k,0) for k in ('passed','failed','error'))==0 or any(r.get('counts',{}).get(k,0) for k in ('failed','error','unavailable')) for r in current)
     if reports and not current:bad=True
     unknowns=[o['label']+': missing or unbound candidate evidence' for o in record['material']['observations'] if o['required'] and (o['value'] is None or o.get('candidate_applicability', 'declared' if o['binding']=='declared-same-source' else 'unknown')!='declared')]
     for report in reports:
@@ -75,6 +75,12 @@ def summary(path,change_id):
     for report in d['reports']:
         if report['status']!='reported':parts.append('- Invalid supported report; inspect retained evidence.');continue
         parts.append('- '+report['binding']+': '+', '.join(str(v)+' '+k for k,v in report['counts'].items()))
+        if report.get('ci'):
+            ci=report['ci'];parts.extend(['  Process: '+str(ci['exit_code'])+' ('+ci['process_outcome']+'); report: '+ci['report_status'], '  Tested product: '+ci['product_repository']+' @ '+str(ci['tested_revision']), '  Observed source: '+ci['source_state']])
+            if ci['provider']:
+                p=ci['provider'];parts.extend(['  Workflow: '+p['repository']+' @ '+p['workflow_revision']+'; job '+p['job']+'; attempt '+p['attempt'],ci['run_url']])
+            else:parts.append('  Local run; no CI provider identity.')
+            parts.extend('  Evidence issue: '+line(x) for x in ci['problems'])
     if not d['reports']:parts.append('- No supported check report; generic observations remain available in the handoff.')
     parts.extend(['','Unresolved findings:',*[('- '+line(f)) for f in d['findings']]])
     if not d['findings']:parts.append('- No current findings recorded; evidence completeness is separate.')

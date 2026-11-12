@@ -147,7 +147,7 @@ export function displayExact(value) {
 export function attentionFromRecord(record) {
   const s=record.state,m=record.material,reports=m.reported_checks||[];
   const current=reports.filter(r=>r.binding!=='declared-base-source');
-  const bad=current.some(r=>r.status!=='reported'||r.binding!=='declared-same-source'||r.warnings?.length||!['passed','failed','error'].some(k=>r.counts?.[k]>0)||['failed','error','unavailable'].some(k=>r.counts?.[k]>0))||(reports.length>0&&current.length===0);
+  const bad=current.some(r=>r.status!=='reported'||r.binding!=='declared-same-source'||r.warnings?.length||r.ci?.problems?.length||!['passed','failed','error'].some(k=>r.counts?.[k]>0)||['failed','error','unavailable'].some(k=>r.counts?.[k]>0))||(reports.length>0&&current.length===0);
   const unknowns=m.observations.filter(o=>o.required&&(o.value===null||(o.candidate_applicability??(o.binding==='declared-same-source'?'declared':'unknown'))!=='declared')).map(o=>o.label+': missing or unbound candidate evidence');
   for(const r of reports) {
     let original;try{original=strictJSON(m.attachments.find(a=>a.name===r.attachment)?.text||'null');}catch{}

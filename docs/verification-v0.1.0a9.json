@@ -1,0 +1,385 @@
+{
+  "version": "0.1.0a9",
+  "checked": "2026-11-12",
+  "baseline": "412f6ea0e733736ed153460a29505037e3300e62",
+  "source_sha256": {
+    "bundles/unicode-hyphen/README.md": "e25ded34b8daa95db133bc2f08821915f1d14212f0e510bdbfe0dc4122944085",
+    "bundles/unicode-hyphen/catalog.json": "99aa10a96fd90b40a29fda93b41315cac057c3c493f18fcb2f99a93fec93d096",
+    "bundles/unicode-hyphen/license": "2409d020da7238797c8511e51b37fff81abec789568c1bce305750c24823a370",
+    "bundles/unicode-hyphen/negative-control.patch": "6b59e35a7f8d401100d2c9fb6b4922b4ea4a7316f7d28b381a15c1c0f9cf6a04",
+    "bundles/unicode-hyphen/predictions.jsonl": "fb4325e8d363116a1bdfe090c9d69f06dafc2b0f0ec96825569f8282f2ae625c",
+    "bundles/unicode-hyphen/review-plan.json": "adb06bc3494f2a476051ed8398a974232718aa2a4d7674fbc0720f91efe01fed",
+    "bundles/unicode-hyphen/sample.jsonl": "401af6cd46a8dc032fd67e39203df8136a4b7f184fc3da9868a6098012ccfca4",
+    "bundles/unicode-hyphen/upstream.patch": "6720941b3e44652afbcb0227955ec786f94f12d73b772ea07f06acb3a25aa5e8",
+    "fixtures/README.md": "0bb67d33825225f0f758d3ea7b6f324d76e9e97741adc6de5eb8b141e1a0d79e",
+    "fixtures/catalog.json": "b42566b9fe0e8ad3200df58be7e6a61811b129683889a08e8a34dd8fb9efa144",
+    "fixtures/sample.jsonl": "8a0c65e75b67e4419f3f7db1a1eff07ea4bff838d17197a4e5cab4ce956e44a8",
+    "swe_workbench/__init__.py": "c491ff1a389395813db7196e6d900f76290816cb8efb24628ae74dc499265f82",
+    "swe_workbench/api.py": "1d424616ee4e1ec7c43778bc53bc0a49b776f498da551b331befa48b08862559",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/attention.py": "54f458c58fa0bc559f7e507cab928822924f09c26e51768a44f98066075eb948",
+    "swe_workbench/bundle.py": "419db11963f0e46ab7a1ab68ee7ece2c504b6b52d5568b3fa7900914b51aea1a",
+    "swe_workbench/check_receipt.py": "c39640e0c6b426f8cc3ac44713f3f12c003ae4bc65868279e62d5bd42af87671",
+    "swe_workbench/cli.py": "26a0d449646068aa96e67a301b73ef799a82da0349992d50bb9cca323f9ceca8",
+    "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
+    "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
+    "swe_workbench/exact_json.py": "0801a8d4b5156c58fc9ad1ffc6e4834e14e2294fa7a91398b19c96b060565513",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/git_capture.py": "4054674d77b13c99781905c99569630865a952ba187865a699f2aa7290204020",
+    "swe_workbench/handoff.py": "3b14a4056ab2d39f3f8b1a1c5335c365bde27e32d33ca1654a1eabc82ac1a7a8",
+    "swe_workbench/handoff_compact.py": "503e4316b3901d26ecf6241e42117f24173b6c537e54e8906c1abc4b7409a2b8",
+    "swe_workbench/handoff_context.py": "01688af560a24593f91c430213e8bfb6106f92e7b866410104a219d475f8f970",
+    "swe_workbench/handoff_profile.py": "a2000d68857a5c32876affc1509cc80f87e4c9afb4cc6792ab1052f47d9414ca",
+    "swe_workbench/handoff_validation.py": "53208ec0171923bd2a048d1161a2343e78aff82c030cd0c9fe6d39cde690b93d",
+    "swe_workbench/handoff_view.py": "9a4dbe393fecc6d8b7f1d6f40bc61e7ca7c42d6d12e05c5192c13f09a4b35748",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/junit_report.py": "49df8296cc398b184d17ea31d095412a39e46227d45de2009778fa2010d1155e",
+    "swe_workbench/project_context.py": "83b81c869bddfdaf78f9a8017417a97623b3503692f47f996a080886004fd9bd",
+    "swe_workbench/project_scope.py": "436cf7d0a7ff7348bcc6a93e5e6e4b01d9856c607df91d3089ffd34ef6dea75e",
+    "swe_workbench/receipt_example.py": "cc8691d71c9a1a7cfe21029b575cad06c4d611182f209e1d66a187ac69d522cd",
+    "swe_workbench/release_check.py": "832e569aea44328e0e7aacc995eccae43671a72b15dd7128a53a65199e00e4e3",
+    "swe_workbench/reported_checks.py": "7dcfbc6e57e9d49e586e7a14d4754105ca166e687dbad3eeb7e29fa43cc5fef0",
+    "swe_workbench/review_package.py": "0b07315d0aaaa8240c15e2e967238afe3d7ae5e6dd07e8e8e6af3a6c402350b3",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/state_backup.py": "d4e843c11f387b340ee3e5319a4b468a1dae3a676c05730349bd8b4b4d8ac09c",
+    "swe_workbench/store.py": "86cbcc8989e39ecd15198cec9ca40bdd8fc5d377543398104c5c92c505db7949",
+    "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
+    "web/app.js": "300837c2d62328a8c346fab1981fb6e27cb36864dcf1f274477ee6dc497cad05",
+    "web/attention.html": "9f35b890617e4f5a50d2f5783ecaf122c2d18356fc3ec2db25a8cde8f55df098",
+    "web/attention.js": "02cc37207a3eac3247c536fd5841a6604694fbbac56abb4ebc4d48302d7b9b45",
+    "web/handoff-verify.js": "7b82e8925e24abc63414c60bbe82f18f20fa99c6b305e106774d1e14af36875d",
+    "web/index.html": "12e82fadd827e6dacb0decf62ed27001ab27dc664dda93b326b0d24e9729bc08",
+    "web/style.css": "b7c136f33cd9d2fcc9dd5a1e10c2126ed0cbc6af6a35436cf61314b901840306"
+  },
+  "wheel_sha256": "1e18b99a7b4b92e8b3da63178f402c989a7e819438e32e886b572e858de8134b",
+  "focused_checks": {
+    "clean_source_archive_cases": 12,
+    "clean_source_archive_private_or_generated_inputs": false,
+    "affected_legacy_handoff_backup_cases": 22,
+    "browser_cases_in_clean_source": "v1/v2/v3 selected startup/alterations plus overview/exact v4 fixture; actual private asset route",
+    "failed_provisional_checks": "The first overview fixture check deleted its imported fixture alias; corrected test setup. Installed daily guard initially classified a venv under the source root as source import; corrected guard in tool only. Neither changed runtime wheel bytes.",
+    "policy": "Focused checks repeated after specific changed behavior, failed setup or final packaging; no whole suite or model evaluation."
+  },
+  "installed_compatibility": {
+    "version": "0.1.0a9",
+    "wheel_sha256": "1e18b99a7b4b92e8b3da63178f402c989a7e819438e32e886b572e858de8134b",
+    "checks": [
+      {
+        "name": "installed-wheel-parity",
+        "files": 50
+      },
+      {
+        "name": "frozen-v1",
+        "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b"
+      },
+      {
+        "name": "frozen-v2",
+        "manifest_digest": "700e46594fd20d68bbd24064d816913ed3c1df2a9a586666106884dec301982c"
+      },
+      {
+        "name": "preview-capture-review-export",
+        "revision": 1,
+        "retries_preserved": true,
+        "occupied_export_and_stale_review_refused": true
+      },
+      {
+        "name": "restore-and-continue",
+        "history_preserved": true
+      },
+      {
+        "name": "unknown-source-remains-unresolved"
+      }
+    ],
+    "application_model_calls": 0,
+    "input_project_execution": 0,
+    "ok": true
+  },
+  "installed_daily": {
+    "version": "0.1.0a9",
+    "installed_only": true,
+    "report_scope": "Authored qualification reports and scripted review decisions; no claimed source test execution.",
+    "application_model_calls": 0,
+    "ok": true,
+    "browser": {
+      "actual_private_module_delivery": true,
+      "owner_connection": true,
+      "verified_overview_to_detail": true,
+      "original_duration_text": true,
+      "errors": []
+    },
+    "composed_packages": 2,
+    "explicit_scripted_reviews": 2,
+    "private_restore": true
+  },
+  "static_browser": {
+    "profile": "local",
+    "http": 200,
+    "attention_to_detail": true,
+    "verified_overview": true,
+    "authored_failed_unknown_case": true,
+    "original_numeric_duration_text": true,
+    "real_cases": [
+      {
+        "reported_passed": 3,
+        "source": "swe_workbench/junit_report.py",
+        "history": true,
+        "downloads": 3
+      },
+      {
+        "reported_passed": 1,
+        "source": "swe_workbench/api.py",
+        "history": true,
+        "downloads": 3
+      }
+    ],
+    "historical_needs_work_preserved": true,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "private_inputs_uploaded": false,
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "actual_daily_use": {
+    "actual_changes": [
+      {
+        "change_id": "private-module-delivery",
+        "package_stage": "complete",
+        "review_revision": 5,
+        "source": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94"
+      },
+      {
+        "change_id": "existing-report-import",
+        "package_stage": "complete",
+        "review_revision": 5,
+        "source": "217064e5637e4fa493af23cef3dc2f95c9d19a7c"
+      }
+    ],
+    "profile_mapping_edits_between_actual_changes": 0,
+    "existing_original_reports_reused": true,
+    "new_source_test_runs": 0,
+    "new_model_evaluations": 0,
+    "authored_problem_case": "Separate explicitly labeled failed/skipped/unknown-context fixture, not an actual execution.",
+    "human_usability_and_time_saving": "unmeasured"
+  },
+  "read_reuse": {
+    "before": {
+      "changes": 10,
+      "full_event_loads": 22,
+      "elapsed_seconds": 0.012435369193553925,
+      "scope": "One owned10-change fixture; no production latency claim."
+    },
+    "after": {
+      "changes": 10,
+      "full_event_loads": 1,
+      "elapsed_seconds": 0.006825135089457035,
+      "writer_lock_released_before_projection": true,
+      "scope": "One owned10-change fixture; not a production latency benchmark."
+    },
+    "interpretation": "22 to1 full-event loads on one owned10-change fixture; no production latency or generalized throughput claim."
+  },
+  "corrections_to_prior_scope": [
+    "Original0.1.0a8 browser token handling did not prevent Python numeric observation rounding/underflow. New v4 exact typed trees close that extraction gap; old formats keep their original precision limits.",
+    "The retained browser regression passed before the final0.1.0a8 public-root layout change and failed in the subsequent audit. This release makes it independent of ignored dist and verifies the final layout. Original passing receipts/release bytes remain historical."
+  ],
+  "project_scope": "Private audited association uses Git common-directory identity and repository label. New capture, context reads and generic capture respect ownership; explicit safe legacy association/relocation preserves history. Local association is not publisher authentication.",
+  "numeric_scope": "New daily v4 exact observation trees retain source tokens through Python extraction, canonical material/export/restore and browser display. Legacy canonical/parse unchanged; signed decimal zero, numeric/string/boolean/null types distinct.4300-character numeric token guard; no exponent expansion.",
+  "overview_scope": "Cards verify linked fixed local packages and association before status/filter; purpose/scope/outcomes/unknowns derive from retained material. Invalid/unavailable remains visible; global audit errors fail loudly.",
+  "composition_scope": "prepare-review composes existing local operations, saves prepared/captured/complete stages, uses capture CAS and exact selections, and explicitly resumes or refuses stale inputs/state. No listener/upload/source-project/model execution.",
+  "attribution": "Owner-led requirements; substantial Codex implementation/verification/docs assistance. Two actual source/report cases are historical real measurements with new AI-assisted package reviews. Additional failure/unknown case and installed qualification reports/decisions are explicitly authored/scripted.",
+  "private_state_and_tickets_published": false,
+  "old_release_bytes_preserved": true,
+  "human_usability_and_time_saving": "unmeasured",
+  "ci_status": "Hosted push run43218708022 completed successfully on first attempt at source7f8633d677974f978a6b1bb8174dbf809024440a, including clean checks, wheel build and isolated installed rehearsal.",
+  "public_status": "Published v0.1.0a9 and hosted version9 verified2026-11-12. The original release verification asset retains its prepublication cut; current docs append the actual hosted/CI receipt.",
+  "actual_mixed_restore": {
+    "mixed_v3_v4_restore": {
+      "private-module-delivery": true,
+      "existing-report-import": true,
+      "authored-report-example": true
+    },
+    "original_histories_retained": true
+  },
+  "publication": {
+    "code_commit": "7f8633d677974f978a6b1bb8174dbf809024440a",
+    "tag": "v0.1.0a9",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a9",
+    "assets_verified": 6,
+    "asset_size_and_sha256_match_local": true,
+    "tag_full_sha_match": true,
+    "assets": [
+      {
+        "name": "daily-change-exports.zip",
+        "bytes": 68764,
+        "sha256": "sha256:de71158db8953061da9f027d8b9636852ee9108bf4fcc835bd0ad8c816510c68"
+      },
+      {
+        "name": "installed-daily-qualification.json",
+        "bytes": 491,
+        "sha256": "sha256:db2c8b809aea38f00d98a2372b8d815ee945a30d8bd22f9588827d72dd7e7c14"
+      },
+      {
+        "name": "private-ui-regression-recipe.zip",
+        "bytes": 3285,
+        "sha256": "sha256:e67c9bfca62021802cd54056a2e91c0a2067fa79ad7fd8d2af4ecdc62243ae29"
+      },
+      {
+        "name": "SHA256SUMS",
+        "bytes": 485,
+        "sha256": "sha256:858f87cecfc38ec79a7d8f3293d86d5eb1e45ba338256a28b6f21a847a072c43"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a9-py3-none-any.whl",
+        "bytes": 143885,
+        "sha256": "sha256:1e18b99a7b4b92e8b3da63178f402c989a7e819438e32e886b572e858de8134b"
+      },
+      {
+        "name": "verification.json",
+        "bytes": 12499,
+        "sha256": "sha256:cf035ed92e363ebed084da1dfc74fc538bb32019bed9fc944fc90685761247b4"
+      }
+    ],
+    "ci": {
+      "id": 43218708022,
+      "head_sha": "7f8633d677974f978a6b1bb8174dbf809024440a",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43218708022",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 131184437466,
+          "name": "focused",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 43218708022,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install pinned tools and Chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Check corrected source paths",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Build and install one wheel",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Check isolated installed compatibility and daily workflow",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        }
+      ]
+    },
+    "site_version": 9,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "deployment_id": "appgdep_6af5b22a373c81918ea1e3241705b402",
+    "deployment_status": "succeeded",
+    "saved_version_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_9ed02ad940508191a5262674f27cd44b",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "attention_to_detail": true,
+      "verified_overview": true,
+      "authored_failed_unknown_case": true,
+      "original_numeric_duration_text": true,
+      "real_cases": [
+        {
+          "reported_passed": 3,
+          "source": "swe_workbench/junit_report.py",
+          "history": true,
+          "downloads": 3
+        },
+        {
+          "reported_passed": 1,
+          "source": "swe_workbench/api.py",
+          "history": true,
+          "downloads": 3
+        }
+      ],
+      "historical_needs_work_preserved": true,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "legacy_direct_paths": {
+      "prepared": 200,
+      "unicode-hyphen": 200,
+      "synthetic": 200
+    }
+  }
+}
