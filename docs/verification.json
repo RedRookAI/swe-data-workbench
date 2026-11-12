@@ -1,1 +1,268 @@
-{"version":"0.1.0a10","checked":"2026-11-12","baseline":"4ed531cae30a8cd7c8a18ca2da5d675b0511cc7f","focused":{"passed":10,"scope":"producer/package/containment/recipe fixtures"},"external_local":{"passed":17,"exit_code":0,"candidate":"7f4dcf83a07bb3d53f4e0e65ef1b43327b4cca90","review":"unreviewed"},"publication":"pending observed qualification","application_model_calls":0}
+{
+  "version": "0.1.0a10",
+  "checked": "2026-11-12",
+  "baseline": "4ed531cae30a8cd7c8a18ca2da5d675b0511cc7f",
+  "runtime_source_commit": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+  "wheel_sha256": "b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
+  "focused_components": {
+    "passed": 10,
+    "scope": "Authored producer/package/containment/recipe fixtures; subsequent six affected checks passed after validator hardening."
+  },
+  "clean_local_normal": {
+    "passed": 18,
+    "pytest_warnings": 1,
+    "warning": "Existing Starlette test-client/httpx deprecation warning; tests passed.",
+    "original_report": true,
+    "source_state": "clean",
+    "review": "unreviewed"
+  },
+  "local_external": {
+    "passed": 17,
+    "scope": "Pinned original signer tests; current tools; no baseline-failure or FIPS claim."
+  },
+  "installed_compatibility": {
+    "version": "0.1.0a10",
+    "wheel_sha256": "b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
+    "checks": [
+      {
+        "name": "installed-wheel-parity",
+        "files": 51
+      },
+      {
+        "name": "frozen-v1",
+        "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b"
+      },
+      {
+        "name": "frozen-v2",
+        "manifest_digest": "700e46594fd20d68bbd24064d816913ed3c1df2a9a586666106884dec301982c"
+      },
+      {
+        "name": "preview-capture-review-export",
+        "revision": 1,
+        "retries_preserved": true,
+        "occupied_export_and_stale_review_refused": true
+      },
+      {
+        "name": "restore-and-continue",
+        "history_preserved": true
+      },
+      {
+        "name": "unknown-source-remains-unresolved"
+      }
+    ],
+    "application_model_calls": 0,
+    "input_project_execution": 0,
+    "ok": true
+  },
+  "installed_daily": {
+    "version": "0.1.0a10",
+    "installed_only": true,
+    "report_scope": "Authored qualification reports and scripted review decisions; no claimed source test execution.",
+    "application_model_calls": 0,
+    "ok": true,
+    "browser": {
+      "actual_private_module_delivery": true,
+      "owner_connection": true,
+      "verified_overview_to_detail": true,
+      "original_duration_text": true,
+      "errors": []
+    },
+    "composed_packages": 2,
+    "explicit_scripted_reviews": 2,
+    "private_restore": true
+  },
+  "actual_hosted": {
+    "normal": {
+      "run_id": "43226409121",
+      "process_exit": 0,
+      "counts": {
+        "error": 0,
+        "failed": 0,
+        "passed": 18,
+        "skipped": 0,
+        "unavailable": 0
+      },
+      "product": "RedRookAI/swe-data-workbench",
+      "tested_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+      "source_state": "clean",
+      "review": "unreviewed",
+      "manifest_digest": "ae67a1804851159c241b29bd430b3243817f6bb5190dffeec5afe12ce8e5218d",
+      "internal_verification": true,
+      "private_files_excluded": true
+    },
+    "external": {
+      "run_id": "43226500722",
+      "process_exit": 0,
+      "counts": {
+        "error": 0,
+        "failed": 0,
+        "passed": 17,
+        "skipped": 0,
+        "unavailable": 0
+      },
+      "product": "pallets/itsdangerous",
+      "tested_revision": "7f4dcf83a07bb3d53f4e0e65ef1b43327b4cca90",
+      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+      "source_state": "clean",
+      "review": "unreviewed",
+      "manifest_digest": "67ac4aabe1f8005f689e6cd0947952760207532f9eb152523cfc6e0a719e4962",
+      "internal_verification": true,
+      "private_files_excluded": true
+    },
+    "intentional-failure": {
+      "run_id": "43226505309",
+      "process_exit": 1,
+      "counts": {
+        "error": 0,
+        "failed": 1,
+        "passed": 0,
+        "skipped": 0,
+        "unavailable": 0
+      },
+      "product": "RedRookAI/swe-data-workbench",
+      "tested_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
+      "source_state": "clean",
+      "review": "unreviewed",
+      "manifest_digest": "8ed5807f857f9187eab0746ab3e64bfe75bd1c782ebcfa3cf651343dc38f8050",
+      "internal_verification": true,
+      "private_files_excluded": true
+    }
+  },
+  "provider_artifacts": {
+    "normal": {
+      "id": 13948088318,
+      "name": "selected-review-43226409121-1-focused-normal",
+      "size_in_bytes": 944168,
+      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13948088318",
+      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13948088318/zip",
+      "expired": false,
+      "created_at": "2026-11-12T13:21:39Z",
+      "expires_at": "2027-02-10T13:20:51Z",
+      "updated_at": "2026-11-12T13:21:39Z",
+      "digest": "sha256:dda9f14da0943ac7cd0ae82f6b996af54453fb81d98660239845a78a5106b52a",
+      "workflow_run": {
+        "id": 43226409121,
+        "repository_id": 1454462067,
+        "head_repository_id": 1454462067,
+        "head_branch": "main",
+        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
+      }
+    },
+    "external": {
+      "id": 13947868590,
+      "name": "selected-review-43226500722-1-focused-itsdangerous",
+      "size_in_bytes": 152863,
+      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947868590",
+      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947868590/zip",
+      "expired": false,
+      "created_at": "2026-11-12T13:22:08Z",
+      "expires_at": "2027-02-10T13:21:26Z",
+      "updated_at": "2026-11-12T13:22:08Z",
+      "digest": "sha256:8d12724c96d38c9ff1da20a9f89ce85749f023dba164cbb5c5a163d4cd59f637",
+      "workflow_run": {
+        "id": 43226500722,
+        "repository_id": 1454462067,
+        "head_repository_id": 1454462067,
+        "head_branch": "main",
+        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
+      }
+    },
+    "intentional-failure": {
+      "id": 13947813585,
+      "name": "selected-review-43226505309-1-focused-intentional-failure",
+      "size_in_bytes": 930898,
+      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947813585",
+      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947813585/zip",
+      "expired": false,
+      "created_at": "2026-11-12T13:22:07Z",
+      "expires_at": "2027-02-10T13:21:28Z",
+      "updated_at": "2026-11-12T13:22:07Z",
+      "digest": "sha256:776208a7ccecdd0201f59418837feb419e96ff1f76fa38b9436e419a368d3167",
+      "workflow_run": {
+        "id": 43226505309,
+        "repository_id": 1454462067,
+        "head_repository_id": 1454462067,
+        "head_branch": "main",
+        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
+      }
+    }
+  },
+  "local_ci_browser": {
+    "ok": true,
+    "cases": [
+      {
+        "route": "ci/normal/view",
+        "reported": "18 passed",
+        "repository": "RedRookAI/swe-data-workbench",
+        "process": "0",
+        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226409121/attempts/1"
+      },
+      {
+        "route": "ci/external/view",
+        "reported": "17 passed",
+        "repository": "pallets/itsdangerous",
+        "process": "0",
+        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226500722/attempts/1"
+      },
+      {
+        "route": "ci/intentional-failure/view",
+        "reported": "1 failed",
+        "repository": "RedRookAI/swe-data-workbench",
+        "process": "1",
+        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226505309/attempts/1"
+      }
+    ],
+    "errors": [],
+    "actual_browser": true,
+    "mobile_fit": true,
+    "review_unreviewed": true,
+    "credential_or_model_calls": 0
+  },
+  "local_preserved_browser": {
+    "profile": "local",
+    "http": 200,
+    "attention_to_detail": true,
+    "verified_overview": true,
+    "authored_failed_unknown_case": true,
+    "original_numeric_duration_text": true,
+    "real_cases": [
+      {
+        "reported_passed": 3,
+        "source": "swe_workbench/junit_report.py",
+        "history": true,
+        "downloads": 3
+      },
+      {
+        "reported_passed": 1,
+        "source": "swe_workbench/api.py",
+        "history": true,
+        "downloads": 3
+      }
+    ],
+    "historical_needs_work_preserved": true,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "private_inputs_uploaded": false,
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "scope": "GitHub/Linux/Python/pytest; optional versioned receipt; fixed external case; old release bytes/history untouched.",
+  "assurance": "Unsigned pre/post source/check observations and content consistency, not independent witness, continuous integrity or hermetic execution.",
+  "attribution": "Owner-led requirements; substantial Codex implementation/research/verification/docs assistance. Itsdangerous change belongs to historical upstream authors. Intentional failure is explicitly authored qualification. No new application model evaluation.",
+  "application_model_calls": 0,
+  "private_state_tickets_published": false,
+  "publication": "Audited source is public; release/public Site publication receipt follows observed completion."
+}

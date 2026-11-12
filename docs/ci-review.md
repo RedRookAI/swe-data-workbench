@@ -69,6 +69,8 @@ Upload uses the pinned native upload-artifact action, hidden files disabled, ove
 
 Download through GitHub's artifact control while signed in. After extraction, use verify-handoff on export/ or view/handoff/. Provider ZIP SHA256 and the workbench manifest digest identify different layers; compare each with its corresponding receipt. Serve view/ through an existing trusted HTTP connection. A double-clicked file:// page cannot reliably load its modules/evidence. The audited public selection on the existing preview provides an anonymous browser route and the release retains a stable chosen download.
 
+For an existing static workbench build, tools/build_ci_gallery.py can add these three explicitly selected extracted artifacts using --dist, --normal, --external and --failure. It verifies each export, receipt, source/outcome and file allowlist before copying. Only use public-safe inputs. Existing CI selections refuse overwrite; start with the retained earlier build for a different selection.
+
 ## Research checked2026-11-12
 
 GitHub variable/event and artifact documentation supplies the identity, status and delivery behavior. Current tagged upload-artifact v7 was checked against its official ref; older tutorial snippets still use v4. Pytest documents JUnit and exit meanings. Research about artifact verifiability motivated retained source/recipe context; this preview makes no measured reproducibility, independent-attestation or model-quality claim.

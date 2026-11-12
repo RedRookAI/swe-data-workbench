@@ -36,6 +36,10 @@ The GitHub workflow now records its selected pytest invocation once, retains the
 
 The same fixed recipe can inspect a pinned historical itsdangerous change. Its original signer tests run against the selected source; upstream authorship and the BSD notice stay with the export. The intentional failure option is a separate, clearly labeled artifact-delivery check.
 
+The published qualification retained18 passing workbench checks,17 passing upstream signer checks and one intentional failure. Open the actual CI examples:
+
+https://swe-data-workbench.flyswatterghost.chatgpt.site/ci/
+
 See docs/ci-review.md for the commands, base-selection policy, artifact contents and limits. CI downloads require GitHub sign-in and follow repository retention. The selected browser view needs HTTP serving; the public preview supplies that for audited examples.
 
 ## Review the original real-change example
