@@ -126,5 +126,42 @@
   "private_inputs_published": false,
   "old_release_bytes_preserved": true,
   "human_time_savings": "unmeasured",
-  "public_status": "Private source/artifact/browser qualification complete; public checkpoint pending at this evidence cut."
+  "public_status": "Published v0.1.0a7 and hosted version7 verified2026-11-12. Release assets retain their original prepublication verification cut; this later receipt does not replace bytes.",
+  "publication": {
+    "code_commit": "62643792383d08ce7aa6363fd56439667de631f4",
+    "tag": "v0.1.0a7",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a7",
+    "assets_verified": 5,
+    "asset_size_and_sha256_match_local": true,
+    "site_version": 7,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "deployment_id": "appgdep_6af520acd3448191a038d4b98083d0c7",
+    "deployment_status": "succeeded",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "summary_first": true,
+      "typed_roles": true,
+      "real_prior_comparison": true,
+      "historical_material_hash_checked": true,
+      "downloads": 3,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "content_verification_gate": "passed dedicated v1/v2/error browser cases",
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    }
+  }
 }
