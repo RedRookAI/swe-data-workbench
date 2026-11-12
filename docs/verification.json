@@ -264,5 +264,138 @@
   "attribution": "Owner-led requirements; substantial Codex implementation/research/verification/docs assistance. Itsdangerous change belongs to historical upstream authors. Intentional failure is explicitly authored qualification. No new application model evaluation.",
   "application_model_calls": 0,
   "private_state_tickets_published": false,
-  "publication": "Audited source is public; release/public Site publication receipt follows observed completion."
+  "publication": {
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a10",
+    "release_source": "7b988883711293c63c1aa6e8d04b8f4da3126376",
+    "tag_matches_source": true,
+    "assets_verified_downloaded": 8,
+    "asset_identity": [
+      {
+        "name": "actual-ci-external-itsdangerous.zip",
+        "size": 152863,
+        "digest": "sha256:8d12724c96d38c9ff1da20a9f89ce85749f023dba164cbb5c5a163d4cd59f637",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-external-itsdangerous.zip"
+      },
+      {
+        "name": "actual-ci-intentional-failure.zip",
+        "size": 930898,
+        "digest": "sha256:776208a7ccecdd0201f59418837feb419e96ff1f76fa38b9436e419a368d3167",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-intentional-failure.zip"
+      },
+      {
+        "name": "actual-ci-normal.zip",
+        "size": 944168,
+        "digest": "sha256:dda9f14da0943ac7cd0ae82f6b996af54453fb81d98660239845a78a5106b52a",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-normal.zip"
+      },
+      {
+        "name": "installed-compatibility.json",
+        "size": 860,
+        "digest": "sha256:4a376e0bccb1acd477e5218082039f6b4ec11b6f47c1829a53ee9622513f3957",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/installed-compatibility.json"
+      },
+      {
+        "name": "installed-daily-qualification.json",
+        "size": 492,
+        "digest": "sha256:d04ee7005c87e6be9e91959982f8ea01b05d8134c5a5a1b77c33f9245fd7062b",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/installed-daily-qualification.json"
+      },
+      {
+        "name": "SHA256SUMS",
+        "size": 680,
+        "digest": "sha256:ba3a05ad29c3ace78d0948131d080613769fc0e21b4b89dda3a7199fec29f931",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/SHA256SUMS"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a10-py3-none-any.whl",
+        "size": 149259,
+        "digest": "sha256:b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/swe_data_workbench-0.1.0a10-py3-none-any.whl"
+      },
+      {
+        "name": "verification.json",
+        "size": 9627,
+        "digest": "sha256:5b1a8af65e2d85782c66e007bf91517762c6749a981155be0c35a2a6abfef42b",
+        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/verification.json"
+      }
+    ],
+    "site_version": 10,
+    "site_saved_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_8479173548888191a1149060f69d9648",
+    "site_deployment": "appgdep_6af5beb21bf48191878346bded18fae2",
+    "site_status": "succeeded",
+    "site_source": "7b988883711293c63c1aa6e8d04b8f4da3126376",
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site/ci/",
+    "ci_browser": {
+      "ok": true,
+      "cases": [
+        {
+          "route": "ci/normal/view",
+          "reported": "18 passed",
+          "repository": "RedRookAI/swe-data-workbench",
+          "process": "0",
+          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226409121/attempts/1"
+        },
+        {
+          "route": "ci/external/view",
+          "reported": "17 passed",
+          "repository": "pallets/itsdangerous",
+          "process": "0",
+          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226500722/attempts/1"
+        },
+        {
+          "route": "ci/intentional-failure/view",
+          "reported": "1 failed",
+          "repository": "RedRookAI/swe-data-workbench",
+          "process": "1",
+          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226505309/attempts/1"
+        }
+      ],
+      "errors": [],
+      "actual_browser": true,
+      "mobile_fit": true,
+      "review_unreviewed": true,
+      "credential_or_model_calls": 0
+    },
+    "preserved_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "attention_to_detail": true,
+      "verified_overview": true,
+      "authored_failed_unknown_case": true,
+      "original_numeric_duration_text": true,
+      "real_cases": [
+        {
+          "reported_passed": 3,
+          "source": "swe_workbench/junit_report.py",
+          "history": true,
+          "downloads": 3
+        },
+        {
+          "reported_passed": 1,
+          "source": "swe_workbench/api.py",
+          "history": true,
+          "downloads": 3
+        }
+      ],
+      "historical_needs_work_preserved": true,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "release_verification_asset": "Immutable pre-publication snapshot; this docs-only receipt appends subsequent publication observations.",
+    "remaining_blocker": null
+  }
 }
