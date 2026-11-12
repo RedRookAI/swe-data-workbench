@@ -172,5 +172,42 @@
     "Normal key-free recapture returns current review state. Explicit operation-key retries retain their original response; None responsible-party metadata is omitted from legacy operation payloads for compatibility.",
     "Role-bearing fields require v2 and are not silently interpreted as v1. A comparison is recomputed from retained old/new material and does not grant evidence reuse or approval."
   ],
-  "public_status": "Local artifact/browser audit complete; public checkpoint pending at this evidence cut."
+  "public_status": "Published source/release and hosted version6 verified2026-11-12; release verification asset remains the original prepublication evidence cut.",
+  "publication": {
+    "code_commit": "ff50ffcb89ec67ef244f28da14b656c158e546f8",
+    "tag": "v0.1.0a6",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a6",
+    "release_asset_digests_match_local": true,
+    "site_version": 6,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "site_source_commit": "ff50ffcb89ec67ef244f28da14b656c158e546f8",
+    "deployment_status": "succeeded",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "summary_first": true,
+      "typed_roles": true,
+      "real_prior_comparison": true,
+      "historical_material_hash_checked": true,
+      "downloads": 3,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "private_unknowns_and_unassigned": "previous local check reused; no private inputs uploaded",
+      "legacy_handoff": "previous local check reused",
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "release_bytes_preserved": true
+  }
 }

@@ -17,3 +17,7 @@ The local browser verified the summary-first view, role details, actual prior-re
 Profile setup, mapping selection and human review remain work. The observed repeated use removes copied field-map edits; command execution timings exclude developer construction and do not establish human time savings. The decision is to retain the optional small handoff workflow. No model evaluation, native rebuild, collection, fleet restart or source-project push was performed. Old releases and original evidence bytes remain preserved.
 
 Local source/artifact/browser audit is complete at this evidence cut. Hosted publication is recorded separately after deployment.
+
+## Publication receipt2026-11-12
+
+Code commit ff50ffcb89ec67ef244f28da14b656c158e546f8 is public as v0.1.0a6. All five uploaded release assets match local size/SHA256 and have uploaded status. The release verification asset retains its original prepublication evidence cut; this later documentation receipt does not replace release bytes. Hosted version6 uses the same code commit. The hosted browser passed summary/roles/comparison, content-hash-checked history, three downloads, task-quality/three old views, mobile fit, actual captions and paused/muted media with volume0 retained. No browser errors, API calls or external requests occurred. Private-case browser checks remained local.
