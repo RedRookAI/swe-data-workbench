@@ -16,12 +16,192 @@
   "original_evidence_media_files_unchanged": 87,
   "new_model_calls": 0,
   "prior_verification": "verification-v0.1.0a12.md/json",
-  "publication": "Source CI, release download and deployed preview receipt will be appended after observation.",
+  "publication": "Complete: current source, corrected CI, exact release downloads, existing public Site and hosted browser checks verified. This later documentation receipt adds release observations without modifying published assets.",
   "initial_ci": {
     "run_id": 43259673888,
     "source": "db44aa490896b5a455eb69dc5a2a116c86ef316d",
     "passed": 55,
     "failed": 1,
     "cause": "Pinned /usr/bin/node runtime absent on hosted runner. CI now installs nodejs; regression reports explicit prerequisite failure."
+  },
+  "hosted": {
+    "http": 200,
+    "candidate_labels_and_selection": [
+      "Existing behavior control",
+      "Alternate valid design",
+      "Unapproved variant",
+      "Authored reference",
+      "Recorded Codex attempt"
+    ],
+    "acceptance_explanation": true,
+    "media_paused_muted_controls": true,
+    "mobile_fit": true,
+    "page_errors": []
+  },
+  "site": {
+    "source": "db44aa490896b5a455eb69dc5a2a116c86ef316d",
+    "saved_version": 12,
+    "version_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_a7f7fb9dee50819183c5280eb5a6818a",
+    "archive": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_0000000014b4821094549a2b2a9bd0c8",
+      "content_hash": "sha256:7d03e9575dbd6907717f38a8fa4678d0fb34af7c5e27c2c8bed39f15e8db8daf",
+      "size_bytes": 43100160,
+      "file_count": 148
+    },
+    "deployment_id": "appgdep_6af5ea2a6d048191b746291a9b031847",
+    "status": "succeeded",
+    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site"
+  },
+  "source_asset_parity": {
+    "source_asset_files_equal": 40,
+    "wheel_sha256": "de415c9626d535d1f45a5b330b63883a431c18decc537761e86e9d339996af5b",
+    "private_save": true,
+    "protected_files_equal": 87
+  },
+  "release_source": "8173ec86a1078681c8fae01d33946fc17ba908bc",
+  "site_source_note": "The subsequent CI prerequisite correction changes only workflow, test diagnostics and verification docs. Published application and preview bytes are identical to the deployed db44aa4 source.",
+  "actual_ci": {
+    "run_id": 43260190189,
+    "source": "8173ec86a1078681c8fae01d33946fc17ba908bc",
+    "conclusion": "success",
+    "passed": 56,
+    "subtests_passed": 16,
+    "warnings": 1,
+    "warning": "Existing FastAPI TestClient deprecation warning for httpx; no failure.",
+    "jobs": [
+      {
+        "id": 131329057881,
+        "name": "focused",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43260190189,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned tools and Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install Node for the pinned Unicode fixture",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build and install packager before tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Prepare fixed source and base policy",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run selected pytest command once and retain actual exit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Assemble selected report even when checks fail",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload selected evidence only",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Record provider upload identity separately",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Check isolated installed compatibility and authored daily fixture",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25
+          }
+        ]
+      }
+    ]
+  },
+  "release": {
+    "url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a13",
+    "target": "8173ec86a1078681c8fae01d33946fc17ba908bc",
+    "assets_verified": [
+      {
+        "name": "public-preview.zip",
+        "size": 33866068,
+        "sha256": "f5855ad3c75e59d3d18cf1206e445522f8e7d4514d1b01e0a4348ca1d3779593"
+      },
+      {
+        "name": "SHA256SUMS",
+        "size": 365,
+        "sha256": "946f2a8bbfc2bb630ec694cbf183d044c908fbc13a2a809a20264976040b8a3c"
+      },
+      {
+        "name": "source-parity.json",
+        "size": 178,
+        "sha256": "0c0476e3b3d82dbba2e32cc45c634f4ed8dab6e55b427ec6987c3bf567d7575e"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a13-py3-none-any.whl",
+        "size": 153480,
+        "sha256": "de415c9626d535d1f45a5b330b63883a431c18decc537761e86e9d339996af5b"
+      },
+      {
+        "name": "verification.json",
+        "size": 6028,
+        "sha256": "94c9fc28a0188a56b6ea7ae7e3ffec4503f4b9822ecc774fb6343676e04914fd"
+      }
+    ],
+    "anonymous_wheel_http": 200
   }
 }
