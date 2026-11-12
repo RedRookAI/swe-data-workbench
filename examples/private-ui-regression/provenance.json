@@ -1,0 +1,7 @@
+{
+  "origin": "actual_workbench_change",
+  "license": "MIT",
+  "repository": "https://github.com/RedRookAI/swe-data-workbench",
+  "base_commit": "5d5e70cc1c00e28b31c11112ad8e9c148222b52a",
+  "scope": "Actual selected API source plus protected check. Installed dependency modules/assets are reused and their package version is recorded; this is not a complete independent application environment."
+}

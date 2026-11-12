@@ -1,0 +1,10 @@
+[
+  {
+    "name": "private-api-module-delivery",
+    "argv": [
+      "{python}",
+      "{verifier}/check.py"
+    ],
+    "timeout": 30
+  }
+]

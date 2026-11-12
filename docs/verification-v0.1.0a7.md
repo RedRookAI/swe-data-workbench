@@ -1,0 +1,21 @@
+# Verification:0.1.0a7
+
+Checked2026-11-12. This release adds precise handoff field errors, bounded Git reads, checked current browser content, read-only profile preview, reusable check receipts, a complete installed workflow and private quiescent state backup/restore. Keep and other input projects remained read-only.
+
+Six new boundary cases, three bounded-reader cases, two profile/receipt cases, five backup cases and one browser case passed. The browser case covered two frozen formats, four altered-content failures per format and three unsupported/ambiguous JSON inputs. Twelve affected handoff/context cases and eleven existing preparation cases passed. Focused follow-ups ran after parser changes and the audit correction for malformed saved audit payload; no whole workbench suite or source-project tests ran.
+
+The bounded reader exercised exact-cap/cap+1, concurrent pipes, actual exit23,65536 diagnostic bytes,16384 maximum read and owned child cleanup. Admitted Git content remains exact; oversized source/path/diff output is refused. Preview material matches capture on unchanged inputs and creates no runtime database/artifacts. Changed/missing evidence remains visible without updating saved state during preview.
+
+Receipt checks preserved passed/failed/skipped/unavailable outcomes and unknown/dirty source context, exact attachment bytes, existing output refusal and ordinary profile use. A reporting helper does not witness execution. The fixed synthetic producer actually ran one Python check in its own new repository. Qualification reviews are explicitly scripted; the original genuine Codex task remains separate and unchanged.
+
+Backup checks covered original review/retry/history, restore into fresh state, a further review/export, corrupted content/occupied/overlapping/symlink destinations, active execution refusal and a later metadata write after the consistent SQLite cut. An existing completed native synthetic recording retained its stored results/audit without executing it again. A malformed stored audit payload receives a specific refusal. All database records and immutable artifacts are preserved; external bundles/exports/workspaces and worker migration remain outside this operation.
+
+The final wheel was installed without runtime dependency changes. A fresh isolated process outside the checkout matched39 installed module/asset files to the wheel, verified original frozen v1/v2 exports and followed preview→capture→explicit scripted review→export→backup→restore→continued review/export. Retries retained the current review, stale review and occupied output were refused, and a later missing source binding could not become handoff-ready. A wrong wheel and modified export were independently refused. The first qualification remains retained privately; the final wheel was rebuilt/requalified after the specific audit corrections. Human productivity gains remain unmeasured.
+
+The public static build passed current-content verification, summary/roles/comparison, hashed original history, three downloads, old task-quality/three historical views, mobile fit, actual HTTP200 captions, paused/muted controls and retained deliberate volume0. No browser errors, API calls or external requests occurred. Private inputs were not uploaded. Browser checks establish consistency relative to an unsigned manifest, with safe-integer numeric syntax; the Python verifier supplies the broader semantic checks.
+
+Old verification0.1.0a6 and prior frozen exports/releases retain their original bytes. Private backups, qualification runtime state and tickets remain outside public Git/hosting/assets. Public publication is recorded separately after the private save/audit checkpoint.
+
+## Publication receipt2026-11-12
+
+Code62643792383d08ce7aa6363fd56439667de631f4 is public as v0.1.0a7. All five release assets have uploaded status and match local size/SHA256. Hosted version7 uses that code commit and succeeded. The hosted browser passed content verification, summary/roles/comparison, original hashed history, three downloads, preserved task-quality/three old views, mobile fit, actual captions and paused/muted media with deliberate volume0 retained. No page errors, API calls or external requests occurred. The original release verification asset remains the prepublication evidence cut; this docs-only receipt preserves its bytes.

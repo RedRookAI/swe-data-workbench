@@ -1,0 +1,15 @@
+diff --git a/swe_workbench/api.py b/swe_workbench/api.py
+index 8d6fa3b871b28821792073a1e977b49692d8abb0..eeac1d393e6fed0dd89ca7b164626a897e9394b0 100644
+--- a/swe_workbench/api.py
++++ b/swe_workbench/api.py
+@@ -236,6 +236,10 @@ def create_app(root: Path | str, *, owner_token: str | None = None, bundle_dir:
+     def javascript():
+         return FileResponse(WEB_DIR / "app.js", media_type="text/javascript")
+ 
++    @app.get("/handoff-verify.js")
++    def handoff_verifier():
++        return FileResponse(WEB_DIR / "handoff-verify.js", media_type="text/javascript")
++
+     @app.get("/style.css")
+     def stylesheet():
+         return FileResponse(WEB_DIR / "style.css", media_type="text/css")

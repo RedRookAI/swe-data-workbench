@@ -1,0 +1,1 @@
+Restore the authored verifier module through the private API static allowlist. Preserve owner-only API access and refuse arbitrary filesystem paths. This case selects the actual API source module, not the full application.

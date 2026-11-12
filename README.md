@@ -4,25 +4,25 @@
 
 SWE Data Workbench captures committed changes, keeps evidence and review decisions tied to exact versions, and exports a package another reviewer can inspect. Its coding-task workflow also executes admitted patches, records grader findings and freezes evaluation datasets.
 
-Explore the recorded audit and silent walkthrough:
+Explore the recorded change reviews and earlier silent walkthrough:
 
 https://swe-data-workbench.flyswatterghost.chatgpt.site
 
-The browser verifies the selected handoff files and retained current content before showing its review. The current view puts the operational answers first: what changed, what evidence applies, what remains unresolved, who acts next and the next action. A comparison highlights changes since the previous review, with exact historical inputs available for inspection.
+The current view shows two actual workbench changes and their next actions: a repaired private-server module route and an importer for existing test reports. Open either change to inspect its committed source, reported checks, exact evidence and review history. Reviews are AI-assisted operator judgments.
 
-Reusable project profiles remove repeated field-map editing. The public example distinguishes product code, qualification workflow, consumer fixture and a reported download for an actual Keep change. A second private application trial used the same generic capture path; its missing execution revision remained unresolved. Its inputs are kept private.
+Configure a project once, reuse an existing pytest/JUnit report and capture later changes without editing field maps. The selected view works independently of the task dataset. Compact handoffs share unchanged source across revisions and make metadata-only coverage explicit. Setup and commands are in docs/daily-workflow.md.
 
-The original task-quality example remains available: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
+The earlier task-quality example remains linked from the current view: a weak recovery checker gives buggy code100/100; the repaired checker gives it50/100 and a failed critical gate. Both valid repairs and the recorded Codex candidate pass.
 
 ![Actual workbench evidence view](docs/images/workbench.png)
 
-Installable wheel, original example inputs, recording and verified evaluation exports:
+Installable wheel, two daily-change exports, regression recipe and verification:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a7
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a8
 
 ## Try a complete handoff
 
-Preview a profile, capture a change, record your review, export the evidence and restore your saved work. The small synthetic example runs one fixed Python check and needs no account or model call. Follow docs/reliable-handoffs.md for the installed-package commands.
+Import an existing report, select your project context, capture a change and inspect it in a standalone view. Record an explicit review, export the evidence and restore your saved work. The small synthetic example runs one fixed Python check and needs no account or model call. Follow docs/reliable-handoffs.md for the installed-package commands.
 
 ## Reuse a project profile
 
@@ -40,7 +40,7 @@ Requires Linux, Python3.12 and Git. Install requirements.lock in a project-local
 
 The input repository is read-only: no checkout, reset, installation or project execution. The command captures committed before/after files and selected evidence, explicitly replays the recorded assessment, exports the handoff and verifies it in a fresh process. Full source-object acquisition instructions and generic capture/review/export commands are in examples/keep-handoff/README.md. Keep is an example source, not a runtime dependency.
 
-This is an optional portable handoff. Per-change evidence mapping still requires an operator. The trial demonstrates comprehension and preserved identities; human time savings and broad daily adoption remain unmeasured.
+This is an optional portable handoff. Its original explicit request path uses operator-supplied mappings; the new daily path reuses a project profile. The trial demonstrates comprehension and preserved identities; human time savings and broad daily adoption remain unmeasured.
 
 ## Run the coding-task example
 
@@ -91,13 +91,13 @@ Original source and controls are MIT-licensed. One separate Codex task produced 
 
 The prepared escape-goat case examines two genuine historical human patch revisions, rejecting the first for changing an existing API contract. It remains available with its original evidence:
 
-https://swe-data-workbench.flyswatterghost.chatgpt.site/prepared/
+https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/prepared/
 
 The Unicode-hyphen and original synthetic cases are also preserved:
 
-https://swe-data-workbench.flyswatterghost.chatgpt.site/unicode-hyphen/
+https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/unicode-hyphen/
 
-https://swe-data-workbench.flyswatterghost.chatgpt.site/synthetic/
+https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/synthetic/
 
 Their runnable drivers and source-fetch instructions remain in examples/escape-goat/README.md and bundles/unicode-hyphen/README.md. These historical Node checks require /usr/bin/node. Old releases and receipts keep their original identities.
 
@@ -109,4 +109,4 @@ Execution admits inspected exact source/check/patch tuples. Verifier integrity c
 
 Product direction and acceptance requirements are owner-led. Implementation, debugging, verification, documentation and demonstration preparation used substantial Codex assistance. Keep supplied prior art for recovery and auditable decisions; this application runs independently.
 
-Details: docs/everyday-handoffs.md, docs/change-handoff.md, examples/keep-handoff/README.md, examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.
+Details: docs/daily-workflow.md, docs/everyday-handoffs.md, docs/change-handoff.md, examples/keep-handoff/README.md, examples/ingest-recovery/README.md, docs/task-quality.md, docs/engineering.md and docs/data-contract.md. Exact verification is in docs/verification.md. Prior releases retain their original verification files.

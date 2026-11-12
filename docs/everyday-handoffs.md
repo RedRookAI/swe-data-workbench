@@ -1,3 +1,5 @@
+For the short project-context/report/view workflow, see docs/daily-workflow.md. The original explicit profile path below remains supported.
+
 # Reuse a project profile and review only what changed
 
 A profile saves a project's evidence slot names, dictionary-key mappings, required scope and revision-role declarations. Select the profile explicitly, supply the change's requested goal and exact commits, and bind a directory containing the declared evidence names. The workbench reads only those names; it does not scan for extra files or execute the profile.
@@ -25,7 +27,7 @@ The v2 format distinguishes captured product source, qualification workflow, con
 
 A fixture hash cannot replace the captured product identity. A reported archive hash can be known while its relationship to the candidate remains unknown. Different version labels alone do not establish whether an archive includes a correction. Evidence and source-project effects remain separate; capture performs neither tests nor delivery.
 
-Old v1 requests, operation retries and immutable three-file exports retain their meanings. New role-bearing captures use v2 material/envelopes, with schema dispatch and mixed-version history support. Schema1 SQLite artifacts/audit are reused; no new database or migration is required.
+Old v1 requests, operation retries and immutable three-file exports retain their meanings. Explicit profile captures use v2; opt-in compact project captures use v3 shared source artifacts with coverage. Both preserve role semantics, with schema dispatch and mixed-version history support. Schema1 SQLite artifacts/audit are reused; no new database or migration is required.
 
 ## Previous versus current
 

@@ -1,0 +1,167 @@
+{
+  "version": "0.1.0a7",
+  "checked": "2026-11-12",
+  "baseline": "7300a8d9f530114850f8e2956976a21ba1414f3f",
+  "source_sha256": {
+    "swe_workbench/__init__.py": "0a9bf57d45e8b785bcb73a80a4b6b5f200c176e993e64a5e991d980343e4acc8",
+    "swe_workbench/api.py": "ecd3da3c95129ffc76a91ddb6436b099a2310fd18ce5c270ff02a1d1b3be4cc2",
+    "swe_workbench/assets.py": "370ef9315fb5e2abb740ead204bbb3bd7ca2025a267e9eb21163bc6ea45968b9",
+    "swe_workbench/bundle.py": "419db11963f0e46ab7a1ab68ee7ece2c504b6b52d5568b3fa7900914b51aea1a",
+    "swe_workbench/check_receipt.py": "c39640e0c6b426f8cc3ac44713f3f12c003ae4bc65868279e62d5bd42af87671",
+    "swe_workbench/cli.py": "c30fb0c040f2396d3fbfcbb83006647f06e46adc1bd0127e2739243a1a2c6d6a",
+    "swe_workbench/core.py": "0bfaec735bc89701db28b917ce8e1f0b3a75902dcb1b7b2b6e8e78580269b680",
+    "swe_workbench/errors.py": "d8ff783803bcf871168ab4a364ad52be4aa81f0c09d9d1a6648ca71ffac8c7e7",
+    "swe_workbench/evaluation.py": "b413eca28912427f4c8a73030a936372b840b14622308e22b05ee3d34ad4f1ca",
+    "swe_workbench/evaluation_export.py": "cb0bfe4650edfab7241eed44110f216a511fc238da96392badf49495a43ad47b",
+    "swe_workbench/exporter.py": "9ac4432c0f3848f061d004db475d1a23323f17ca3e65b535926d071a1fbc6215",
+    "swe_workbench/git_capture.py": "4054674d77b13c99781905c99569630865a952ba187865a699f2aa7290204020",
+    "swe_workbench/handoff.py": "16c8febc9364b29db5f8f2708a5ee54f5ae94cc225b827ea6325719e90810b1b",
+    "swe_workbench/handoff_context.py": "3e3488e9854c491bfaeaed9f11eb05b04e8e1a2d7aab651e5398394523bd8ecf",
+    "swe_workbench/handoff_profile.py": "a2000d68857a5c32876affc1509cc80f87e4c9afb4cc6792ab1052f47d9414ca",
+    "swe_workbench/handoff_validation.py": "689699d5af4a9a53d15fe64450307fc1f9a4e951a269eeb545ced81d8d11d48a",
+    "swe_workbench/intake.py": "a17cefb7110a961cac316ad5ebb2b13ac69fa662db4d755ece8f9eee956f5b24",
+    "swe_workbench/receipt_example.py": "cc8691d71c9a1a7cfe21029b575cad06c4d611182f209e1d66a187ac69d522cd",
+    "swe_workbench/release_check.py": "832e569aea44328e0e7aacc995eccae43671a72b15dd7128a53a65199e00e4e3",
+    "swe_workbench/runner.py": "d19e8247e4a22a560b4a66e41d4611124b0c10b36374347e77e791c4b61676d8",
+    "swe_workbench/server.py": "8d5c95737c5e2c5a8a369686af1a898b51ca99876ed3067f685938f65c8bceea",
+    "swe_workbench/state_backup.py": "6f26297af7d4d93b62829d16f535e096df83290868714bab8f2afe3c3a1ac491",
+    "swe_workbench/store.py": "bf1b710146277dbf27d2852a52b0fbbac6dfa78e6e62212f5a573c99a52ed7fb",
+    "swe_workbench/worker.py": "0fa64a7c63589e8c741e6bf9d4ca09085e594c5d80a728f5f5a6c04b51696b1b",
+    "web/app.js": "6387be23a1d23fa6bafd171bdb68232d3fb93614fc1a8d4541c2d999f1c91c5d",
+    "web/handoff-verify.js": "92c6d39fbb43869888efbbe48f650ddbacd0d9d6be01c134201e312d9767e01c",
+    "web/index.html": "12e82fadd827e6dacb0decf62ed27001ab27dc664dda93b326b0d24e9729bc08",
+    "web/style.css": "b7c136f33cd9d2fcc9dd5a1e10c2126ed0cbc6af6a35436cf61314b901840306"
+  },
+  "wheel_sha256": "b4a85be7b204fe730a5ecce1b31e35f3e847d4faf38b2ea10b3c107f06850b99",
+  "focused_checks": {
+    "new_boundary_cases": 6,
+    "new_bounded_git_cases": 3,
+    "affected_prepare_cases": 11,
+    "affected_legacy_handoff_cases": 12,
+    "new_reuse_receipt_cases": 2,
+    "new_backup_cases": 5,
+    "new_browser_case": {
+      "formats": 2,
+      "alteration_cases_per_format": 4,
+      "unsupported_parser_cases": 3,
+      "result": "passed"
+    },
+    "policy": "Checks were repeated only for changed parser/validation/material code or the named audit correction; no whole suite or input-project build."
+  },
+  "installed_artifact": {
+    "version": "0.1.0a7",
+    "wheel_sha256": "b4a85be7b204fe730a5ecce1b31e35f3e847d4faf38b2ea10b3c107f06850b99",
+    "checks": [
+      {
+        "name": "installed-wheel-parity",
+        "files": 39
+      },
+      {
+        "name": "frozen-v1",
+        "manifest_digest": "d7a631c744678f1f2c1f20c68b73e8e459d1d1f269c06f62942c5cfa444b587b"
+      },
+      {
+        "name": "frozen-v2",
+        "manifest_digest": "700e46594fd20d68bbd24064d816913ed3c1df2a9a586666106884dec301982c"
+      },
+      {
+        "name": "preview-capture-review-export",
+        "revision": 1,
+        "retries_preserved": true,
+        "occupied_export_and_stale_review_refused": true
+      },
+      {
+        "name": "restore-and-continue",
+        "history_preserved": true
+      },
+      {
+        "name": "unknown-source-remains-unresolved"
+      }
+    ],
+    "application_model_calls": 0,
+    "input_project_execution": 0,
+    "ok": true
+  },
+  "qualification_refusals": [
+    {
+      "case": "wrong-wheel",
+      "exit": 1,
+      "error": "Selected wheel version differs from installed package."
+    },
+    {
+      "case": "modified-export",
+      "exit": 1,
+      "error": "frozen-v2: ['Manifest content mismatch.']"
+    }
+  ],
+  "static_browser": {
+    "profile": "local",
+    "http": 200,
+    "summary_first": true,
+    "typed_roles": true,
+    "real_prior_comparison": true,
+    "historical_material_hash_checked": true,
+    "downloads": 3,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "content_verification_gate": "passed dedicated v1/v2/error browser cases",
+    "private_inputs_uploaded": false,
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "backup_scope": "Private quiescent schema1 SQLite and all immutable artifact files; all database records retained; active/uncertain execution refused, no old PID signaling or external workspace copy.",
+  "receipt_scope": "Unsigned caller-supplied facts; one fixed synthetic check actually ran in a newly created example; no claim of independent witnessing or SLSA compliance.",
+  "browser_scope": "Manifest file counts/SHA256, artifact digests and current state/material/history associations; not full Python semantic verification or publisher authentication. Safe integer syntax only; other numeric representations require CLI verification.",
+  "private_inputs_published": false,
+  "old_release_bytes_preserved": true,
+  "human_time_savings": "unmeasured",
+  "public_status": "Published v0.1.0a7 and hosted version7 verified2026-11-12. Release assets retain their original prepublication verification cut; this later receipt does not replace bytes.",
+  "publication": {
+    "code_commit": "62643792383d08ce7aa6363fd56439667de631f4",
+    "tag": "v0.1.0a7",
+    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a7",
+    "assets_verified": 5,
+    "asset_size_and_sha256_match_local": true,
+    "site_version": 7,
+    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "deployment_id": "appgdep_6af520acd3448191a038d4b98083d0c7",
+    "deployment_status": "succeeded",
+    "hosted_browser": {
+      "profile": "hosted",
+      "http": 200,
+      "summary_first": true,
+      "typed_roles": true,
+      "real_prior_comparison": true,
+      "historical_material_hash_checked": true,
+      "downloads": 3,
+      "old_views_preserved": 3,
+      "quality_demo_preserved": true,
+      "content_verification_gate": "passed dedicated v1/v2/error browser cases",
+      "private_inputs_uploaded": false,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    }
+  }
+}

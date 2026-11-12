@@ -50,6 +50,10 @@ def _verify_state(root):
             result=parse(row[0]);v.check(isinstance(result,dict) and 'evidence_digest' in result,'backup.result','expected an evidence-bound result object');key=result['evidence_digest'];v.sha(key,'backup.result.evidence_digest');refs.add(key)
             require(store.artifact_bytes(key)==canonical({k:x for k,x in result.items() if k!='evidence_digest'}),'backup.results: stored evidence mismatch')
         refs.update(row[0] for row in con.execute('SELECT result_digest FROM attempts WHERE result_digest IS NOT NULL'))
+        for event in events:
+            if event['kind'].startswith('handoff-') and 'material_digest' in event['payload']:
+                from .handoff import validate_material
+                validate_material(parse(store.artifact_bytes(event['payload']['material_digest'])),store.artifact_bytes)
         for key in refs:
             v.sha(key,'backup.reference');store.artifact_bytes(key)
         for row in con.execute('SELECT key FROM meta WHERE key LIKE ?',('handoff:%',)):

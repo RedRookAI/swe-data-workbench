@@ -2,6 +2,34 @@
 const LIMIT = 8 * 1024 * 1024;
 const decoder = new TextDecoder('utf-8', {fatal: true});
 function insist(ok, message) { if (!ok) throw new Error(message); }
+export class ExactJSONNumber {
+  constructor(token) { this.token=token;Object.freeze(this); }
+  toString() { return this.token; }
+}
+function numericKey(token) {
+  const kind=/[.eE]/.test(token)?'decimal':'integer';
+  const m=token.match(/^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+  let digits=(m[2]+(m[3]||'')).replace(/^0+/,'');
+  let exponent=BigInt(m[4]||'0')-BigInt((m[3]||'').length);
+  while(digits.endsWith('0') && digits.length){digits=digits.slice(0,-1);exponent++;}
+  if(!digits)return kind+':'+(kind==='decimal'?m[1]:'')+'0';
+  return kind+':'+m[1]+digits+'e'+exponent;
+}
+export function displayJSON(value, depth=0) {
+  if(value instanceof ExactJSONNumber)return value.token;
+  if(value===null || typeof value!=='object')return JSON.stringify(value);
+  const pad='  '.repeat(depth),next=pad+'  ';
+  if(Array.isArray(value))return value.length?'[\n'+value.map(v=>next+displayJSON(v,depth+1)).join(',\n')+'\n'+pad+']':'[]';
+  const entries=Object.entries(value);return entries.length?'{\n'+entries.map(([k,v])=>next+JSON.stringify(k)+': '+displayJSON(v,depth+1)).join(',\n')+'\n'+pad+'}':'{}';
+}
+export function exactEqual(a,b) {
+  if(a instanceof ExactJSONNumber || b instanceof ExactJSONNumber){
+    if(!(a instanceof ExactJSONNumber) || !(b instanceof ExactJSONNumber))return false;
+    return numericKey(a.token)===numericKey(b.token);
+  }
+  if(a===null || b===null || typeof a!=='object' || typeof b!=='object')return a===b;
+  const keys=Object.keys(a);return Array.isArray(a)===Array.isArray(b) && keys.length===Object.keys(b).length && keys.every(k=>Object.hasOwn(b,k)&&exactEqual(a[k],b[k]));
+}
 export function strictJSON(text) {
   let at = 0;
   const whitespace = () => { while (/[\x20\x09\x0a\x0d]/.test(text[at] || '\0')) at++; };
@@ -36,9 +64,9 @@ export function strictJSON(text) {
     }
     const token = text.slice(at).match(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/);
     insist(token, 'Invalid JSON value.'); at += token[0].length;
-    const number = Number(token[0]);
-    insist(Number.isSafeInteger(number) && String(number) === token[0], 'Numeric representation unsupported by browser verification; use the CLI verifier.');
-    return number;
+    const number=Number(token[0]);
+    insist(Number.isFinite(number), 'Nonfinite numeric interpretation is unsupported.');
+    return Number.isSafeInteger(number) && String(number)===token[0] ? number : new ExactJSONNumber(token[0]);
   }
   const result = value(); whitespace(); insist(at === text.length, 'Trailing JSON content.'); return result;
 }
@@ -60,10 +88,6 @@ async function read(name, optional = false) {
   for (const chunk of chunks) { raw.set(chunk, offset); offset += chunk.length; }
   return raw;
 }
-function equal(a, b) {
-  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return a === b;
-  const keys = Object.keys(a); return Array.isArray(a) === Array.isArray(b) && keys.length === Object.keys(b).length && keys.every(k => Object.hasOwn(b, k) && equal(a[k], b[k]));
-}
 export async function loadVerifiedHandoff() {
   const raw = await read('handoff.json', true); if (raw === null) return null;
   const manifestRaw = await read('manifest.json'); const manifest = strictJSON(decoder.decode(manifestRaw));
@@ -74,26 +98,35 @@ export async function loadVerifiedHandoff() {
     insist(expected && expected.bytes === content.length && expected.sha256 === await sha256(content), 'Handoff manifest content mismatch: ' + name);
   }
   const record = strictJSON(decoder.decode(raw)); const encoded = strictJSON(decoder.decode(artifactsRaw));
-  insist(['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2'].includes(record.schema) && manifest.schema === record.schema, 'Unsupported handoff schema.');
+  insist(['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2','swe-workbench-handoff/v3'].includes(record.schema) && manifest.schema === record.schema, 'Unsupported handoff schema.');
   insist(record.state && record.material && Array.isArray(record.events) && record.events.length > 0, 'Incomplete handoff state/history.');
   insist(manifest.change_id === record.state.change_id && manifest.revision === record.state.revision, 'Manifest state mismatch.');
   insist(record.workbench_executions === 0 && record.keep_mutations === 0, 'Unsupported execution claim.');
-  const decoded = new Map();
+  const decoded = new Map();const rawArtifacts=new Map();const sourceContents=new Map();
   for (const [key, value] of Object.entries(encoded)) {
     insist(/^[a-f0-9]{64}$/.test(key) && typeof value === 'string', 'Invalid artifact reference.');
     const bytes = Uint8Array.from(atob(value), c => c.charCodeAt(0));
     insist(await sha256(bytes) === key, 'Historical artifact identity mismatch.');
-    decoded.set(key, strictJSON(decoder.decode(bytes)));
+    rawArtifacts.set(key,bytes);
   }
   const references = new Set();
   for (const [i, event] of record.events.entries()) {
     const p = event.payload; insist(p && p.revision === i && p.change_id === record.state.change_id, 'Handoff event association mismatch.');
-    for (const k of ['state_digest', 'material_digest']) { insist(decoded.has(p[k]), 'Missing referenced artifact.'); references.add(p[k]); }
+    for (const k of ['state_digest', 'material_digest']) { insist(rawArtifacts.has(p[k]), 'Missing referenced artifact.');references.add(p[k]);if(!decoded.has(p[k]))decoded.set(p[k],strictJSON(decoder.decode(rawArtifacts.get(p[k])))); }
+    const material=decoded.get(p.material_digest);
+    if(material.schema==='swe-workbench-handoff/v3'){
+      for(const file of material.files){for(const phase of [file.before,file.after]){
+        if(phase?.coverage==='text'){
+          insist(rawArtifacts.has(phase.content_digest),'Missing source artifact.');const raw=rawArtifacts.get(phase.content_digest);
+          insist(raw.length===phase.bytes,'Source artifact byte count mismatch.');references.add(phase.content_digest);sourceContents.set(phase.content_digest,decoder.decode(raw));
+        }
+      }}
+    }
     const state = decoded.get(p.state_digest);
     insist(state.material_digest === p.material_digest && state.revision === p.revision && state.change_id === p.change_id, 'Historical state association mismatch.');
   }
-  insist(references.size === decoded.size, 'Unreferenced handoff artifacts.');
+  insist(references.size === rawArtifacts.size, 'Unreferenced handoff artifacts.');
   const last = record.events.at(-1).payload;
-  insist(equal(record.state, decoded.get(last.state_digest)) && equal(record.material, decoded.get(last.material_digest)), 'Current handoff differs from retained artifacts.');
-  Object.defineProperty(record, '_verifiedArtifacts', {value: encoded}); return record;
+  insist(exactEqual(record.state, decoded.get(last.state_digest)) && exactEqual(record.material, decoded.get(last.material_digest)), 'Current handoff differs from retained artifacts.');
+  Object.defineProperty(record, '_verifiedArtifacts', {value: encoded});Object.defineProperty(record,'_sourceContents',{value:sourceContents}); return record;
 }

@@ -35,6 +35,6 @@ def test_manifest_and_current_content_gate():
                     if failure=='duplicate-key':files['manifest.json']=b'{"files":{},"files":{}}'
                     page.reload();expect(page.get_by_role('alert')).to_contain_text('could not be verified');expect(page.locator('#handoff-overview')).to_have_count(0)
                 page.unroute('**/handoff/*')
-            result=page.evaluate('''async()=>{const {strictJSON}=await import('./handoff-verify.js');return ['{"x":1,"x":2}','9007199254740993','1.0'].map(s=>{try{strictJSON(s);return false}catch{return true}})}''')
+            result=page.evaluate('''async()=>{const {strictJSON}=await import('./handoff-verify.js');return ['{"x":1,"x":2}','1e999'].map(s=>{try{strictJSON(s);return false}catch{return true}})}''')
             assert all(result);assert not errors;browser.close()
     finally:server.shutdown();server.server_close();thread.join()

@@ -1,4 +1,4 @@
-import {loadVerifiedHandoff} from './handoff-verify.js';
+import {loadVerifiedHandoff,strictJSON,displayJSON} from './handoff-verify.js';
 /* Static is the default. Live mode is an explicit owner action on the private API.
    Imported strings enter the DOM only through textContent, never HTML or URLs. */
 const $ = (id) => document.getElementById(id);
@@ -16,7 +16,7 @@ function node(tag, text, cls) {
   return n;
 }
 function badge(text) { return node('span', text || 'unavailable', 'badge ' + (/^(passed|accepted|completed)$/.test(text) ? 'success' : /^(failed|rejected|error|timeout|execution-error)$/.test(text) ? 'error' : '')); }
-function display(value) { return value === undefined || value === null ? 'Unavailable' : typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value); }
+function display(value) { return value === undefined || value === null ? 'Unavailable' : typeof value === 'object' ? displayJSON(value) : String(value); }
 function notify(text, failure = false) { $('message').textContent = text; $('message').className = failure ? 'notice error' : 'notice'; $('message').hidden = false; }
 function hideMessage() { $('message').hidden = true; }
 function appendField(parent, title, value) { const section = node('section'); section.append(node('h3', title), node('pre', display(value))); parent.append(section); }
@@ -441,7 +441,7 @@ async function loadHandoffHistory(container, record) {
     const raw = Uint8Array.from(atob(encoded[key]), c => c.charCodeAt(0));
     const actual = [...new Uint8Array(await crypto.subtle.digest('SHA-256', raw))].map(v => v.toString(16).padStart(2, '0')).join('');
     if (actual !== key) throw new Error('Historical artifact identity mismatch.');
-    const result = JSON.parse(new TextDecoder('utf-8', {fatal: true}).decode(raw)); cache.set(key, result); return result;
+    const result = strictJSON(new TextDecoder('utf-8', {fatal: true}).decode(raw)); cache.set(key, result); return result;
   }
   const fragment = document.createDocumentFragment();
   for (const event of record.events) {
@@ -451,6 +451,31 @@ async function loadHandoffHistory(container, record) {
   }
   container.append(fragment); container.dataset.loaded = 'true';
 }
+function renderHandoffReports(root,record) {
+  let reports=record.material.reported_checks;
+  if(!Array.isArray(reports)){
+    reports=[];
+    for(const attachment of record.material.attachments){
+      let data;try{data=strictJSON(attachment.text);}catch{continue;}
+      if(!data || !['swe-workbench-junit-report/v1','swe-workbench-check-receipt/v1'].includes(data.schema))continue;
+      const cases=data.schema==='swe-workbench-junit-report/v1'?data.cases:Object.entries(data.checks||{}).map(([name,c])=>({name,outcome:c.outcome}));
+      reports.push({attachment:attachment.name,status:'legacy-reported',binding:data.execution_revision===null?'unbound':data.execution_revision===record.material.candidate_revision?'declared-same-source':data.execution_revision===record.material.base_revision?'declared-base-source':'declared-other-source',cases});
+    }
+  }
+  if(!reports.length)return;
+  const section=node('section');section.id='reported-checks';section.append(node('h3','Reported test results · external evidence'));
+  for(const report of reports){
+    if(report.status==='invalid-supported-report' || !Array.isArray(report.cases) || !report.cases.every(c=>['passed','failed','error','skipped','unavailable'].includes(c.outcome))){section.append(node('p','Invalid supported report; inspect retained evidence.'));continue;}
+    const counts={};for(const c of report.cases)counts[c.outcome]=(counts[c.outcome]||0)+1;
+    section.append(node('h4',report.attachment+' · '+report.binding),node('p',Object.entries(counts).map(([k,v])=>v+' '+k).join(' · ')||'No executed cases'));
+    if(report.warnings?.length)section.append(node('p','Reported suite counts differ from retained cases; inspect the discrepancy.'));
+    if(!report.cases.some(c=>['passed','failed','error'].includes(c.outcome)))section.append(node('p','No executed cases; skipped/unavailable evidence is separate from success.'));
+    const details=node('details');details.append(node('summary','Actual reported cases and scope'));
+    for(const c of report.cases){details.append(node('p',c.name+' · '+c.outcome+(c.duration_seconds==null?'':' · '+String(c.duration_seconds)+' seconds')));if(c.detail)appendField(details,'Reported detail',c.detail);}
+    section.append(details);
+  }
+  section.append(node('p','Package readiness and reported outcomes are separate. No execution or merge permission is granted.','small muted'));root.append(section);
+}
 async function loadHandoff() {
   $('handoff-content').replaceChildren(node('p','Checking handoff content…'));
   let record;
@@ -459,9 +484,9 @@ async function loadHandoff() {
     $('handoff-content').replaceChildren(warning);$('handoff-section').hidden=false;return;
   }
   if (record === null) { $('handoff-section').hidden=true;return; }
-  if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
+  if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2','swe-workbench-handoff/v3'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
   const {state: review, material} = record; const root = $('handoff-content'); root.replaceChildren();
-  const unresolved = material.observations.filter(o => o.required && (o.value === null || (record.material.schema === 'swe-workbench-handoff/v2' ? o.candidate_applicability !== 'declared' : o.binding !== 'declared-same-source')));
+  const unresolved = material.observations.filter(o => o.required && (o.value === null || (record.material.schema !== 'swe-workbench-handoff/v1' ? o.candidate_applicability !== 'declared' : o.binding !== 'declared-same-source')));
   const overview = node('section', null, 'handoff-overview'); overview.id = 'handoff-overview';
   overview.append(node('p', 'Content matches the selected manifest · unsigned external evidence', 'small muted'), node('h3', material.title), node('p', material.goal), badge(review.decision),
     node('p', material.observations.length + ' externally reported observations · ' + unresolved.length + ' required bindings unresolved · ' + record.workbench_executions + ' checks executed by this handoff', 'small muted'),
@@ -472,18 +497,24 @@ async function loadHandoff() {
   if (!findings.childNodes.length) findings.append(node('li', 'No unresolved findings recorded; evidence scope remains visible below.'));
   overview.append(findings, node('h4', 'Who acts next'), node('p', review.responsible_party || 'Unassigned'), node('h4', 'Next action'), node('p', review.next_action),
     node('p', 'This is review-package readiness. Source-project acceptance and delivery remain separate.', 'small muted'));
-  root.append(overview); renderHandoffComparison(root, record.schema === 'swe-workbench-handoff/v2' ? record.comparison : null);
+  if(material.coverage)overview.append(node('p',material.coverage.text_paths.length+' fully captured text paths · '+material.coverage.metadata_only_paths.length+' metadata-only paths. Diff covers fully captured text paths only.','small muted'));
+  root.append(overview);renderHandoffReports(root,record); renderHandoffComparison(root, record.schema !== 'swe-workbench-handoff/v1' ? record.comparison : null);
   const recorded = node('details'); recorded.append(node('summary', 'Recorded review and attribution')); appendField(recorded, 'Reason', review.reason); appendField(recorded, 'Reviewer declaration', {actor: review.actor, mode: review.reviewer_mode}); root.append(recorded);
   const versions = node('details'); versions.append(node('summary', 'Exact versions, roles and hashes'));
   const identity = node('dl', null, 'handoff-identity');
   for (const [label, value] of [['Base', material.base_revision], ['Candidate', material.candidate_revision], ['Patch SHA-256', material.patch_sha256], ['Review revision', review.revision]]) identity.append(node('dt', label), node('dd', value, 'digest'));
   versions.append(identity);
-  if (material.schema === 'swe-workbench-handoff/v2' && Array.isArray(material.subjects)) {
+  if (material.schema !== 'swe-workbench-handoff/v1' && Array.isArray(material.subjects)) {
     for (const subject of material.subjects) versions.append(node('p', subject.role.replaceAll('_', ' ') + ': ' + (subject.value || 'Unknown') + ' · ' + subject.origin));
     for (const relationship of material.relationships) versions.append(node('p', relationship.from + ' → ' + relationship.to + ': ' + relationship.kind + ' · ' + relationship.status));
     versions.append(node('p', 'Relationships are declarations with retained references; they do not authenticate execution.', 'small muted'));
   } else versions.append(node('p', 'Typed roles were not recorded in this legacy handoff. Unassigned roles remain unknown.', 'small muted'));
   root.append(versions);
+  if(material.schema==='swe-workbench-handoff/v3'){
+    const sources=node('details');sources.append(node('summary','Captured source content and coverage'));
+    for(const file of material.files){const row=node('details');row.append(node('summary',file.path));for(const name of ['before','after']){const phase=file[name];if(!phase){row.append(node('p',name+': absent'));continue;}row.append(node('h4',name+' · mode '+phase.mode+' · '+phase.coverage));if(phase.coverage==='text')row.append(node('pre',record._sourceContents.get(phase.content_digest)));else row.append(node('p',phase.reason+' · Git object '+phase.git_blob));}sources.append(row);}
+    root.append(sources);
+  }
   const observations = node('details'); observations.append(node('summary', 'Reported evidence and scope (' + material.observations.length + ')'));
   const wrapper = node('div', null, 'table-scroll'); const table = node('table'); const header = node('tr');
   for (const text of ['Observation', 'Reported result', 'Binding / subject', 'Scope and origin']) header.append(node('th', text));
@@ -506,6 +537,15 @@ async function loadHandoff() {
   $('recording-section').querySelector('h2').textContent = 'Earlier task-quality walkthrough · 0.1.0a4';
 }
 async function start() {
+  if (document.body.dataset.handoffOnly === 'true') {
+    for (const id of ['connection','owner-actions','case-kind','quality-section','metrics','accounting-note','intake-details','workbench','export-section','audit-section','recording-section']) { const e=$(id);if(e)e.hidden=true; }
+    document.querySelector('h1').textContent='Change review';$('mode').textContent='Selected handoff · read only';
+    document.querySelector('.topbar .eyebrow').textContent='SOFTWARE CHANGE REVIEW';
+    document.querySelector('.sidebar nav').replaceChildren(node('a','Selected change'));$('case-kind').closest('section').hidden=true;document.querySelector('.batchbar').hidden=true;
+    $('case-sidebar').textContent='Exact source, reported results and version-bound decisions.';
+    try { await loadHandoff();if($('handoff-section').hidden)notify('The selected handoff is unavailable.',true); } catch(error){notify(error.message,true);}
+    return;
+  }
   if (live) { $('mode').textContent = 'Live · owner access'; $('connection').hidden = false; $('batch-meta').textContent = 'Connect to load private evidence.'; render(); return; }
   try {
     const response = await fetch('./data/evidence.json', {cache: 'no-store', credentials: 'omit'});

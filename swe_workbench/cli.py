@@ -26,6 +26,20 @@ def main(argv=None):
     receipt.add_argument('--request',type=Path,required=True);receipt.add_argument('--output',type=Path,required=True)
     backup=commands.add_parser('backup-state',help='Private quiescent SQLite/artifact snapshot');backup.add_argument('--output',type=Path,required=True)
     restore=commands.add_parser('restore-state',help='Restore a private snapshot to a fresh root');restore.add_argument('path',type=Path);restore.add_argument('--output',type=Path,required=True)
+    view=commands.add_parser('build-handoff-view',help='Build a selected read-only view without task data/DB');view.add_argument('path',type=Path);view.add_argument('--output',type=Path,required=True)
+    junit=commands.add_parser('import-junit',help='Read an existing pytest XML report; executes nothing');junit.add_argument('path',type=Path);junit.add_argument('--context',type=Path);junit.add_argument('--output',type=Path,required=True)
+    context=commands.add_parser('configure-project',help='Save explicitly selected owner defaults');context.add_argument('--output',type=Path,required=True)
+    for name in ('repo','profile','evidence-directory','state','base-ref','candidate-ref'):context.add_argument('--'+name,required=True)
+    collect=commands.add_parser('project-capture',help='Resolve selected refs and reuse a saved context');collect.add_argument('context',type=Path);collect.add_argument('change_id')
+    for name in ('title','goal'):collect.add_argument('--'+name,required=True)
+    for name in ('base','candidate','evidence-directory'):collect.add_argument('--'+name)
+    collect.add_argument('--preview',action='store_true');collect.add_argument('--compact',action='store_true');collect.add_argument('--output',type=Path)
+    selected=commands.add_parser('review-selection',help='Explicit decision using saved exact tokens');selected.add_argument('context',type=Path);selected.add_argument('selection',type=Path)
+    for name in ('decision','reason','next-action'):selected.add_argument('--'+name,required=True)
+    selected.add_argument('--finding',action='append',default=[]);selected.add_argument('--responsible-party');selected.add_argument('--operation-key');selected.add_argument('--reviewer-mode',default='ai_assisted_adjudication')
+    project_view=commands.add_parser('build-project-view',help='Freeze selected attention list and views');project_view.add_argument('context',type=Path);project_view.add_argument('--output',type=Path,required=True)
+    attention=commands.add_parser('attention',help='List captured changes in the selected owned context');attention.add_argument('context',type=Path);attention.add_argument('--only-attention',action='store_true')
+    summary=commands.add_parser('handoff-summary',help='Readable summary from retained current evidence');summary.add_argument('context',type=Path);summary.add_argument('change_id')
     show_handoff = commands.add_parser('handoff'); show_handoff.add_argument('change_id'); show_handoff.add_argument('--baseline-revision', type=int)
     change_review = commands.add_parser('review-handoff')
     change_review.add_argument('change_id'); change_review.add_argument('--request', type=Path)
@@ -82,7 +96,7 @@ def main(argv=None):
     export.add_argument('--operation-key', required=True)
     args = parser.parse_args(argv)
     try:
-        if args.command in ('capture-handoff', 'preview-handoff', 'write-receipt', 'backup-state', 'restore-state', 'handoff', 'review-handoff', 'export-handoff', 'verify-handoff'):
+        if args.command in ('capture-handoff', 'preview-handoff', 'write-receipt', 'backup-state', 'restore-state', 'build-handoff-view', 'import-junit', 'configure-project', 'project-capture', 'review-selection', 'build-project-view', 'attention', 'handoff-summary', 'handoff', 'review-handoff', 'export-handoff', 'verify-handoff'):
             from . import handoff
             from .bundle import _read
             if args.command in ('capture-handoff','preview-handoff'):
@@ -112,6 +126,27 @@ def main(argv=None):
                 else:
                     result = handoff.capture(args.root, repo=args.repo, base=args.base, candidate=args.candidate,
                         request=effective, evidence=evidence, operation_key=args.operation_key)
+            elif args.command=='build-project-view':
+                from .handoff_view import build_project
+                result=build_project(args.context,args.output)
+            elif args.command in ('attention','handoff-summary'):
+                from .attention import list_changes,summary
+                result=list_changes(args.context,args.only_attention) if args.command=='attention' else summary(args.context,args.change_id)
+            elif args.command=='configure-project':
+                from .project_context import configure
+                result=configure(args.output,**{k:getattr(args,k) for k in ('repo','profile','evidence_directory','state','base_ref','candidate_ref')})
+            elif args.command=='project-capture':
+                from .project_context import collect
+                result=collect(args.context,change_id=args.change_id,title=args.title,goal=args.goal,base=args.base,candidate=args.candidate,evidence_directory=args.evidence_directory,preview=args.preview,compact=args.compact,output=args.output)
+            elif args.command=='review-selection':
+                from .project_context import review_selection
+                result=review_selection(args.context,args.selection,decision=args.decision,reason=args.reason,findings=args.finding,next_action=args.next_action,responsible_party=args.responsible_party,operation_key=args.operation_key,reviewer_mode=args.reviewer_mode)
+            elif args.command=='import-junit':
+                from .junit_report import import_report
+                result=import_report(args.path,args.output,args.context)
+            elif args.command=='build-handoff-view':
+                from .handoff_view import build
+                result=build(args.path,args.output)
             elif args.command in ('backup-state','restore-state'):
                 from .state_backup import backup,restore
                 result=backup(args.root,args.output) if args.command=='backup-state' else restore(args.path,args.output)

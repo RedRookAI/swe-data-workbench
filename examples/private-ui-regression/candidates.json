@@ -1,0 +1,13 @@
+[
+  {
+    "patch_file": "fix.patch",
+    "model_name_or_path": "Codex-assisted maintenance",
+    "provenance": {
+      "origin": "actual_workbench_change",
+      "license": "MIT",
+      "source_base": "5d5e70cc1c00e28b31c11112ad8e9c148222b52a",
+      "source_commit": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94",
+      "scope": "Selected API-file diff from actual committed fix; no invented model generation run."
+    }
+  }
+]

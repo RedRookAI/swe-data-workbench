@@ -4,6 +4,8 @@ from .errors import WorkbenchError
 from . import handoff_validation as shape
 
 V2 = 'swe-workbench-handoff/v2'
+V3 = 'swe-workbench-handoff/v3'
+ROLE_SCHEMAS=(V2,V3)
 PROFILE = 'swe-workbench-handoff-profile/v1'
 ROLES = {'product_source', 'qualification_workflow', 'consumer_fixture', 'released_artifact'}
 RELATIONS = {'checks_source': 'qualification_workflow', 'fixture_for': 'consumer_fixture', 'built_from': 'released_artifact'}
@@ -108,7 +110,7 @@ def eligible(material):
         if not observation['required']:
             continue
         known = observation['value'] is not None
-        bound = observation.get('candidate_applicability') == 'declared' if material['schema'] == V2 else observation['binding'] == 'declared-same-source'
+        bound = observation.get('candidate_applicability') == 'declared' if material['schema'] in ROLE_SCHEMAS else observation['binding'] == 'declared-same-source'
         if not known or not bound:
             return False
     return True
@@ -141,7 +143,7 @@ def compare(state, material, events, artifacts, baseline_revision=None):
     applicability = []
     for observation in material['observations']:
         prior = prior_obs.get(observation['label'])
-        bound = observation.get('candidate_applicability') == 'declared' if material['schema'] == V2 else observation['binding'] == 'declared-same-source'
+        bound = observation.get('candidate_applicability') == 'declared' if material['schema'] in ROLE_SCHEMAS else observation['binding'] == 'declared-same-source'
         if not bound:
             status = 'unknown-applicability'
         elif prior is not None and canonical(prior) == canonical(observation) and source_same and roles_same:
