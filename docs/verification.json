@@ -158,5 +158,37 @@
   },
   "decision": "Retain optional portable handoff; avoid broader orchestration or mandatory use. No measured human productivity claim.",
   "caption_correction": "The earlier video requested recording.vtt while the published file was captions.vtt. Current assets now request captions.vtt, and actual HTTP200 plus WEBVTT content were checked; original media/release bytes preserved.",
-  "public_status": "Local source/artifact/browser audit complete; publication pending at this evidence cut."
+  "public_status": "Public workbench source/tag/release and hosted version5 verified. Main-branch documentation adds hosted results after immutable release cut; runtime/media/release bytes unchanged.",
+  "hosted_publication": {
+    "site_version": 5,
+    "source_commit": "ab19fc4e5575399f7f31f253474d93369d83e6bf",
+    "deployment_id": "appgdep_6af50afff71c8191bc629f88f0107dd8",
+    "status": "succeeded",
+    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "browser": {
+      "profile": "hosted",
+      "http": 200,
+      "real_handoff_visible": true,
+      "reported_and_native_separated": true,
+      "downloads": 3,
+      "historical_views": 3,
+      "quality_demo_preserved": true,
+      "initial_player": {
+        "paused": true,
+        "muted": true,
+        "controls": true,
+        "volume": 0.1,
+        "autoplay": false
+      },
+      "captions_http": 200,
+      "captions_vtt": true,
+      "zero_volume_retained": true,
+      "mobile_fit": true,
+      "inert_import_check": "prior local check",
+      "errors": [],
+      "api_requests": [],
+      "external_requests": []
+    },
+    "release_assets_verified": 7
+  }
 }
