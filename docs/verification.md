@@ -20,4 +20,23 @@ All 87 original selected data/manifest/media files were byte-identical after the
 
 The actual grading evidence and today's successful fresh-source audit run were reused. No original source checks, new model candidate or recording were run merely for presentation. Earlier operator counts/known limits and full provisional history remain in versioned verification/private records. Human direction and substantial AI assistance remain explicit; unsigned source/report declarations, trusted execution and one-task corpus scope remain unchanged.
 
-Actual new CI/source, downloadable-release and hosted-publication observations are appended after they are observed. Old 0.1.0a11 verification is retained byte-for-byte in verification-v0.1.0a11.md/json. Private tickets/state/context/selections remain outside publication; Keep, fleet/shared services and other workspaces were untouched.
+Actual new CI/source, downloadable-release and hosted-publication observations follow below. Old 0.1.0a11 verification is retained byte-for-byte in verification-v0.1.0a11.md/json. Private tickets/state/context/selections remain outside publication; Keep, fleet/shared services and other workspaces were untouched.
+
+
+## Observed publication
+
+The source checkpoint is 6506812aab287f6a2c9e16abfe5b744316df1ffd; the v0.1.0a12 tag resolves to that exact commit. Actual normal CI run 43241612303 succeeded with 21 passed, zero failed/error/skipped/unavailable cases and process exit 0. Its receipt binds the clean tested source and workflow source to that commit. The exported handoff remains unreviewed: passing checks do not create an acceptance decision. The downloaded provider artifact matched its recorded size and SHA256 digest; its export/view passed the installed semantic verifier.
+
+https://github.com/RedRookAI/swe-data-workbench/actions/runs/43241612303
+
+The existing public Site deployed saved version 11 from the same source commit. Deployment appgdep_6af5d30536cc8191b27ed1867f69c39e succeeded. Archive SHA256 is c8b84845f29abedf76bda468c68ec0a06f255ee112eba8bf968bc68196040c16 (43,089,920 bytes; 148 files). The Site audience and identity are preserved.
+
+https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/
+
+Hosted checks passed the primary root action, original false-pass comparison, five candidates, native keyboard disclosure, historical review, established change/CI/legacy routes and downloads, mobile fit and captions. Video begins paused/muted with controls at volume 0.1 and preserves deliberate volume 0. No page errors or failed required resources were observed. The first layout assertion ran before asynchronous recording/handoff readiness; waiting for the existing visible recording control and historical disclosure confirmed the same stable positions as local QA. This qualification adjustment made no product change. Nine modules also retained exact comment tokens and import order in a separate comparison; this complements the AST checks.
+
+The prerelease contains seven assets, including the actual normal-CI evidence. All seven were downloaded and matched their original bytes, provider sizes and SHA256 digests. An unauthenticated wheel download returned HTTP 200 with the expected digest. SHA256SUMS and per-asset results are recorded in verification.json. The release verification asset is the pre-release observation snapshot; this later source receipt appends final download observations without changing that asset.
+
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a12
+
+Repository About description/homepage were reread, updated to the implemented preview and read back successfully; no topics, visibility or other settings changed. Original selected evidence/media and older release identities remain unchanged. The submission-polish goal has no remaining publication blocker. These checks establish the named preview behavior and artifact consistency; trusted execution, unsigned external reports and the single authored task remain the stated limits.

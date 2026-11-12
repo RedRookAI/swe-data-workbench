@@ -286,5 +286,234 @@
   "historical_source_tests_rerun": 0,
   "private_state_tickets_published": false,
   "old_release_bytes_preserved": true,
-  "publication": "Private qualified source/layout; new CI, release and actual hosted observations follow audited publication."
+  "publication": "Completed: audited source 6506812aab287f6a2c9e16abfe5b744316df1ffd, v0.1.0a12 tag/release, actual normal CI, deployed Site version 11, hosted browser inspection, exact release downloads and About readback. This later documentation receipt adds observations without replacing any release asset.",
+  "actual_ci": {
+    "run_id": 43241612303,
+    "source": "6506812aab287f6a2c9e16abfe5b744316df1ffd",
+    "counts": {
+      "error": 0,
+      "failed": 0,
+      "passed": 21,
+      "skipped": 0,
+      "unavailable": 0
+    },
+    "process": 0,
+    "review": "unreviewed",
+    "source_state": "clean",
+    "manifest_digest": "64028036be0db5757d0945903f4fd375fecc1db558b0e8178084bd05d2ee521e",
+    "provider": {
+      "id": 13956160215,
+      "name": "selected-review-43241612303-1-focused-normal",
+      "size_in_bytes": 1203371,
+      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13956160215",
+      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13956160215/zip",
+      "expired": false,
+      "created_at": "2026-11-12T14:52:44Z",
+      "expires_at": "2027-02-10T14:51:50Z",
+      "updated_at": "2026-11-12T14:52:44Z",
+      "digest": "sha256:a245ac6101bf43a3036eeb8c606bc49a6f201dad8cc38d177a460065be0c1702",
+      "workflow_run": {
+        "id": 43241612303,
+        "repository_id": 1454462067,
+        "head_repository_id": 1454462067,
+        "head_branch": "main",
+        "head_sha": "6506812aab287f6a2c9e16abfe5b744316df1ffd"
+      }
+    },
+    "conclusion": "success"
+  },
+  "hosted_showcase": {
+    "profile": "hosted",
+    "ok": true,
+    "first_screen_demo_action": true,
+    "false_pass_comparison": true,
+    "candidate_count": 5,
+    "sections": {
+      "quality-section": 497,
+      "recording-section": 1358,
+      "workbench": 1932,
+      "historical-handoff": 5896
+    },
+    "keyboard_details": true,
+    "historical_handoff_preserved": true,
+    "initial_media": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "failed_requests": []
+  },
+  "hosted_preserved_browser": {
+    "profile": "hosted",
+    "http": 200,
+    "attention_to_detail": true,
+    "verified_overview": true,
+    "authored_failed_unknown_case": true,
+    "original_numeric_duration_text": true,
+    "real_cases": [
+      {
+        "reported_passed": 3,
+        "source": "swe_workbench/junit_report.py",
+        "history": true,
+        "downloads": 3
+      },
+      {
+        "reported_passed": 1,
+        "source": "swe_workbench/api.py",
+        "history": true,
+        "downloads": 3
+      }
+    ],
+    "historical_needs_work_preserved": true,
+    "old_views_preserved": 3,
+    "quality_demo_preserved": true,
+    "private_inputs_uploaded": false,
+    "initial_player": {
+      "paused": true,
+      "muted": true,
+      "controls": true,
+      "volume": 0.1,
+      "autoplay": false
+    },
+    "captions_http": 200,
+    "zero_volume_retained": true,
+    "mobile_fit": true,
+    "errors": [],
+    "api_requests": [],
+    "external_requests": []
+  },
+  "site": {
+    "project_id": "appgprj_6af4ce5c62a0819180f920555ee14028",
+    "version_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_7f7e817b8a1c8191a927d790032c6d00",
+    "version_number": 11,
+    "source": {
+      "commit_sha": "6506812aab287f6a2c9e16abfe5b744316df1ffd"
+    },
+    "archive_storage": {
+      "archive_format": "tar",
+      "sediment_file_id": "file_00000000c40c8210beb2690917a60ab0",
+      "content_hash": "sha256:c8b84845f29abedf76bda468c68ec0a06f255ee112eba8bf968bc68196040c16",
+      "size_bytes": 43089920,
+      "file_count": 148
+    },
+    "deployment_id": "appgdep_6af5d30536cc8191b27ed1867f69c39e",
+    "status": "succeeded",
+    "url": "https://swe-data-workbench.flyswatterghost.chatgpt.site",
+    "updated_at": "2026-11-12T14:54:11.494975+00:00"
+  },
+  "repository_about": {
+    "description": "Review software changes and coding-task evaluations with exact source, executable checks, version-bound decisions and recoverable processing.",
+    "homepage": "https://swe-data-workbench.flyswatterghost.chatgpt.site/evaluation-demo/",
+    "topics": []
+  },
+  "qualification_notes": [
+    "The first hosted layout assertion ran before asynchronous recording/handoff readiness. Waiting for the existing visible recording control and handoff disclosure produced the expected stable order; no product behavior change was required."
+  ],
+  "release": {
+    "version": "0.1.0a12",
+    "source": "6506812aab287f6a2c9e16abfe5b744316df1ffd",
+    "url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a12",
+    "prerelease": true,
+    "downloaded_assets": [
+      {
+        "name": "actual-ci-normal.zip",
+        "size": 1203371,
+        "sha256": "a245ac6101bf43a3036eeb8c606bc49a6f201dad8cc38d177a460065be0c1702",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/actual-ci-normal.zip"
+      },
+      {
+        "name": "formatting-evidence.json",
+        "size": 2005,
+        "sha256": "0470380b4e451076f96d4390a86c1dd059807c425f6f7e8a1e7e60c3b958ad21",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/formatting-evidence.json"
+      },
+      {
+        "name": "installed-compatibility.json",
+        "size": 860,
+        "sha256": "21ca1a4da6117d3ce4393a50361bff22bd915d3c07c1fd8e7f4bf3d0cc8250d4",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/installed-compatibility.json"
+      },
+      {
+        "name": "public-preview.zip",
+        "size": 33863065,
+        "sha256": "1a539cb4a2b311568994040fcddf9850ccca75d6b28cf953311ab6bc53e68fbf",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/public-preview.zip"
+      },
+      {
+        "name": "SHA256SUMS",
+        "size": 553,
+        "sha256": "0f2c6c1d77c23bf86044adce97dcfb1c48d19a3e512b14b64206f9e217f355b5",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/SHA256SUMS"
+      },
+      {
+        "name": "swe_data_workbench-0.1.0a12-py3-none-any.whl",
+        "size": 153246,
+        "sha256": "5a039199aea2a6a8ff857d0c886bb01715dd7ad085e5286cbf92847fec345f13",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/swe_data_workbench-0.1.0a12-py3-none-any.whl"
+      },
+      {
+        "name": "verification.json",
+        "size": 14513,
+        "sha256": "cc212baee97606bc1fa47d75f173345787e8d026955b8654a7a675a564cf3c49",
+        "download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a12/verification.json"
+      }
+    ],
+    "all_original_download_size_digest_equal": true,
+    "unauthenticated_wheel_download": {
+      "http": 200,
+      "sha256_equal": true
+    }
+  },
+  "format_comment_import_check": [
+    {
+      "file": "swe_workbench/attention.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/review_package.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/ci_evidence.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/reported_checks.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/junit_report.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/project_context.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/handoff_view.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/cli.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    },
+    {
+      "file": "swe_workbench/handoff.py",
+      "comments_exact": true,
+      "imports_and_order_equal": true
+    }
+  ]
 }
