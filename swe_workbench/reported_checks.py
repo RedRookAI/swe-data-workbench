@@ -21,6 +21,8 @@ def extract(material):
                 expected=project(original['text'].encode(),None if context is None else context.encode())
                 ci=None
                 if 'ci_receipt_sha256' in data:
+                    if context is None:
+                        raise ValueError('report.context_text: CI evidence requires textual run context')
                     from .ci_evidence import validate as validate_ci
                     receipt=next((a for a in attachments if a['sha256']==data['ci_receipt_sha256']),None)
                     if receipt is None:raise ValueError('CI receipt attachment missing')

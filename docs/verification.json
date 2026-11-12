@@ -1,28 +1,25 @@
 {
-  "version": "0.1.0a10",
+  "version": "0.1.0a11",
   "checked": "2026-11-12",
-  "baseline": "4ed531cae30a8cd7c8a18ca2da5d675b0511cc7f",
-  "runtime_source_commit": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-  "wheel_sha256": "b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
-  "focused_components": {
+  "baseline": "c3866a6a28b1c13f1d5cd6d77aa5700c1af43027",
+  "changes": [
+    "CI-null report containment with visible snapshot problem entries",
+    "Fresh CI profile product label from validated receipt",
+    "Complete operator guide with fresh post-decision shares",
+    "Bounded retained-real-report operator trial"
+  ],
+  "focused_checks": {
     "passed": 10,
-    "scope": "Authored producer/package/containment/recipe fixtures; subsequent six affected checks passed after validator hardening."
-  },
-  "clean_local_normal": {
-    "passed": 18,
-    "pytest_warnings": 1,
-    "warning": "Existing Starlette test-client/httpx deprecation warning; tests passed.",
-    "original_report": true,
-    "source_state": "clean",
-    "review": "unreviewed"
-  },
-  "local_external": {
-    "passed": 17,
-    "scope": "Pinned original signer tests; current tools; no baseline-failure or FIPS claim."
+    "files": [
+      "tests/test_report_containment.py",
+      "tests/test_ci_evidence.py",
+      "tests/test_ci_recipe.py"
+    ],
+    "scope": "Null context direct/legacy/current capture, healthy sibling view, report-only null, global audit loud failure, CI source/profile/hash/status/recipe behavior"
   },
   "installed_compatibility": {
-    "version": "0.1.0a10",
-    "wheel_sha256": "b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
+    "version": "0.1.0a11",
+    "wheel_sha256": "55bb62f1e7b003224f1aaa597c1a3b20dba5cbb8f3eb8e5a60c63607ecc378e0",
     "checks": [
       {
         "name": "installed-wheel-parity",
@@ -54,348 +51,87 @@
     "input_project_execution": 0,
     "ok": true
   },
-  "installed_daily": {
-    "version": "0.1.0a10",
-    "installed_only": true,
-    "report_scope": "Authored qualification reports and scripted review decisions; no claimed source test execution.",
-    "application_model_calls": 0,
-    "ok": true,
-    "browser": {
-      "actual_private_module_delivery": true,
-      "owner_connection": true,
-      "verified_overview_to_detail": true,
-      "original_duration_text": true,
-      "errors": []
-    },
-    "composed_packages": 2,
-    "explicit_scripted_reviews": 2,
-    "private_restore": true
-  },
-  "actual_hosted": {
-    "normal": {
-      "run_id": "43226409121",
-      "process_exit": 0,
-      "counts": {
-        "error": 0,
-        "failed": 0,
-        "passed": 18,
-        "skipped": 0,
-        "unavailable": 0
-      },
-      "product": "RedRookAI/swe-data-workbench",
-      "tested_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-      "source_state": "clean",
-      "review": "unreviewed",
-      "manifest_digest": "ae67a1804851159c241b29bd430b3243817f6bb5190dffeec5afe12ce8e5218d",
-      "internal_verification": true,
-      "private_files_excluded": true
-    },
-    "external": {
-      "run_id": "43226500722",
-      "process_exit": 0,
-      "counts": {
-        "error": 0,
-        "failed": 0,
-        "passed": 17,
-        "skipped": 0,
-        "unavailable": 0
-      },
-      "product": "pallets/itsdangerous",
-      "tested_revision": "7f4dcf83a07bb3d53f4e0e65ef1b43327b4cca90",
-      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-      "source_state": "clean",
-      "review": "unreviewed",
-      "manifest_digest": "67ac4aabe1f8005f689e6cd0947952760207532f9eb152523cfc6e0a719e4962",
-      "internal_verification": true,
-      "private_files_excluded": true
-    },
-    "intentional-failure": {
-      "run_id": "43226505309",
-      "process_exit": 1,
-      "counts": {
-        "error": 0,
-        "failed": 1,
-        "passed": 0,
-        "skipped": 0,
-        "unavailable": 0
-      },
-      "product": "RedRookAI/swe-data-workbench",
-      "tested_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-      "workflow_revision": "145fdd19fd30cea0367d6b2a07439c67044dbf9d",
-      "source_state": "clean",
-      "review": "unreviewed",
-      "manifest_digest": "8ed5807f857f9187eab0746ab3e64bfe75bd1c782ebcfa3cf651343dc38f8050",
-      "internal_verification": true,
-      "private_files_excluded": true
+  "external_retained_import": {
+    "installed_version": "0.1.0a11",
+    "generated_product": "pallets/itsdangerous",
+    "workflow_repository": "RedRookAI/swe-data-workbench",
+    "manual_profile_edits": 0,
+    "configured_and_prepared": true,
+    "source_tests_executed": 0,
+    "original_evidence_unchanged": true,
+    "v0a10_anchor_manifests": {
+      "normal": "ae67a1804851159c241b29bd430b3243817f6bb5190dffeec5afe12ce8e5218d",
+      "external": "67ac4aabe1f8005f689e6cd0947952760207532f9eb152523cfc6e0a719e4962",
+      "intentional-failure": "8ed5807f857f9187eab0746ab3e64bfe75bd1c782ebcfa3cf651343dc38f8050"
     }
   },
-  "provider_artifacts": {
-    "normal": {
-      "id": 13948088318,
-      "name": "selected-review-43226409121-1-focused-normal",
-      "size_in_bytes": 944168,
-      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13948088318",
-      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13948088318/zip",
-      "expired": false,
-      "created_at": "2026-11-12T13:21:39Z",
-      "expires_at": "2027-02-10T13:20:51Z",
-      "updated_at": "2026-11-12T13:21:39Z",
-      "digest": "sha256:dda9f14da0943ac7cd0ae82f6b996af54453fb81d98660239845a78a5106b52a",
-      "workflow_run": {
-        "id": 43226409121,
-        "repository_id": 1454462067,
-        "head_repository_id": 1454462067,
-        "head_branch": "main",
-        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
-      }
-    },
-    "external": {
-      "id": 13947868590,
-      "name": "selected-review-43226500722-1-focused-itsdangerous",
-      "size_in_bytes": 152863,
-      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947868590",
-      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947868590/zip",
-      "expired": false,
-      "created_at": "2026-11-12T13:22:08Z",
-      "expires_at": "2027-02-10T13:21:26Z",
-      "updated_at": "2026-11-12T13:22:08Z",
-      "digest": "sha256:8d12724c96d38c9ff1da20a9f89ce85749f023dba164cbb5c5a163d4cd59f637",
-      "workflow_run": {
-        "id": 43226500722,
-        "repository_id": 1454462067,
-        "head_repository_id": 1454462067,
-        "head_branch": "main",
-        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
-      }
-    },
-    "intentional-failure": {
-      "id": 13947813585,
-      "name": "selected-review-43226505309-1-focused-intentional-failure",
-      "size_in_bytes": 930898,
-      "url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947813585",
-      "archive_download_url": "https://api.github.com/repos/RedRookAI/swe-data-workbench/actions/artifacts/13947813585/zip",
-      "expired": false,
-      "created_at": "2026-11-12T13:22:07Z",
-      "expires_at": "2027-02-10T13:21:28Z",
-      "updated_at": "2026-11-12T13:22:07Z",
-      "digest": "sha256:776208a7ccecdd0201f59418837feb419e96ff1f76fa38b9436e419a368d3167",
-      "workflow_run": {
-        "id": 43226505309,
-        "repository_id": 1454462067,
-        "head_repository_id": 1454462067,
-        "head_branch": "main",
-        "head_sha": "145fdd19fd30cea0367d6b2a07439c67044dbf9d"
-      }
-    }
-  },
-  "local_ci_browser": {
-    "ok": true,
+  "operator_trial": {
+    "version": "0.1.0a11",
+    "scope": "Assisted/scripted traversal of the exact guide CLI blocks using the documented existing isolated installation option. Original tests were not rerun.",
     "cases": [
       {
-        "route": "ci/normal/view",
-        "reported": "18 passed",
-        "repository": "RedRookAI/swe-data-workbench",
-        "process": "0",
-        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226409121/attempts/1"
+        "change": "startup",
+        "base": "5d5e70cc1c00e28b31c11112ad8e9c148222b52a",
+        "candidate": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94",
+        "historical_passed_checks": 1,
+        "xml_sha256": "37485fd26d6e453d652764b797ab47c549fabb3ab83bed774d05071d5015fdfa",
+        "original_manifest": "b9806460b1d17f944f561b5a0d847fbf241dc2bcf5aad1c27f2d19f72bc1eb4e",
+        "frozen_decision": "unreviewed",
+        "reviewed_decision": "needs-work",
+        "reviewed_revision": 1,
+        "reviewer_mode": "scripted_adjudication",
+        "source_tests_executed": 0,
+        "original_history_unchanged": true
       },
       {
-        "route": "ci/external/view",
-        "reported": "17 passed",
-        "repository": "pallets/itsdangerous",
-        "process": "0",
-        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226500722/attempts/1"
-      },
-      {
-        "route": "ci/intentional-failure/view",
-        "reported": "1 failed",
-        "repository": "RedRookAI/swe-data-workbench",
-        "process": "1",
-        "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226505309/attempts/1"
+        "change": "importer",
+        "base": "2e7f1d4563cb9a70d77a60e5cc3323774b692d94",
+        "candidate": "217064e5637e4fa493af23cef3dc2f95c9d19a7c",
+        "historical_passed_checks": 3,
+        "xml_sha256": "51d7ddb90a039abd80b55c56608989bcbfb7e8a3431fb0c32256c56c9fed6b8e",
+        "original_manifest": "12a2c4dd8dcfd92f07f9b20bb4490f7af92aa24abc7e0a1fdc8da07e2aa981f9",
+        "frozen_decision": "unreviewed",
+        "reviewed_decision": "handoff-ready",
+        "reviewed_revision": 1,
+        "reviewer_mode": "scripted_adjudication",
+        "source_tests_executed": 0,
+        "original_history_unchanged": true
       }
     ],
-    "errors": [],
-    "actual_browser": true,
-    "mobile_fit": true,
-    "review_unreviewed": true,
-    "credential_or_model_calls": 0
-  },
-  "local_preserved_browser": {
-    "profile": "local",
-    "http": 200,
-    "attention_to_detail": true,
-    "verified_overview": true,
-    "authored_failed_unknown_case": true,
-    "original_numeric_duration_text": true,
-    "real_cases": [
-      {
-        "reported_passed": 3,
-        "source": "swe_workbench/junit_report.py",
-        "history": true,
-        "downloads": 3
-      },
-      {
-        "reported_passed": 1,
-        "source": "swe_workbench/api.py",
-        "history": true,
-        "downloads": 3
-      }
-    ],
-    "historical_needs_work_preserved": true,
-    "old_views_preserved": 3,
-    "quality_demo_preserved": true,
-    "private_inputs_uploaded": false,
-    "initial_player": {
-      "paused": true,
-      "muted": true,
-      "controls": true,
-      "volume": 0.1,
-      "autoplay": false
+    "cli_invocations": {
+      "first": 4,
+      "first-review": 5,
+      "repeat": 9
     },
-    "captions_http": 200,
-    "zero_volume_retained": true,
-    "mobile_fit": true,
-    "errors": [],
-    "api_requests": [],
-    "external_requests": []
+    "first_total": 9,
+    "repeat_total": 9,
+    "one_time_acquisition_invocations": 1,
+    "one_time_configure_invocations": 1,
+    "manual_json_or_mapping_edits": 0,
+    "guide_cli_corrections": 0,
+    "fresh_export_needed_after_each_decision": true,
+    "source_tests_executed": 0,
+    "application_model_calls": 0,
+    "independent_human_usability": "unmeasured",
+    "wall_time_productivity_claim": false,
+    "conclusion": "Retain for durable, inspectable selected handoffs. Repeat operation still requires9 CLI invocations with the chosen inspection steps; ordinary PR review is simpler when durable export/history is unnecessary. No broad productivity gain measured."
   },
-  "scope": "GitHub/Linux/Python/pytest; optional versioned receipt; fixed external case; old release bytes/history untouched.",
-  "assurance": "Unsigned pre/post source/check observations and content consistency, not independent witness, continuous integrity or hermetic execution.",
-  "attribution": "Owner-led requirements; substantial Codex implementation/research/verification/docs assistance. Itsdangerous change belongs to historical upstream authors. Intentional failure is explicitly authored qualification. No new application model evaluation.",
+  "browser": {
+    "ok": true,
+    "installed_candidate_views": true,
+    "frozen_unreviewed_and_fresh_decision_distinct": true,
+    "original_counts": [
+      1,
+      3
+    ],
+    "mobile_fit": true,
+    "errors": []
+  },
+  "wheel_sha256": "55bb62f1e7b003224f1aaa597c1a3b20dba5cbb8f3eb8e5a60c63607ecc378e0",
   "application_model_calls": 0,
+  "historical_source_tests_rerun": 0,
   "private_state_tickets_published": false,
-  "publication": {
-    "release_url": "https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a10",
-    "release_source": "7b988883711293c63c1aa6e8d04b8f4da3126376",
-    "tag_matches_source": true,
-    "assets_verified_downloaded": 8,
-    "asset_identity": [
-      {
-        "name": "actual-ci-external-itsdangerous.zip",
-        "size": 152863,
-        "digest": "sha256:8d12724c96d38c9ff1da20a9f89ce85749f023dba164cbb5c5a163d4cd59f637",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-external-itsdangerous.zip"
-      },
-      {
-        "name": "actual-ci-intentional-failure.zip",
-        "size": 930898,
-        "digest": "sha256:776208a7ccecdd0201f59418837feb419e96ff1f76fa38b9436e419a368d3167",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-intentional-failure.zip"
-      },
-      {
-        "name": "actual-ci-normal.zip",
-        "size": 944168,
-        "digest": "sha256:dda9f14da0943ac7cd0ae82f6b996af54453fb81d98660239845a78a5106b52a",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/actual-ci-normal.zip"
-      },
-      {
-        "name": "installed-compatibility.json",
-        "size": 860,
-        "digest": "sha256:4a376e0bccb1acd477e5218082039f6b4ec11b6f47c1829a53ee9622513f3957",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/installed-compatibility.json"
-      },
-      {
-        "name": "installed-daily-qualification.json",
-        "size": 492,
-        "digest": "sha256:d04ee7005c87e6be9e91959982f8ea01b05d8134c5a5a1b77c33f9245fd7062b",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/installed-daily-qualification.json"
-      },
-      {
-        "name": "SHA256SUMS",
-        "size": 680,
-        "digest": "sha256:ba3a05ad29c3ace78d0948131d080613769fc0e21b4b89dda3a7199fec29f931",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/SHA256SUMS"
-      },
-      {
-        "name": "swe_data_workbench-0.1.0a10-py3-none-any.whl",
-        "size": 149259,
-        "digest": "sha256:b511e81011e74b5d95a1dea5ec2ea54a03d39e4283b4fd882047e12c3b26172f",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/swe_data_workbench-0.1.0a10-py3-none-any.whl"
-      },
-      {
-        "name": "verification.json",
-        "size": 9627,
-        "digest": "sha256:5b1a8af65e2d85782c66e007bf91517762c6749a981155be0c35a2a6abfef42b",
-        "browser_download_url": "https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a10/verification.json"
-      }
-    ],
-    "site_version": 10,
-    "site_saved_id": "appgprj_6af4ce5c62a0819180f920555ee14028~appgver_8479173548888191a1149060f69d9648",
-    "site_deployment": "appgdep_6af5beb21bf48191878346bded18fae2",
-    "site_status": "succeeded",
-    "site_source": "7b988883711293c63c1aa6e8d04b8f4da3126376",
-    "site_url": "https://swe-data-workbench.flyswatterghost.chatgpt.site/ci/",
-    "ci_browser": {
-      "ok": true,
-      "cases": [
-        {
-          "route": "ci/normal/view",
-          "reported": "18 passed",
-          "repository": "RedRookAI/swe-data-workbench",
-          "process": "0",
-          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226409121/attempts/1"
-        },
-        {
-          "route": "ci/external/view",
-          "reported": "17 passed",
-          "repository": "pallets/itsdangerous",
-          "process": "0",
-          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226500722/attempts/1"
-        },
-        {
-          "route": "ci/intentional-failure/view",
-          "reported": "1 failed",
-          "repository": "RedRookAI/swe-data-workbench",
-          "process": "1",
-          "run_url": "https://github.com/RedRookAI/swe-data-workbench/actions/runs/43226505309/attempts/1"
-        }
-      ],
-      "errors": [],
-      "actual_browser": true,
-      "mobile_fit": true,
-      "review_unreviewed": true,
-      "credential_or_model_calls": 0
-    },
-    "preserved_browser": {
-      "profile": "hosted",
-      "http": 200,
-      "attention_to_detail": true,
-      "verified_overview": true,
-      "authored_failed_unknown_case": true,
-      "original_numeric_duration_text": true,
-      "real_cases": [
-        {
-          "reported_passed": 3,
-          "source": "swe_workbench/junit_report.py",
-          "history": true,
-          "downloads": 3
-        },
-        {
-          "reported_passed": 1,
-          "source": "swe_workbench/api.py",
-          "history": true,
-          "downloads": 3
-        }
-      ],
-      "historical_needs_work_preserved": true,
-      "old_views_preserved": 3,
-      "quality_demo_preserved": true,
-      "private_inputs_uploaded": false,
-      "initial_player": {
-        "paused": true,
-        "muted": true,
-        "controls": true,
-        "volume": 0.1,
-        "autoplay": false
-      },
-      "captions_http": 200,
-      "zero_volume_retained": true,
-      "mobile_fit": true,
-      "errors": [],
-      "api_requests": [],
-      "external_requests": []
-    },
-    "release_verification_asset": "Immutable pre-publication snapshot; this docs-only receipt appends subsequent publication observations.",
-    "remaining_blocker": null
-  }
+  "old_release_bytes_preserved": true,
+  "site": "Existing public version10 retained as a historical selection; no hosted asset change or redeploy required.",
+  "publication": "Private qualified checkpoint; actual source CI and release/download receipt follow audited push."
 }

@@ -39,6 +39,11 @@ def build_project(context_path,output):
     try:
         selected=[]
         for row in rows:
+            invalid=[r for r in row.get('reports',[]) if r['status']=='invalid-supported-report']
+            if invalid:
+                # Legacy material may lack a derived report projection. Do not
+                # offer a leaf that could display its raw claims as valid results.
+                row=row|{'problem':{'code':'invalid-supported-report','message':'; '.join(r['attachment']+': '+r['error'] for r in invalid)}}
             if row.get('problem'):
                 selected.append({k:row[k] for k in ('change_id','title','decision','needs_attention','responsible_party','next_action','revision','material_digest','problem')}|{'view':None})
                 continue

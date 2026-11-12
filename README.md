@@ -16,13 +16,13 @@ The earlier task-quality example remains linked from the current view: a weak re
 
 ![Actual workbench evidence view](docs/images/workbench.png)
 
-Installable wheel, two daily-change exports, regression recipe and verification:
+Installable wheel, selected evidence and verification:
 
-https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a10
+https://github.com/RedRookAI/swe-data-workbench/releases/tag/v0.1.0a11
 
 ## Try a complete handoff
 
-Import an existing report, select your project context, capture a change and inspect it in a standalone view. Record an explicit review, export the evidence and restore your saved work. The small synthetic example runs one fixed Python check and needs no account or model call. Follow docs/reliable-handoffs.md for the installed-package commands.
+Start with [the complete daily operator guide](docs/daily-workflow.md): configure once, prepare and inspect two real changes, record explicit decisions, then export fresh reviewed packages. It reuses original reports and runs no source tests or model calls. The first package stays frozen; the guide shows how to share a later decision. See docs/reliable-handoffs.md for the smaller synthetic example and backup/restore commands.
 
 ## Reuse a project profile
 

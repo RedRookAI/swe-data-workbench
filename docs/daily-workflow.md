@@ -1,105 +1,131 @@
-# Review a change with the results you already have
+# Review a change from setup to a reviewed handoff
 
-Configure a project once. Select a change and an existing test report, inspect the source and results, then record your decision and next action. The attention view shows which captured changes need review.
+Use the results you already have. This guide takes you through one project setup, a frozen first package, an explicit decision and a fresh export containing that decision. A second real change reuses the same setup.
 
-The daily path reads committed Git objects and selected local reports. It creates no new model request and does not run the source project's tests. The separate regression recipe explicitly runs its one admitted check when invoked.
+The example reads two historical workbench changes and their original reports: a private UI route repair with one passing check, then the JUnit importer with three. It runs neither project's checks nor a model. New demonstration decisions are explicitly scripted; original evidence and original review histories stay in the downloaded inputs.
 
-The optional fixed CI recipe executes the declared pytest selection and feeds its observed results into this same report-only assembly path. See ci-review.md.
+Inspect the original examples in your browser:
 
-## Start with an existing pytest report
+https://swe-data-workbench.flyswatterghost.chatgpt.site/change-b39b3e0c4fb83f37c2b2/
 
-If a run already produced JUnit XML, import that file. If you need to produce one during your normal check run, pytest supports --junit-xml=results.xml. The importer supports the pytest testsuite/testsuites dialect and keeps the exact original XML.
+https://swe-data-workbench.flyswatterghost.chatgpt.site/change-833fc94c43fa30e26989/
 
-Supply available run context as JSON: schema swe-workbench-run-context/v1, source_revision (full Git ID or null), source_state (clean/dirty/unknown), optional definition_sha256 and inputs (named SHA256 values). Resolve execution context when the check runs. Missing metadata stays unknown; selecting a candidate later cannot manufacture its execution identity.
+## 1. Install and acquire explicit inputs
 
-```sh
-swe-workbench import-junit /path/to/results.xml --context /path/to/run-context.json --output /path/to/fresh-import
-```
-
-The import directory contains original.xml, report.json and a reusable profile.json. Omit --context when unavailable; the missing source/check definition remains visible. Failed, error, skipped and empty results keep their actual meaning. XML commands, links and paths are data.
-
-## Configure once and prepare a review
-
-Choose an existing base and candidate that identify a nonempty committed change. State and package output belong outside the input repository. The context is explicit local data; no repository configuration is discovered or executed.
+Requires Linux, Python3.12 and Git. Start from a checkout of this repository. Choose a fresh output root outside the checkout. Commands below use Bash arrays to preserve argument boundaries.
 
 ```sh
-swe-workbench configure-project --repo /path/to/repository \
-  --profile /path/to/fresh-import/profile.json --evidence-directory /path/to/fresh-import \
-  --state /path/outside/repository/review-state --base-ref main --candidate-ref your-change \
-  --output /path/to/project.json
+WORKBENCH_SOURCE="$PWD"
+RUN_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/workbench-review.XXXXXXXX")"
+python3 -m venv "$RUN_ROOT/venv"
+PYTHON="$RUN_ROOT/venv/bin/python"
+"$PYTHON" -m pip install 'https://github.com/RedRookAI/swe-data-workbench/releases/download/v0.1.0a11/swe_data_workbench-0.1.0a11-py3-none-any.whl'
+WB=("$PYTHON" -I -m swe_workbench.cli)
 
-swe-workbench prepare-review /path/to/project.json \
-  --change-id change-id --title "Describe the change" --goal "State the requested result" \
-  --report /path/to/results.xml --run-context /path/to/run-context.json \
-  --output /path/outside/repository/review-package
+"$PYTHON" -I "$WORKBENCH_SOURCE/tools/prepare_daily_example.py" --output "$RUN_ROOT/inputs"
 ```
 
-The package contains a view, summary, exact export, review selection and stage receipt. Use the view through your existing trusted private connection. The receipt/imports/selection keep their intended private audience. Omit --run-context when it is unavailable; source/check identity remains unknown. Use --base and --candidate to select explicit refs for later changes. The command reuses the pytest import profile; custom mapping profiles retain their lower-level commands.
+An existing isolated installation of this version can supply PYTHON instead of creating another environment. The small acquisition helper downloads two fixed public handoffs, verifies them, preserves the exact XML/context and common profile, then clones source objects into a fresh directory without checking out or executing the projects. It refuses an existing destination. A failed acquisition leaves named partial inputs for inspection; choose a new root rather than reset an old workspace.
 
-prepare-review reads committed Git objects and the selected report. It creates no test/model execution, approval, listener or upload. A later output failure keeps a receipt showing whether capture committed. Resume the same selection explicitly:
+This one-time network acquisition occurs before capture. The remaining review commands read committed Git objects and local evidence. Source files, original exports and original execution identities stay unchanged.
+
+## 2. Configure once, then prepare the first change
 
 ```sh
-swe-workbench prepare-review /path/to/project.json \
-  --output /path/outside/repository/review-package --resume
+INPUTS="$RUN_ROOT/inputs"
+PROJECT="$RUN_ROOT/project.json"
+STATE="$RUN_ROOT/state"
+FIRST="$RUN_ROOT/startup-package"
+
+"${WB[@]}" configure-project --repo "$INPUTS/source" \
+  --profile "$INPUTS/profile.json" --evidence-directory "$INPUTS/startup" \
+  --state "$STATE" \
+  --base-ref 5d5e70cc1c00e28b31c11112ad8e9c148222b52a \
+  --candidate-ref 2e7f1d4563cb9a70d77a60e5cc3323774b692d94 \
+  --output "$PROJECT"
+
+"${WB[@]}" prepare-review "$PROJECT" --change-id startup \
+  --title 'Restore private UI startup' --goal 'Restore delivery of the verifier module to the private UI' \
+  --report "$INPUTS/startup/original.xml" --run-context "$INPUTS/startup/run-context.json" \
+  --output "$FIRST"
+
+"${WB[@]}" verify-handoff "$FIRST/export"
+"${WB[@]}" handoff-summary "$PROJECT" startup
 ```
 
-Changed inputs, material or a newer review are refused during an unfinished resume. Completed packages remain frozen selections. No automatic retry or silent review-token refresh occurs.
+Expected: the export verifies; the summary reports one passed check bound to candidate2e7f1d4, and the package decision is unreviewed. Check the goal, source diff, actual report scope, unknowns and next action. Passing that historical route check does not establish complete browser behavior.
 
-## Project association and older state
+The package contains private receipt/imports/selection files and a selected export/view/summary. Use the public original above for browser inspection without installation. To inspect newly generated private view/ on a headless server, serve only that selection through your existing trusted HTTP connection. The commands create no listener or upload. A local path, file:// page or localhost address is not a remote browser preview.
 
-New daily capture binds state to the selected local Git common-directory identity and repository label. Another project cannot reuse it accidentally, even with the same change ID. Context/selection v1 files retain their meanings. Existing legacy state requires explicit association after inspection:
+## 3. Record a deliberate decision and export it afresh
+
+For this worked example, record the following explicitly scripted concern. For your own work, use your actual findings, reason, responsible party and reviewer mode.
 
 ```sh
-swe-workbench associate-project /path/to/project.json
+"${WB[@]}" review-selection "$PROJECT" "$FIRST/selection.json" \
+  --decision needs-work --reason 'Scripted example: the original route check has limited scope' \
+  --finding 'The route report does not establish complete private browser behavior' \
+  --next-action 'Inspect browser behavior separately before calling the package complete' \
+  --responsible-party 'Project owner' --reviewer-mode scripted_adjudication
+
+"${WB[@]}" --root "$STATE" export-handoff startup --output "$RUN_ROOT/startup-reviewed-export"
+"${WB[@]}" verify-handoff "$RUN_ROOT/startup-reviewed-export"
+"${WB[@]}" build-handoff-view "$RUN_ROOT/startup-reviewed-export" --output "$RUN_ROOT/startup-reviewed-view"
+"${WB[@]}" handoff-summary "$PROJECT" startup
 ```
 
-Mixed labels, unavailable original commits or a different bound project produce a specific refusal. Original source/material/review history is preserved. A same-filesystem directory move preserves Git-directory identity. For a deliberate clone or filesystem relocation, select an updated context and use associate-project with --relocate; it verifies the retained project/commits and records the new local association. This is local ownership context, not publisher authentication. Direct legacy read/export/restore remains supported.
+Expected: the new export/view and current summary contain needs-work and the named concern at review revision1. The original FIRST/export and FIRST/view remain unreviewed at revision0. They are frozen selections. Completed prepare-review --resume returns that same original package; it does not refresh it after a later decision.
 
-## Lower-level capture and exact observations
+Share the fresh reviewed export/view when you want the decision included. Select only evidence suited to its audience. State, context, private receipts, saved selections and backups stay private. A handoff-ready decision means package readiness; it grants no execution, merge or native code-acceptance authority.
 
-The individual commands remain available:
+## 4. Reuse the setup for the second change
+
+The common profile and project state stay in place. Only change ID, requested result, existing report/context, selected commits and fresh destination change. Both examples use ordinary pytest evidence; switching to the optional CI profile is a separate explicit setup choice.
 
 ```sh
-swe-workbench project-capture /path/to/project.json change-id \
-  --title "Describe the change" --goal "State the requested result" \
-  --output /path/to/fresh-selection.json
+SECOND="$RUN_ROOT/importer-package"
+"${WB[@]}" prepare-review "$PROJECT" --change-id importer \
+  --title 'Read existing pytest results' --goal 'Import original pytest outcomes without executing report instructions' \
+  --base 2e7f1d4563cb9a70d77a60e5cc3323774b692d94 \
+  --candidate 217064e5637e4fa493af23cef3dc2f95c9d19a7c \
+  --report "$INPUTS/importer/original.xml" --run-context "$INPUTS/importer/run-context.json" \
+  --output "$SECOND"
+"${WB[@]}" verify-handoff "$SECOND/export"
+"${WB[@]}" handoff-summary "$PROJECT" importer
+
+"${WB[@]}" review-selection "$PROJECT" "$SECOND/selection.json" \
+  --decision handoff-ready --reason 'Scripted example: inspectable source and original scoped report are retained' \
+  --next-action 'Review the retained importer source and its three original checks' \
+  --responsible-party 'Project owner' --reviewer-mode scripted_adjudication
+"${WB[@]}" --root "$STATE" export-handoff importer --output "$RUN_ROOT/importer-reviewed-export"
+"${WB[@]}" verify-handoff "$RUN_ROOT/importer-reviewed-export"
+"${WB[@]}" build-handoff-view "$RUN_ROOT/importer-reviewed-export" --output "$RUN_ROOT/importer-reviewed-view"
+"${WB[@]}" handoff-summary "$PROJECT" importer
+"${WB[@]}" attention "$PROJECT"
 ```
 
-Use --preview to inspect effective inputs without runtime writes, or --evidence-directory for another imported report. Ref names resolve to full immutable commit IDs. New daily captures use v4 exact observations and shared source; the earlier --compact flag remains accepted. Explicit legacy v1/v2/v3 capture/verification retains its original semantics.
+Expected: three original passed checks remain bound to candidate217064e. The fresh importer export is handoff-ready at revision1; its original package stays unreviewed. Attention still includes startup's concern. New scripted decisions do not replace the original downloaded review histories.
 
-V4 keeps numeric source tokens in typed observation trees, including0.95000000000000001 and1e-400. Numeric-looking strings remain strings. Existing Python default integer-input guard bounds token length; exponents are never expanded into giant decimal strings. Signed decimal zero and integer/decimal type remain distinguishable. Source spelling changes material identity even when two tokens express the same numeric value. Old floating-point-derived observations retain a visible legacy precision limitation.
+## Use your own report or CI evidence
 
-Regular/executable UTF8 files are inert source artifacts. Binary, symlink, gitlink and over-budget phases are metadata-only with a reason; no targets are traversed. The patch covers fully captured text paths. Package readiness does not establish full source coverage or code acceptance.
+Import an existing pytest testsuite/testsuites XML file into a fresh directory with import-junit, then configure with its generated profile. Supply --context when real execution context is available. A report-only null context stays unbound rather than borrowing the later selected candidate identity. Producing JUnit during your normal test invocation needs no extra test run.
 
-## Inspect, decide and hand off
+For observed CI evidence, add --ci-receipt and --check-definition to both import-junit and prepare-review alongside the original report and run context. The new CI profile automatically uses the validated tested product label; workflow repository identity remains separate. Existing profiles/context files are never rewritten. See ci-review.md for the complete observation and optional-attachment contract. A mismatched old profile needs explicit setup with a new generated profile/context, preserving its old files and state association.
 
-Use the selected material and report scope to make a decision. A saved selection carries exact review tokens so you do not have to copy a digest manually. It cannot approve a newer material unnoticed.
+## Resume and inspect problems
+
+If assembly fails after capture, receipt.json records whether capture committed. After resolving the named output problem, explicitly resume the same selected package:
 
 ```sh
-swe-workbench review-selection /path/to/project.json /path/to/review-package/selection.json \
-  --decision needs-work --reason "Explain what remains unresolved" \
-  --finding "Name the specific concern" --next-action "State the next useful action" \
-  --responsible-party "Project owner" --reviewer-mode owner_adjudication
-
-swe-workbench attention /path/to/project.json --only-attention
-swe-workbench handoff-summary /path/to/project.json change-id
-swe-workbench build-project-view /path/to/project.json --output /path/to/fresh-view
+"${WB[@]}" prepare-review "$PROJECT" --output "$FIRST" --resume
 ```
 
-Use handoff-ready when the package is ready for review. Actual test failures, skipped work and missing source context are shown separately. Native accepted-code gates remain separate. A repeated identical decision is an operation retry; a different stale decision is refused. After recapture, read the original concerns and explicitly reassess them rather than carrying an earlier approval forward.
+Changed inputs/profile/context or a newer review during an unfinished assembly are refused. Use an explicit fresh selection for intentional newer work. An existing export/view destination is preserved; choose a new destination. A stale review-selection cannot approve changed material. Do not delete state or reset a source workspace to retry.
 
-The summary includes the current source/material/review identity, observed results, unresolved findings and next action. The attention view freezes each selected change independently. Its cards verify against linked package identities before displaying/filtering status, and show purpose, scope, reported failures and missing context. A mismatch or unavailable package stays visible. Malformed report fields do not hide healthy changes; a broken global audit still fails loudly. Config paths are not automatically included in the shareable summary; private prose and evidence keep their intended audience.
+Malformed supported reports are visibly invalid, including CI evidence missing required run context. A project view keeps a named problem entry instead of offering an invalid-report leaf, while healthy records stay inspectable. Global audit corruption still fails the operation loudly. verify-handoff performs Python semantic checks; browser verification checks content consistency against its selected unsigned manifest and has a narrower guarantee. Neither authenticates the external producer.
 
-build-project-view and build-handoff-view create local files only. Use your existing trusted private serving/connection for private views. Neither command opens a listener or uploads evidence. Public examples use separately authorized hosting. Private backup/restore continues to cover quiescent SQLite state and referenced artifacts.
+## Reference and evidence
 
-For a single existing export:
+Project association, explicit legacy relocation, exact v4 observations and lower-level capture retain their existing contracts. New daily captures use v4; v1/v2/v3 remain readable with their original semantics. Use associate-project for deliberately selected legacy state and --relocate only for an intentional source move with retained commit availability. Other projects cannot silently reuse a bound state.
 
-```sh
-swe-workbench build-handoff-view /path/to/export --output /path/to/fresh-single-view
-```
-
-## What was used here
-
-The recorded daily example contains two actual workbench changes: restoring the private server's verifier-module route and adding the existing-report importer. Their reports retain actual source/check context. One saved project profile served both cases without mapping edits. Reviews are AI-assisted operator judgments. The first package's original needs-work finding and later reassessment remain historical.
-
-The retained private-API regression selects the actual old source and committed repair through the existing admitted runner. Its original source fails and repaired source passes. The check reuses installed dependencies and covers the selected API contract; the actual private browser is checked separately. This is one concrete regression, with no general reliability or model-success claim. See examples/private-ui-regression/README.md and docs/verification.md.
+See everyday-handoffs.md for profiles/roles and explicit capture, reliable-handoffs.md for backup/restore and installation checks, and ci-review.md for actual CI artifacts. Old frozen packages and release bytes remain historical. The scoped two-change operator conclusion is in operator-trial.md; assistance and original check execution are distinguished there. Independent human productivity and adoption remain unmeasured.

@@ -72,7 +72,6 @@ def package(root):
                         if base==candidate:diagnostic.update(status='no-comparable-change',detail='Base equals candidate; original report retained without an invented change.')
                         else:
                             imported=root/'profile-import';import_report(out/'original.xml',imported,out/'run-context.json',out/'ci-receipt.json',out/'check-definition.json')
-                            profile=parse((imported/'profile.json').read_bytes());profile['repository']=recipe['product'];save(imported/'profile.json',profile)
                             context=root/'project.json';configure(context,repo=str(source),profile=str(imported/'profile.json'),evidence_directory=str(imported),state=str(root/'state'),base_ref=base,candidate_ref=candidate)
                             title='Historical itsdangerous lazy SHA-1 lookup' if recipe['case']=='itsdangerous' else ('Intentional failing-check qualification' if recipe['case']=='intentional-failure' else 'Actual workbench CI checks')
                             assembled=root/'assembled';assemble(context,assembled,change_id='ci-selected',title=title,goal='Review the selected committed change with its observed pytest run. Package creation leaves review unreviewed.',report=out/'original.xml',run_context=out/'run-context.json',ci_receipt=out/'ci-receipt.json',check_definition=out/'check-definition.json')
