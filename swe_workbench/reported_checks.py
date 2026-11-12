@@ -15,7 +15,9 @@ def extract(material):
             if data['schema']==JUNIT:
                 original=next((a for a in attachments if a['sha256']==data.get('report_sha256')),None)
                 if original is None:raise ValueError('Original XML attachment missing')
-                context=data.get('context_text');expected=project(original['text'].encode(),None if context is None else context.encode())
+                context=data.get('context_text')
+                if context is not None and not isinstance(context,str):raise ValueError('report.context_text: expected text or null')
+                expected=project(original['text'].encode(),None if context is None else context.encode())
                 if canonical(expected)!=canonical(data):raise ValueError('Projection differs from original XML/context')
                 cases=data['cases'];warnings=data['aggregate_warnings'];definition=data['definition_sha256']
             else:

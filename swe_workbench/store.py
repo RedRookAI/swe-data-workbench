@@ -119,9 +119,22 @@ class Store:
         events = [dict(row) | {'payload': json.loads(row['payload'])} for row in rows]
         return events if batch_id is None else [e for e in events if e['payload'].get('batch_id') == batch_id]
 
+    def validated_events(self, con):
+        if con.execute('PRAGMA user_version').fetchone()[0] != 1:
+            raise WorkbenchError('schema-version','Unsupported database schema.',409)
+        if con.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or con.execute('PRAGMA foreign_key_check').fetchall():
+            raise WorkbenchError('database-integrity','SQLite integrity check failed.',409)
+        events=self.events(con)
+        self.verify_events(events)
+        return events
+
     def verify_audit(self, con):
+        return self.verify_events(self.events(con))
+
+    @staticmethod
+    def verify_events(events):
         prev = '0' * 64
-        for seq, event in enumerate(self.events(con), 1):
+        for seq, event in enumerate(events, 1):
             candidate = dict(event)
             actual = candidate.pop('hash')
             if candidate['seq'] != seq or candidate['prev_hash'] != prev or digest(canonical(candidate)) != actual:

@@ -9,7 +9,7 @@ from . import handoff_validation as v
 V3='swe-workbench-handoff/v3'
 
 def refs(material):
-    return {phase['content_digest'] for f in material['files'] for phase in (f['before'],f['after']) if phase is not None and phase.get('coverage')=='text'} if material['schema']==V3 else set()
+    return {phase['content_digest'] for f in material['files'] for phase in (f['before'],f['after']) if phase is not None and phase.get('coverage')=='text'} if material['schema'] in (V3,'swe-workbench-handoff/v4') else set()
 
 def collect(repo,base,candidate,paths,blobs):
     files=[];total=0;text_paths=[];metadata=[]

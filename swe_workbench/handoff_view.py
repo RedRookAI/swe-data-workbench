@@ -39,12 +39,15 @@ def build_project(context_path,output):
     try:
         selected=[]
         for row in rows:
+            if row.get('problem'):
+                selected.append({k:row[k] for k in ('change_id','title','decision','needs_attention','responsible_party','next_action','revision','material_digest','problem')}|{'view':None})
+                continue
             key='change-'+digest(row['change_id'].encode())[:20];raw=stage/('.raw-'+key)
             export(source,row['change_id'],raw);frozen=parse((raw/'handoff.json').read_bytes())
             current=detail(source,row['change_id']);require(current['revision']==frozen['state']['revision'] and current['material_digest']==frozen['state']['material_digest'],'project.view: change updated while selecting; retry fresh output')
             build(raw,stage/key);shutil.rmtree(raw)
             selected.append({k:current[k] for k in ('change_id','title','decision','needs_attention','responsible_party','next_action','revision','material_digest') }|{'view':key+'/'})
-        for name in ('attention.html','attention.js','style.css'):shutil.copyfile(web/name,stage/('index.html' if name=='attention.html' else name))
+        for name in ('attention.html','attention.js','handoff-verify.js','style.css'):shutil.copyfile(web/name,stage/('index.html' if name=='attention.html' else name))
         (stage/'attention.json').write_bytes(canonical({'schema':'swe-workbench-attention/v1','changes':selected,'scope':'Each selected change is frozen independently; not a global atomic batch.'})+b'\n')
         _fsync_directory(stage);_publish(stage,target);_fsync_directory(target.parent)
         return {'output':str(target),'changes':len(selected),'read_only':True,'notice':'Local selected snapshot; no listener or publication. Private evidence keeps its intended audience.'}

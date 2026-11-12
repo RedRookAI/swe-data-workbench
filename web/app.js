@@ -1,4 +1,4 @@
-import {loadVerifiedHandoff,strictJSON,displayJSON} from './handoff-verify.js';
+import {loadVerifiedHandoff,strictJSON,displayJSON,displayExact} from './handoff-verify.js';
 /* Static is the default. Live mode is an explicit owner action on the private API.
    Imported strings enter the DOM only through textContent, never HTML or URLs. */
 const $ = (id) => document.getElementById(id);
@@ -471,7 +471,7 @@ function renderHandoffReports(root,record) {
     if(report.warnings?.length)section.append(node('p','Reported suite counts differ from retained cases; inspect the discrepancy.'));
     if(!report.cases.some(c=>['passed','failed','error'].includes(c.outcome)))section.append(node('p','No executed cases; skipped/unavailable evidence is separate from success.'));
     const details=node('details');details.append(node('summary','Actual reported cases and scope'));
-    for(const c of report.cases){details.append(node('p',c.name+' · '+c.outcome+(c.duration_seconds==null?'':' · '+String(c.duration_seconds)+' seconds')));if(c.detail)appendField(details,'Reported detail',c.detail);}
+    for(const c of report.cases){details.append(node('p',c.name+' · '+c.outcome+(c.duration_seconds==null?'':' · '+String(c.duration_text??c.duration_seconds)+' seconds')));if(c.detail)appendField(details,'Reported detail',c.detail);}
     section.append(details);
   }
   section.append(node('p','Package readiness and reported outcomes are separate. No execution or merge permission is granted.','small muted'));root.append(section);
@@ -484,7 +484,7 @@ async function loadHandoff() {
     $('handoff-content').replaceChildren(warning);$('handoff-section').hidden=false;return;
   }
   if (record === null) { $('handoff-section').hidden=true;return; }
-  if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2','swe-workbench-handoff/v3'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
+  if (!['swe-workbench-handoff/v1', 'swe-workbench-handoff/v2','swe-workbench-handoff/v3','swe-workbench-handoff/v4'].includes(record.schema) || !record.state || !Array.isArray(record.material?.observations)) throw new Error('Unsupported change handoff.');
   const {state: review, material} = record; const root = $('handoff-content'); root.replaceChildren();
   const unresolved = material.observations.filter(o => o.required && (o.value === null || (record.material.schema !== 'swe-workbench-handoff/v1' ? o.candidate_applicability !== 'declared' : o.binding !== 'declared-same-source')));
   const overview = node('section', null, 'handoff-overview'); overview.id = 'handoff-overview';
@@ -498,6 +498,7 @@ async function loadHandoff() {
   overview.append(findings, node('h4', 'Who acts next'), node('p', review.responsible_party || 'Unassigned'), node('h4', 'Next action'), node('p', review.next_action),
     node('p', 'This is review-package readiness. Source-project acceptance and delivery remain separate.', 'small muted'));
   if(material.coverage)overview.append(node('p',material.coverage.text_paths.length+' fully captured text paths · '+material.coverage.metadata_only_paths.length+' metadata-only paths. Diff covers fully captured text paths only.','small muted'));
+  if(material.schema!=='swe-workbench-handoff/v4')overview.append(node('p','Legacy numeric observations may have binary floating-point precision limits; original report bytes are retained.','small muted'));
   root.append(overview);renderHandoffReports(root,record); renderHandoffComparison(root, record.schema !== 'swe-workbench-handoff/v1' ? record.comparison : null);
   const recorded = node('details'); recorded.append(node('summary', 'Recorded review and attribution')); appendField(recorded, 'Reason', review.reason); appendField(recorded, 'Reviewer declaration', {actor: review.actor, mode: review.reviewer_mode}); root.append(recorded);
   const versions = node('details'); versions.append(node('summary', 'Exact versions, roles and hashes'));
@@ -510,7 +511,7 @@ async function loadHandoff() {
     versions.append(node('p', 'Relationships are declarations with retained references; they do not authenticate execution.', 'small muted'));
   } else versions.append(node('p', 'Typed roles were not recorded in this legacy handoff. Unassigned roles remain unknown.', 'small muted'));
   root.append(versions);
-  if(material.schema==='swe-workbench-handoff/v3'){
+  if(['swe-workbench-handoff/v3','swe-workbench-handoff/v4'].includes(material.schema)){
     const sources=node('details');sources.append(node('summary','Captured source content and coverage'));
     for(const file of material.files){const row=node('details');row.append(node('summary',file.path));for(const name of ['before','after']){const phase=file[name];if(!phase){row.append(node('p',name+': absent'));continue;}row.append(node('h4',name+' · mode '+phase.mode+' · '+phase.coverage));if(phase.coverage==='text')row.append(node('pre',record._sourceContents.get(phase.content_digest)));else row.append(node('p',phase.reason+' · Git object '+phase.git_blob));}sources.append(row);}
     root.append(sources);
@@ -521,12 +522,12 @@ async function loadHandoff() {
   const head = node('thead'); head.append(header); table.append(head); const body = node('tbody');
   for (const observation of material.observations) {
     const value = observation.value;
-    const result = value && typeof value === 'object' && Number.isInteger(value.passed) && Number.isInteger(value.tests) ? value.passed + ' / ' + value.tests + ' passed · ' + (value.profile || 'profile unspecified') : display(value);
+    const result = observation.value_format==='swe-workbench-exact-json/v1' ? displayExact(value) : value && typeof value === 'object' && Number.isInteger(value.passed) && Number.isInteger(value.tests) ? value.passed + ' / ' + value.tests + ' passed · ' + (value.profile || 'profile unspecified') : display(value);
     const row = node('tr'); row.append(node('th', observation.label), node('td', result), node('td', observation.binding + (observation.subject_role ? ' · ' + observation.subject_role : '')), node('td', observation.scope + ' · externally reported')); body.append(row);
   }
   table.append(body); wrapper.append(table); observations.append(wrapper); root.append(observations);
   const details = node('details'); details.append(node('summary', 'Exact diff and reported values')); appendField(details, 'Patch', material.patch);
-  for (const observation of material.observations) appendField(details, observation.label, observation.value);
+  for (const observation of material.observations) appendField(details, observation.label, observation.value_format==='swe-workbench-exact-json/v1'?displayExact(observation.value):observation.value);
   details.append(node('p', material.assurance, 'small muted')); root.append(details);
   const history = node('details'); history.append(node('summary', 'Version-bound review history and original inputs'));
   history.addEventListener('toggle', async () => { if (history.open) { try { await loadHandoffHistory(history, record); } catch (error) { history.append(node('p', error.message, 'notice error')); } } });

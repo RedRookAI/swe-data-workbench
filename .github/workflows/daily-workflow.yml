@@ -1,0 +1,38 @@
+name: Daily workflow
+on:
+  push:
+    branches: [main]
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+  pull_request:
+    paths: ['swe_workbench/**', 'web/**', 'tests/**', 'tools/qualify_daily.py', 'pyproject.toml', 'requirements*.lock', 'docs/examples/**', '.github/workflows/daily-workflow.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned tools and Chromium
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements-dev.lock
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: Check corrected source paths
+        run: |
+          .venv/bin/python -m pytest tests/test_project_scope.py tests/test_report_containment.py tests/test_exact_observations.py tests/test_attention_cut.py tests/test_review_package.py tests/test_handoff_browser.py tests/test_review_overview.py tests/test_private_assets.py -q -p no:cacheprovider
+      - name: Build and install one wheel
+        run: |
+          .venv/bin/python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/workbench-wheel" .
+          .venv/bin/python -m pip install --no-deps --force-reinstall "$RUNNER_TEMP"/workbench-wheel/*.whl
+      - name: Check isolated installed compatibility and daily workflow
+        run: |
+          .venv/bin/python -I -m swe_workbench.release_check --wheel "$RUNNER_TEMP"/workbench-wheel/*.whl --legacy-export "$GITHUB_WORKSPACE/docs/examples/keep-handoff/export" --current-export "$GITHUB_WORKSPACE/docs/examples/everyday-handoff/export" --output "$RUNNER_TEMP/workbench-compatibility"
+          .venv/bin/python -I "$GITHUB_WORKSPACE/tools/qualify_daily.py" --output "$RUNNER_TEMP/workbench-daily"

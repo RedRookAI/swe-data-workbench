@@ -19,8 +19,11 @@ from . import handoff_validation as shape
 SCHEMA='swe-workbench-handoff/v1'
 V2='swe-workbench-handoff/v2'
 V3='swe-workbench-handoff/v3'
-ROLE_SCHEMAS=(V2,V3)
-VERSIONS=(SCHEMA,V2,V3)
+V4='swe-workbench-handoff/v4'
+COMPACT_SCHEMAS=(V3,V4)
+ROLE_SCHEMAS=(V2,V3,V4)
+VERSIONS=(SCHEMA,V2,V3,V4)
+UNSET=object()
 FILES=('handoff.json','artifacts.json','manifest.json')
 
 
@@ -63,12 +66,25 @@ def observations(material):
         require(all(isinstance(request.get(k),str) and request[k].strip() for k in ('label','attachment','scope')) and type(request.get('required')) is bool,'Observation needs label, attachment, scope and required flag.')
         require(request['attachment'] in attachments,'Observation attachment is missing.')
         attachment=attachments[request['attachment']]
-        value=parse(attachment['text'])
+        if material['schema']==V4:
+            from .exact_json import decode
+            value=decode(attachment['text'])
+        else:value=parse(attachment['text'])
         observed=field(value,request.get('field_path'))
+        if material['schema']==V4:
+            from .exact_json import decode,encode
+            exact=field(decode(attachment['text']),request.get('field_path'))
+            observed=None if exact is None else encode(exact)
         revision=field(value,request['context_path']) if 'context_path' in request else None
+        if material['schema']==V4:
+            from .exact_json import Token
+            if isinstance(revision,Token):revision=None
         binding='declared-same-source' if revision==material['candidate_revision'] else ('declared-other-source' if revision is not None else 'unbound')
         item={**request,'value':observed,'declared_revision':revision,'binding':binding,'origin':'externally-reported',
               'attachment_sha256':attachment['sha256'],'execution_by_workbench':False}
+        if material['schema']==V4:
+            from .exact_json import FORMAT
+            item['value_format']=FORMAT
         if material['schema'] in ROLE_SCHEMAS:
             from .handoff_context import observation_binding
             item.update(observation_binding(material,request,revision))
@@ -83,7 +99,7 @@ def validate_material(material,read_blob=None):
     require(material.get('schema') in VERSIONS and digest(material['patch'].encode())==material['patch_sha256'],'Patch identity mismatch.','handoff-integrity',409)
     if material['schema']==SCHEMA:
         require(not ({'subjects','subject_requests','relationships','relationship_requests','profile'} & set(material)), 'Role/profile fields require a v2 material version.','handoff-integrity',409)
-    if material['schema']==V3:
+    if material['schema'] in COMPACT_SCHEMAS:
         from .handoff_compact import validate
         validate(material,read_blob)
     else:
@@ -110,18 +126,18 @@ def validate_material(material,read_blob=None):
             effective=expand(definition,change_id='validation',title=material['title'],goal=material['goal'])
             require(effective['repository']==material['repository'] and canonical(effective['observations'])==canonical(material['observation_requests']) and canonical(effective['subjects'])==canonical(material['subject_requests']) and canonical(effective['relationships'])==canonical(material['relationship_requests']), 'Effective profile differs from captured material.','handoff-integrity',409)
             require(set(definition.get('attachments',[]))<={a['name'] for a in material['attachments']},'Required profile attachment missing.')
-    if material['schema']==V3 and 'reported_checks' in material:
+    if material['schema'] in COMPACT_SCHEMAS and 'reported_checks' in material:
         from .reported_checks import extract
         require(canonical(material['reported_checks'])==canonical(extract(material)),'Reported checks differ from original retained report/context.','handoff-integrity',409)
     require(canonical(material['observations'])==canonical(observations(material)),'Observation differs from retained evidence.','handoff-integrity',409)
 
 
-def _load(store,con,change_id):
+def _load(store,con,change_id,selected_events=None):
     row=con.execute('SELECT value FROM meta WHERE key=?',('handoff:'+change_id,)).fetchone()
     if not row:raise WorkbenchError('handoff-not-found','Change handoff does not exist.',404)
     state=parse(store.artifact_bytes(row['value']));shape.state(state);material=parse(store.artifact_bytes(state['material_digest']))
     validate_material(material,store.artifact_bytes)
-    events=[e for e in store.events(con) if e['kind'].startswith('handoff-') and e['payload'].get('change_id')==change_id]
+    events=selected_events if selected_events is not None else [e for e in store.events(con) if e['kind'].startswith('handoff-') and e['payload'].get('change_id')==change_id]
     require(events and events[-1]['payload']['state_digest']==row['value'],'Handoff state/audit mismatch.','handoff-integrity',409)
     return state,material,events
 
@@ -153,7 +169,7 @@ def inspect(root,*,repo,base,candidate,request,evidence,source_blobs=None):
     paths=[_text(p,'Source path') for p in _git(repo,'diff','--no-ext-diff','--no-textconv','--no-renames','--name-only','-z',base,candidate).split(b'\0') if p]
     require(paths and len(paths)<=MAX_RECORDS,'Select a nonempty supported committed change.')
     if source_blobs is None:source_blobs={}
-    if version==V3:
+    if version in COMPACT_SCHEMAS:
         from .handoff_compact import collect
         files,patch,total,coverage=collect(repo,base,candidate,paths,source_blobs)
     else:
@@ -179,13 +195,13 @@ def inspect(root,*,repo,base,candidate,request,evidence,source_blobs=None):
     material={'schema':version,'title':request['title'],'goal':request['goal'],'repository':request['repository'],'base_revision':base,'candidate_revision':candidate,
               'files':files,'patch':_text(patch,'Patch'),'patch_sha256':digest(patch),'attachments':attachments,'observation_requests':request['observations'],
               'assurance':'Captured Git/evidence content consistency; unsigned external reports, no independent execution or delivery authority.'}
-    if version==V3:material['coverage']=coverage
+    if version in COMPACT_SCHEMAS:material['coverage']=coverage
     if version in ROLE_SCHEMAS:
         from .handoff_context import subjects,relationships
         material.update(profile=request.get('profile'),subject_requests=request.get('subjects',[{'id':'product','role':'product_source','selector':{'source':'candidate'}}]),relationship_requests=request.get('relationships',[]))
         material['subjects']=subjects(material);material['relationships']=relationships(material)
     material['observations']=observations(material)
-    if version==V3:
+    if version in COMPACT_SCHEMAS:
         from .reported_checks import extract
         reports=extract(material)
         if reports:material['reported_checks']=reports
@@ -194,19 +210,24 @@ def inspect(root,*,repo,base,candidate,request,evidence,source_blobs=None):
     return material
 
 
-def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
+def capture(root,*,repo,base,candidate,request,evidence,operation_key=None,project=False,expected_state=UNSET):
     blobs={}
     material=inspect(root,repo=repo,base=base,candidate=candidate,request=request,evidence=evidence,source_blobs=blobs)
     version=material["schema"]
     store=Store(root);store.initialize()
-    for raw in blobs.values():store.artifact_write(raw)
-    material_digest=store.artifact_write(canonical(material))
-    payload={'change_id':request['change_id'],'material_digest':material_digest}
     with store.transaction() as con:
-        prior=store.operation(con,'capture-handoff',operation_key,payload) if operation_key is not None else None
-        if prior is not None:return prior
+        from .project_scope import enforce
+        enforce(store,con,repo,material['repository'],claim=project)
         current=con.execute('SELECT value FROM meta WHERE key=?',('handoff:'+request['change_id'],)).fetchone()
         state=_load(store,con,request['change_id'])[0] if current else None
+        if expected_state is not UNSET:
+            actual=None if state is None else {k:state[k] for k in ('revision','material_digest')}
+            require(actual==expected_state,'Capture selection advanced; no newer material was selected.','handoff-conflict',409)
+        for raw in blobs.values():store.artifact_write(raw)
+        material_digest=store.artifact_write(canonical(material))
+        payload={'change_id':request['change_id'],'material_digest':material_digest}
+        prior=store.operation(con,'capture-handoff',operation_key,payload) if operation_key is not None else None
+        if prior is not None:return prior
         if state is None or state['material_digest']!=material_digest:
             state={'schema':version,'change_id':request['change_id'],'revision':0 if state is None else state['revision']+1,'material_digest':material_digest,
                    'decision':'unreviewed','reason':'','findings':[],'next_action':'Inspect the exact change and evidence scope.','reviewer_mode':None,'actor':None}
@@ -218,7 +239,7 @@ def capture(root,*,repo,base,candidate,request,evidence,operation_key=None):
 
 def _envelope(store,events):
     schemas={parse(store.artifact_bytes(e['payload']['state_digest']))['schema'] for e in events}
-    return V3 if V3 in schemas else (V2 if V2 in schemas else SCHEMA)
+    return V4 if V4 in schemas else (V3 if V3 in schemas else (V2 if V2 in schemas else SCHEMA))
 
 
 def read(root,change_id,baseline_revision=None):
@@ -293,7 +314,8 @@ def _validate_package(handoff,encoded):
         previous=s['revision'];expected.update((p['state_digest'],p['material_digest']))
         from .handoff_compact import refs
         expected.update(refs(m))
-        require(m['schema']!=V3 or handoff['schema']==V3,'v3 history needs a v3 envelope')
+        require(m['schema'] not in COMPACT_SCHEMAS or handoff['schema'] in COMPACT_SCHEMAS,'Compact history needs a compact envelope')
+        require(m['schema']!=V4 or handoff['schema']==V4,'v4 history needs a v4 envelope')
     require(set(artifacts)==expected,'Missing or extra handoff artifacts.','handoff-integrity',409)
     last=events[-1]['payload'];require(canonical(handoff['state'])==artifacts[last['state_digest']] and canonical(handoff['material'])==artifacts[last['material_digest']],'Current handoff differs from history.','handoff-integrity',409)
     if handoff['state']['decision']=='handoff-ready':

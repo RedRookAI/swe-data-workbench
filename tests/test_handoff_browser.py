@@ -6,24 +6,31 @@ from playwright.sync_api import sync_playwright,expect
 
 ROOT=Path(__file__).resolve().parents[1]
 
-def test_manifest_and_current_content_gate():
+def test_manifest_and_current_content_gate(tmp_path):
+    from swe_workbench.handoff_view import build
+    from tests.test_handoff_context import ContextTests
+    from swe_workbench import handoff
+    fixture=ContextTests();fixture.setUp()
+    try:
+        request=fixture.request();request['schema']=handoff.V3;fixture.capture(request)
+        handoff.export(fixture.root,'change',tmp_path/'compact-export')
+    finally:fixture.doCleanups()
+    folders=[ROOT/'docs/examples'/example/'export' for example in ('keep-handoff','everyday-handoff')]+[tmp_path/'compact-export']
+    for i,folder in enumerate(folders):build(folder,tmp_path/('view'+str(i)))
     class Handler(http.server.SimpleHTTPRequestHandler):
         def log_message(self,*args):pass
-        def translate_path(self,path):
-            if path.split('?')[0] in ['/app.js','/handoff-verify.js','/style.css','/index.html','/']:
-                return str(ROOT/'web'/('index.html' if path=='/' else path.split('?')[0].lstrip('/')))
-            return super().translate_path(path)
-    server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Handler,directory=str(ROOT/'dist')))
+    server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Handler,directory=str(tmp_path)))
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     try:
         with sync_playwright() as p:
             browser=p.chromium.launch(headless=True);page=browser.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
             origin='http://127.0.0.1:'+str(server.server_port)
-            for example in ['keep-handoff','everyday-handoff']:
-                folder=ROOT/'docs/examples'/example/'export';files={f.name:f.read_bytes() for f in folder.iterdir()}
+            requests=[];page.on('request',lambda r:requests.append(r.url))
+            for i,folder in enumerate(folders):
+                files={f.name:f.read_bytes() for f in folder.iterdir()}
                 def route(r):
                     name=r.request.url.rsplit('/',1)[-1];r.fulfill(body=files[name],content_type='application/json')
-                page.route('**/handoff/*',route);page.goto(origin)
+                page.route('**/handoff/*',route);page.goto(origin+'/view'+str(i)+'/')
                 expect(page.locator('#handoff-overview')).to_contain_text('Content matches the selected manifest')
                 for failure in ['changed-bytes','current-association','missing-history','duplicate-key']:
                     baseline={f.name:f.read_bytes() for f in folder.iterdir()};files.clear();files.update(baseline)
@@ -36,5 +43,5 @@ def test_manifest_and_current_content_gate():
                     page.reload();expect(page.get_by_role('alert')).to_contain_text('could not be verified');expect(page.locator('#handoff-overview')).to_have_count(0)
                 page.unroute('**/handoff/*')
             result=page.evaluate('''async()=>{const {strictJSON}=await import('./handoff-verify.js');return ['{"x":1,"x":2}','1e999'].map(s=>{try{strictJSON(s);return false}catch{return true}})}''')
-            assert all(result);assert not errors;browser.close()
+            assert all(result);assert not errors;assert not any('/data/' in r or '/api/' in r for r in requests);browser.close()
     finally:server.shutdown();server.server_close();thread.join()

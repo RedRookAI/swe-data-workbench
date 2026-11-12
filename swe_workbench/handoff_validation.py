@@ -57,7 +57,7 @@ def observation_requests(value, version):
     array(value, 'observations')
     for i, item in enumerate(value):
         path = f'observations[{i}]'
-        obj(item, path, ('label', 'attachment', 'field_path', 'required', 'scope'), ('context_path', 'subject') if version.endswith(('/v2','/v3')) else ('context_path',))
+        obj(item, path, ('label', 'attachment', 'field_path', 'required', 'scope'), ('context_path', 'subject') if version.endswith(('/v2','/v3','/v4')) else ('context_path',))
         for k in ('label', 'attachment', 'scope'):
             text(item[k], path + '.' + k)
         check(type(item['required']) is bool, path + '.required', 'expected a boolean')
@@ -85,9 +85,9 @@ def state(value, path='state'):
 
 def material(value):
     common = {'schema', 'title', 'goal', 'repository', 'base_revision', 'candidate_revision', 'files', 'patch', 'patch_sha256', 'attachments', 'observation_requests', 'observations', 'assurance'}
-    obj(value, 'material', common, ('profile', 'subject_requests', 'relationship_requests', 'subjects', 'relationships', 'coverage', 'reported_checks') if isinstance(value,dict) and value.get('schema')=='swe-workbench-handoff/v3' else ('profile','subject_requests','relationship_requests','subjects','relationships'))
-    if value['schema']=='swe-workbench-handoff/v3':check('coverage' in value,'material.coverage','required for v3')
-    if value['schema'] in ('swe-workbench-handoff/v2','swe-workbench-handoff/v3'):
+    obj(value, 'material', common, ('profile', 'subject_requests', 'relationship_requests', 'subjects', 'relationships', 'coverage', 'reported_checks') if isinstance(value,dict) and value.get('schema') in ('swe-workbench-handoff/v3','swe-workbench-handoff/v4') else ('profile','subject_requests','relationship_requests','subjects','relationships'))
+    if value['schema'] in ('swe-workbench-handoff/v3','swe-workbench-handoff/v4'):check('coverage' in value,'material.coverage','required for v3')
+    if value['schema'] in ('swe-workbench-handoff/v2','swe-workbench-handoff/v3','swe-workbench-handoff/v4'):
         check({'profile','subjects','subject_requests','relationships','relationship_requests'} <= value.keys(),'material','v2 role/profile fields are missing')
     for k in ('schema', 'title', 'goal', 'repository', 'assurance', 'patch'):
         text(value[k], 'material.' + k, empty=k == 'patch')
@@ -101,7 +101,7 @@ def material(value):
         path = f'material.files[{i}]'
         obj(f, path, ('path', 'before', 'after'))
         text(f['path'], path + '.path')
-        if value['schema']=='swe-workbench-handoff/v3':continue
+        if value['schema'] in ('swe-workbench-handoff/v3','swe-workbench-handoff/v4'):continue
         for phase in ('before', 'after'):
             blob = f[phase]
             if blob is not None:

@@ -5,7 +5,8 @@ from . import handoff_validation as shape
 
 V2 = 'swe-workbench-handoff/v2'
 V3 = 'swe-workbench-handoff/v3'
-ROLE_SCHEMAS=(V2,V3)
+V4='swe-workbench-handoff/v4'
+ROLE_SCHEMAS=(V2,V3,V4)
 PROFILE = 'swe-workbench-handoff-profile/v1'
 ROLES = {'product_source', 'qualification_workflow', 'consumer_fixture', 'released_artifact'}
 RELATIONS = {'checks_source': 'qualification_workflow', 'fixture_for': 'consumer_fixture', 'built_from': 'released_artifact'}
